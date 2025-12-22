@@ -1,0 +1,42 @@
+namespace TurnBase.Core;
+
+public class FieldRotator : IField
+{
+    private IField mainField;
+    private int playerNumber;
+    private IPointRotator pointRotator;
+
+    public FieldRotator(IField mainField, int playerNumber, IPointRotator pointRotator)
+    {
+        this.mainField = mainField;
+        this.playerNumber = playerNumber;
+        this.pointRotator = pointRotator;
+    }
+
+    public IFigure? get(Point from)
+    {
+        Point point = pointRotator.getRotatedPoint(this.mainField, from, this.playerNumber);
+        return this.mainField.get(point);
+    }
+
+    public bool trySet(Point to, IFigure? figure)
+    {
+        Point point = pointRotator.getRotatedPoint(this.mainField, to, this.playerNumber);
+        return this.mainField.trySet(point, figure);
+    }
+
+    public int getWidth()
+    {
+        return this.mainField.getWidth();
+    }
+
+    public int getHeight()
+    {
+        return this.mainField.getHeight();
+    }
+
+    public IField copyField()
+    {
+        return new FieldRotator(this.mainField.copyField(), this.playerNumber, this.pointRotator);
+    }
+}
