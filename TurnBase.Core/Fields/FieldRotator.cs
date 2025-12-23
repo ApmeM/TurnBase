@@ -6,6 +6,9 @@ public class FieldRotator : IField
     private int playerNumber;
     private IPointRotator pointRotator;
 
+    public int Width => this.mainField.Width;
+    public int Height => this.mainField.Height;
+
     public FieldRotator(IField mainField, int playerNumber, IPointRotator pointRotator)
     {
         this.mainField = mainField;
@@ -15,24 +18,14 @@ public class FieldRotator : IField
 
     public IFigure? get(Point from)
     {
-        Point point = pointRotator.getRotatedPoint(this.mainField, from, this.playerNumber);
+        Point point = pointRotator.RotatePoint(this.mainField, from, this.playerNumber);
         return this.mainField.get(point);
     }
 
-    public bool trySet(Point to, IFigure? figure)
+    public IField.SetStatus trySet(Point to, IFigure? figure)
     {
-        Point point = pointRotator.getRotatedPoint(this.mainField, to, this.playerNumber);
+        Point point = pointRotator.RotatePoint(this.mainField, to, this.playerNumber);
         return this.mainField.trySet(point, figure);
-    }
-
-    public int getWidth()
-    {
-        return this.mainField.getWidth();
-    }
-
-    public int getHeight()
-    {
-        return this.mainField.getHeight();
     }
 
     public IField copyField()

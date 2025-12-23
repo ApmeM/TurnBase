@@ -2,28 +2,28 @@ using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
 
-public class PlayerAIEasy : IPlayer
+public class KaNoBuPlayerEasy : IPlayer
 {
     private Random r = new Random();
     private string name = "Computer easy";
     private int myNumber;
 
-    public async Task<InitResponseModel> init(InitModel model)
+    public async Task<InitResponseModel> Init(int playerNumber, InitModel model)
     {
         await Task.Delay(0);
-        this.myNumber = model.playerNumber;
-        var ships = new List<IFigure>(model.availableFigures);
-        var preparedField = model.preparingField.copyField();
+        this.myNumber = playerNumber;
+        var ships = new List<IFigure>(model.AvailableFigures);
+        var preparedField = model.PreparingField.copyField();
         this.generateField(preparedField, ships);
         return new InitResponseModel
         {
-            success = true,
-            name = name,
-            preparedField = preparedField
+            IsSuccess = true,
+            Name = name,
+            PreparedField = preparedField
         };
     }
 
-    public async Task<MakeTurnResponseModel> makeTurn(MakeTurnModel model)
+    public async Task<MakeTurnResponseModel> MakeTurn(MakeTurnModel model)
     {
         await Task.Delay(0);
         List<Move> from = this.findAllMovement(model.field);
@@ -33,8 +33,10 @@ public class PlayerAIEasy : IPlayer
             return new MakeTurnResponseModel
             {
                 isSuccess = true,
-                move = null,
-                moveStatus = MoveStatus.SKIP_TURN
+                move = new Move
+                {
+                    Status = MoveStatus.SKIP_TURN
+                },
             };
         }
 
@@ -44,16 +46,15 @@ public class PlayerAIEasy : IPlayer
         {
             isSuccess = true,
             move = from[movementNum],
-            moveStatus = MoveStatus.MAKE_TURN
         };
     }
 
     private List<Move> findAllMovement(IField field)
     {
         var availableShips = new List<Move>();
-        for (int x = 0; x < field.getWidth(); x++)
+        for (int x = 0; x < field.Width; x++)
         {
-            for (int y = 0; y < field.getHeight(); y++)
+            for (int y = 0; y < field.Height; y++)
             {
                 var from = new Point { X = x, Y = y };
                 var shipFrom = field.get(from) as KaNoBuFigure;
@@ -84,7 +85,7 @@ public class PlayerAIEasy : IPlayer
 
     private void tryAdd(List<Move> availableShips, IField field, Point from, int x, int y)
     {
-        if (x < 0 || y < 0 || x >= field.getWidth() || y >= field.getHeight())
+        if (x < 0 || y < 0 || x >= field.Width || y >= field.Height)
         {
             return;
         }
@@ -96,15 +97,16 @@ public class PlayerAIEasy : IPlayer
             availableShips.Add(new Move
             {
                 From = from,
-                To = to
+                To = to,
+                Status = MoveStatus.MAKE_TURN
             });
         }
     }
 
     private void generateField(IField preparedField, List<IFigure> ships)
     {
-        var width = preparedField.getWidth();
-        var height = preparedField.getHeight();
+        var width = preparedField.Width;
+        var height = preparedField.Height;
         for (var i = 0; i < width; i++)
         {
             for (var j = 0; j < height; j++)

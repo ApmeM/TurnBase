@@ -18,6 +18,7 @@ public enum MoveStatus {
 
 public enum MoveValidationStatus {
     OK,
+    ERROR_COMMUNICATION,
     ERROR_OUTSIDE_FIELD,
     ERROR_INVALID_MOVE,
     ERROR_FIELD_OCCUPIED
@@ -25,27 +26,13 @@ public enum MoveValidationStatus {
 
 public struct Move
 {
+    public MoveStatus Status;
     public Point From;
     public Point To;
 }
 
-public struct AutoMove {
-    public enum AutoMoveStatus {
-        NONE,
-        MAKE_TURN,
-        SKIP_TURN
-    }
-    public Move? move;
-    public AutoMoveStatus status;
-}
-
-public struct BattleResult {
+public struct MoveResult {
     public List<IFigure> attackers;
     public List<IFigure> defenders;
     public List<IFigure> winners;
-}
-
-public struct PlayerInitialization {
-    public IField preparingField;
-    public List<IFigure> availableFigures;
 }

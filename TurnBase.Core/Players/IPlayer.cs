@@ -2,7 +2,7 @@ namespace TurnBase.Core;
 
 public interface IPlayer
 {
-    Task<InitResponseModel> init(InitModel model);
+    Task<InitResponseModel> Init(int playerNumber, InitModel model);
 
-    Task<MakeTurnResponseModel> makeTurn(MakeTurnModel model);
+    Task<MakeTurnResponseModel> MakeTurn(MakeTurnModel model);
 }

@@ -6,11 +6,11 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var rules = new GameRulesKaNoBu(8, 8);
+        var rules = new KaNoBuRules(8, 8);
         var player = new PlayerConsole();
         var game = new Game(rules);
-        game.addPlayer(new PlayerAIEasy());
-        game.addPlayer(player);
+        game.AddPlayer(player);
+        game.AddPlayer(new KaNoBuPlayerEasy());
 
         game.GameStarted += player.gameStarted;
         game.GamePlayerInitialized += player.playerInitialized;
@@ -18,7 +18,6 @@ public class Program
         game.GamePlayerTurn += player.playerTurnMade;
         game.GameFinished += player.gameFinished;
         
-        var starter = new GameStarterSync(game);
-        await starter.play();
+        await game.Play(true);
     }
 }

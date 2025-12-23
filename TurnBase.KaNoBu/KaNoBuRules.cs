@@ -2,7 +2,7 @@ using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
 
-public class GameRulesKaNoBu : IGameRules
+public class KaNoBuRules : IGameRules
 {
     private readonly int width;
     private readonly int height;
@@ -10,7 +10,7 @@ public class GameRulesKaNoBu : IGameRules
     private readonly Dictionary<int, IField> fieldsCache;
     private readonly IPointRotator pointRotator = new TwoPlayerPointRotator();
 
-    public GameRulesKaNoBu(int width, int height)
+    public KaNoBuRules(int width, int height)
     {
         this.width = width;
         this.height = height;
@@ -22,7 +22,7 @@ public class GameRulesKaNoBu : IGameRules
         return new Field2D(this.width, this.height);
     }
 
-    public int getPlayersCount()
+    public int getMaxPlayersCount()
     {
         return 2;
     }
@@ -31,11 +31,11 @@ public class GameRulesKaNoBu : IGameRules
     {
         return new PlayerRotatorNormal
         {
-            size = this.getPlayersCount()
+            Size = this.getMaxPlayersCount()
         };
     }
 
-    public PlayerInitialization getInitializationData(int playerNumber)
+    public InitModel getInitializationData(int playerNumber)
     {
         var newFieldWidth = width;
         var newFieldHeight = height / 3;
@@ -52,16 +52,18 @@ public class GameRulesKaNoBu : IGameRules
             if (shipN == 2) availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipPaper));
         }
 
-        return new PlayerInitialization
+        return new InitModel
         {
-            preparingField = new FieldReadOnly(preparingField),
-            availableFigures = availableShips
+            PreparingField = new FieldReadOnly(preparingField),
+            AvailableFigures = availableShips
         };
     }
 
-    public bool checkPreparedField(int playerNumber, IField preparedField)
+    public bool CheckInitResponse(int playerNumber, InitResponseModel initResponse)
     {
-        var ships = this.getInitializationData(playerNumber).availableFigures;
+        var preparedField = initResponse.PreparedField;
+
+        var ships = this.getInitializationData(playerNumber).AvailableFigures;
         var availableShips = new Dictionary<KaNoBuFigure.FigureTypes, int>();
         foreach (KaNoBuFigure s in ships)
         {
@@ -76,9 +78,9 @@ public class GameRulesKaNoBu : IGameRules
             availableShips[shipType] = count;
         }
 
-        for (var i = 0; i < preparedField.getWidth(); i++)
+        for (var i = 0; i < preparedField.Width; i++)
         {
-            for (var j = 0; j < preparedField.getHeight(); j++)
+            for (var j = 0; j < preparedField.Height; j++)
             {
                 var ship = (KaNoBuFigure?)preparedField.get(new Point { X = i, Y = j });
                 if (ship != null)
@@ -106,10 +108,10 @@ public class GameRulesKaNoBu : IGameRules
     {
         var rotator = new FieldRotator(mainField, playerNumber, this.pointRotator);
 
-        var mainHeight = mainField.getHeight();
-        var mainWidth = mainField.getWidth();
-        var playerWidth = playerField.getWidth();
-        var playerHeight = playerField.getHeight();
+        var mainHeight = mainField.Height;
+        var mainWidth = mainField.Width;
+        var playerWidth = playerField.Width;
+        var playerHeight = playerField.Height;
 
         if (mainWidth != playerWidth)
         {
@@ -148,15 +150,15 @@ public class GameRulesKaNoBu : IGameRules
 
     public Move getMoveForPlayer(IField mainField, Move move, int playerNumberToNotify)
     {
-        Point from = this.pointRotator.getRotatedPoint(mainField, move.From, playerNumberToNotify);
-        Point to = this.pointRotator.getRotatedPoint(mainField, move.To, playerNumberToNotify);
+        Point from = this.pointRotator.RotatePoint(mainField, move.From, playerNumberToNotify);
+        Point to = this.pointRotator.RotatePoint(mainField, move.To, playerNumberToNotify);
         return new Move { From = from, To = to };
     }
 
-    public AutoMove autoMove(IField mainField, int playerNumber)
+    public Move? autoMove(IField mainField, int playerNumber)
     {
-        var mainWidth = mainField.getWidth();
-        var mainHeight = mainField.getHeight();
+        var mainWidth = mainField.Width;
+        var mainHeight = mainField.Height;
         var canMove = false;
         for (var i = 0; i < mainWidth; i++)
         {
@@ -184,25 +186,24 @@ public class GameRulesKaNoBu : IGameRules
 
         if (canMove)
         {
-            return new AutoMove
-            {
-                move = null,
-                status = AutoMove.AutoMoveStatus.NONE
-            };
+            return null;
         }
         else
         {
-
-            return new AutoMove
+            return new Move
             {
-                move = null,
-                status = AutoMove.AutoMoveStatus.SKIP_TURN
+                Status = MoveStatus.SKIP_TURN
             };
         }
     }
 
     public MoveValidationStatus checkMove(IField mainField, int playerNumber, Move playerMove)
     {
+        if (playerMove.Status == MoveStatus.SKIP_TURN)
+        {
+            return MoveValidationStatus.OK;
+        }
+
         var rotator = new FieldRotator(mainField, playerNumber, this.pointRotator);
         var from = (KaNoBuFigure?)rotator.get(playerMove.From);
         var to = (KaNoBuFigure?)rotator.get(playerMove.To);
@@ -244,7 +245,7 @@ public class GameRulesKaNoBu : IGameRules
         return MoveValidationStatus.OK;
     }
 
-    public BattleResult? makeMove(IField mainField, int playerNumber, Move playerMove)
+    public MoveResult? makeMove(IField mainField, int playerNumber, Move playerMove)
     {
         var rotatedField = new FieldRotator(mainField, playerNumber, this.pointRotator);
         var from = (KaNoBuFigure?)rotatedField.get(playerMove.From);
@@ -266,7 +267,7 @@ public class GameRulesKaNoBu : IGameRules
 
         if (winner == null)
         {
-            return new BattleResult
+            return new MoveResult
             {
                 attackers = new List<IFigure> { from },
                 defenders = new List<IFigure> { to },
@@ -278,7 +279,7 @@ public class GameRulesKaNoBu : IGameRules
         rotatedField.trySet(playerMove.To, null);
         rotatedField.trySet(playerMove.To, winner);
 
-        return new BattleResult
+        return new MoveResult
         {
             attackers = new List<IFigure> { from },
             defenders = new List<IFigure> { to },
@@ -289,8 +290,8 @@ public class GameRulesKaNoBu : IGameRules
     public List<int>? findWinners(IField mainField)
     {
         var winners = new List<int>();
-        int mainWidth = mainField.getWidth();
-        int mainHeight = mainField.getHeight();
+        int mainWidth = mainField.Width;
+        int mainHeight = mainField.Height;
         for (int i = 0; i < mainWidth; i++)
         {
             for (int j = 0; j < mainHeight; j++)

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.Tasks;
 using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
@@ -11,16 +12,16 @@ public class PlayerConsole : IPlayer
     {
         string result = "";
         result += string.Format("  ");
-        for (int j = 0; j < field.getWidth(); j++)
+        for (int j = 0; j < field.Width; j++)
         {
             result += $" {j}";
         }
         result += "\n";
 
-        for (int i = 0; i < field.getHeight(); i++)
+        for (int i = 0; i < field.Height; i++)
         {
             result += $" {i}";
-            for (int j = 0; j < field.getWidth(); j++)
+            for (int j = 0; j < field.Width; j++)
             {
                 var ship = field.get(new Point { X = j, Y = i });
                 result += $" {getShipResource(ship)}";
@@ -30,10 +31,10 @@ public class PlayerConsole : IPlayer
         return result;
     }
 
-    private Point? readPoint()
+    private async Task<Point?> readPoint()
     {
-        var x = readCoordinate("X");
-        var y = readCoordinate("Y");
+        var x = await readCoordinate("X");
+        var y = await readCoordinate("Y");
         if (x == null || y == null)
         {
             return null;
@@ -44,12 +45,12 @@ public class PlayerConsole : IPlayer
         }
     }
 
-    private int? readCoordinate(string coordinate)
+    private async Task<int?> readCoordinate(string coordinate)
     {
         while (true)
         {
             Console.Write(coordinate + ": ");
-            var xS = Console.ReadLine();
+            var xS = await Task.Run(()=>Console.ReadLine());
             if (string.IsNullOrWhiteSpace(xS))
             {
                 return null;
@@ -66,7 +67,7 @@ public class PlayerConsole : IPlayer
         }
     }
 
-    public Task<MakeTurnResponseModel> makeTurn(MakeTurnModel makeTurnModel)
+    public async Task<MakeTurnResponseModel> MakeTurn(MakeTurnModel makeTurnModel)
     {
         var field = makeTurnModel.field;
         this.showMessage(showField(field));
@@ -74,47 +75,49 @@ public class PlayerConsole : IPlayer
         Point? from = null;
         while (from == null)
         {
-            from = readPoint();
+            from = await readPoint();
         }
 
         this.showMessage("Select destination to move.");
         Point? to = null;
         while (to == null)
         {
-            to = readPoint();
+            to = await readPoint();
         }
 
-        return Task.FromResult(new MakeTurnResponseModel
+        return new MakeTurnResponseModel
         {
             isSuccess = true,
-            move = new Move { From = from.Value, To = to.Value },
-            moveStatus = MoveStatus.MAKE_TURN
-        });
+            move = new Move { 
+                From = from.Value, 
+                To = to.Value,
+                Status = MoveStatus.MAKE_TURN
+            },
+        };
     }
 
-    public Task<InitResponseModel> init(InitModel model)
+    public async Task<InitResponseModel> Init(int playerNumber, InitModel model)
     {
-        var playerNumber = model.playerNumber;
         this.showMessage($"Your turn number: {playerNumber}");
-        var name = this.getName();
-        var ships = new List<IFigure>(model.availableFigures);
-        var preparedField = model.preparingField.copyField();
+        var name = await this.getName();
+        var ships = new List<IFigure>(model.AvailableFigures);
+        var preparedField = model.PreparingField.copyField();
 
-        this.fillField(preparedField, ships);
+        await this.fillField(preparedField, ships);
 
-        return Task.FromResult(new InitResponseModel
+        return new InitResponseModel
         {
-            success = true,
-            name = name,
-            preparedField = preparedField
-        });
+            IsSuccess = true,
+            Name = name,
+            PreparedField = preparedField
+        };
     }
 
-    private void fillField(IField preparedField, List<IFigure> ships)
+    private async Task fillField(IField preparedField, List<IFigure> ships)
     {
         this.showMessage($"Initializing field with {ships.Count} ships.");
-        var width = preparedField.getWidth();
-        var height = preparedField.getHeight();
+        var width = preparedField.Width;
+        var height = preparedField.Height;
         var r = new Random();
 
         while (ships.Count != 0)
@@ -122,7 +125,7 @@ public class PlayerConsole : IPlayer
             this.showMessage(showField(preparedField));
             var ship = ships[0];
             this.showMessage("Select position for " + getShipResource(ship) + ", empty value = random.");
-            Point? p = readPoint();
+            Point? p = await readPoint();
             if (p == null)
             {
                 while (true)
@@ -141,9 +144,10 @@ public class PlayerConsole : IPlayer
             }
             else
             {
-                if (!preparedField.trySet(p.Value, ship))
+                var setStatus = preparedField.trySet(p.Value, ship);
+                if (setStatus != IField.SetStatus.OK)
                 {
-                    this.showMessage("Cant set ship at this coordinate.");
+                    this.showMessage($"Cant set ship at this coordinate: {setStatus}");
                 }
                 else
                 {
@@ -153,10 +157,10 @@ public class PlayerConsole : IPlayer
         }
     }
 
-    private string getName()
+    private async Task<string> getName()
     {
         this.showMessage("Please enter your name (default - unnamed):");
-        var name = Console.ReadLine();
+        var name = await Task.Run(()=>Console.ReadLine());
         if (string.IsNullOrWhiteSpace(name))
         {
             name = "unnamed";
@@ -175,15 +179,15 @@ public class PlayerConsole : IPlayer
         this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {status}.");
     }
 
-    public void playerTurnMade(int playerNumber, MoveStatus status, Move? move, BattleResult? battle)
+    public void playerTurnMade(int playerNumber, Move move, MoveResult? battle)
     {
-        if(status == MoveStatus.SKIP_TURN)
+        if(move.Status == MoveStatus.SKIP_TURN)
         {
             this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' skip turn.");
             return;
         }
 
-        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move from {move!.Value.From} to {move!.Value.To}.");
+        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move from {move.From} to {move.To}.");
         if (battle == null)
         {
             return;

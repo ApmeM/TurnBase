@@ -14,21 +14,14 @@ public class FieldReadOnly : IField
         return this.mainField.get(from);
     }
 
-    public bool trySet(Point to, IFigure figure)
+    public IField.SetStatus trySet(Point to, IFigure? figure)
     {
-        // It is readonly. Nothing will be changed on the mainField
-        throw new Exception("Field is read-only");
+        return IField.SetStatus.READ_ONLY;
     }
 
-    public int getWidth()
-    {
-        return this.mainField.getWidth();
-    }
+    public int Width => this.mainField.Width;
 
-    public int getHeight()
-    {
-        return this.mainField.getHeight();
-    }
+    public int Height => this.mainField.Height;
 
     public IField copyField()
     {

@@ -4,6 +4,11 @@ public class FieldConcealer : IField {
     private IField mainField;
     private int playerNumber;
 
+
+    public int Width => this.mainField.Width;
+    public int Height => this.mainField.Height;
+
+
     public FieldConcealer(IField mainField, int playerNumber) {
         this.mainField = mainField;
         this.playerNumber = playerNumber;
@@ -22,16 +27,8 @@ public class FieldConcealer : IField {
         return figure;
     }
 
-    public bool trySet(Point to, IFigure figure) {
+    public IField.SetStatus trySet(Point to, IFigure? figure) {
         return this.mainField.trySet(to, figure);
-    }
-
-    public int getWidth() {
-        return this.mainField.getWidth();
-    }
-
-    public int getHeight() {
-        return this.mainField.getHeight();
     }
 
     public IField copyField() {

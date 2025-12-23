@@ -2,9 +2,9 @@ namespace TurnBase.Core;
 
 public interface IPlayerRotator
 {
-    public void moveNext();
+    public void MoveNext();
 
-    public int getCurrent();
+    public int GetCurrent();
 
-    public int size { get; set; }
+    public int Size { get; set; }
 }

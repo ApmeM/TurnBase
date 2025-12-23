@@ -6,5 +6,5 @@ public interface IGameEvents
     event Action<int, string>? GamePlayerInitialized;
     event Action<int, MoveValidationStatus>? GamePlayerWrongTurn;
     event Action<List<int>>? GameFinished;
-    event Action<int, MoveStatus, Move?, BattleResult?>? GamePlayerTurn;
+    event Action<int, Move, MoveResult?>? GamePlayerTurn;
 }
