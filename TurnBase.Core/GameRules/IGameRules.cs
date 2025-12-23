@@ -1,6 +1,6 @@
 namespace TurnBase.Core;
 
-public interface IGameRules
+public interface IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
 {
       // Preparing functions.
     IField generateGameField();
@@ -8,15 +8,13 @@ public interface IGameRules
     IPlayerRotator getRotator();
 
     // Player initialization functions.
-    InitModel getInitializationData(int playerNumber);
-    bool CheckInitResponse(int playerNumber, InitResponseModel preparedField);
-    void addPlayerToField(IField mainField, IField playerField, int playerNumber);
+    TInitModel GetInitModel(int playerNumber);
+    bool TryApplyInitResponse(IField mainField, int playerNumber, TInitResponseModel playerResponse);
 
     // Game functions.
-    IField getFieldForPlayer(IField mainField, int playerNumber);
-    Move getMoveForPlayer(IField mainField, Move move, int playerNumberToNotify);
-    Move? autoMove(IField mainField, int playerNumber);
-    MoveValidationStatus checkMove(IField mainField, int playerNumber, Move move);
-    MoveResult? makeMove(IField mainField, int playerNumber, Move playerMove);
+    TMoveResponseModel? AutoMove(IField mainField, int playerNumber);
+    TMoveModel GetMoveModel(IField mainField, int playerNumber);
+    MoveValidationStatus CheckMove(IField mainField, int playerNumber, TMoveResponseModel move);
+    TMoveNotificationModel MakeMove(IField mainField, int playerNumber, TMoveResponseModel playerMove);
     List<int>? findWinners(IField mainField);
 }

@@ -1,6 +1,12 @@
 namespace TurnBase.Core;
 
-public class InitModel {
-    public IField PreparingField;
-    public List<IFigure> AvailableFigures;
+public class InitModel<TInitModel> {
+    public InitModel(int playerId, TInitModel request)
+    {
+        PlayerId = playerId;
+        Request = request;
+    }
+
+    public int PlayerId;
+    public TInitModel Request;
 }

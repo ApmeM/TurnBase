@@ -1,10 +1,9 @@
 using System.Text;
-using System.Threading.Tasks;
 using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
 
-public class PlayerConsole : IPlayer
+public class PlayerConsole : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
 {
     private Dictionary<int, string> players = new Dictionary<int, string>();
 
@@ -50,7 +49,7 @@ public class PlayerConsole : IPlayer
         while (true)
         {
             Console.Write(coordinate + ": ");
-            var xS = await Task.Run(()=>Console.ReadLine());
+            var xS = await Task.Run(() => Console.ReadLine());
             if (string.IsNullOrWhiteSpace(xS))
             {
                 return null;
@@ -67,9 +66,9 @@ public class PlayerConsole : IPlayer
         }
     }
 
-    public async Task<MakeTurnResponseModel> MakeTurn(MakeTurnModel makeTurnModel)
+    public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> makeTurnModel)
     {
-        var field = makeTurnModel.field;
+        var field = makeTurnModel.Model.Field;
         this.showMessage(showField(field));
         this.showMessage("Select ship to move.");
         Point? from = null;
@@ -85,31 +84,28 @@ public class PlayerConsole : IPlayer
             to = await readPoint();
         }
 
-        return new MakeTurnResponseModel
-        {
-            isSuccess = true,
-            move = new Move { 
-                From = from.Value, 
-                To = to.Value,
-                Status = MoveStatus.MAKE_TURN
-            },
-        };
+        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
+            true,
+            new KaNoBuMoveResponseModel(
+                KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
+                from.Value,
+                to.Value));
     }
 
-    public async Task<InitResponseModel> Init(int playerNumber, InitModel model)
+    public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
     {
-        this.showMessage($"Your turn number: {playerNumber}");
+        this.showMessage($"Your turn number: {model.PlayerId}");
         var name = await this.getName();
-        var ships = new List<IFigure>(model.AvailableFigures);
-        var preparedField = model.PreparingField.copyField();
+        var ships = new List<IFigure>(model.Request.AvailableFigures);
+        var preparedField = model.Request.PreparingField.copyField();
 
         await this.fillField(preparedField, ships);
 
-        return new InitResponseModel
+        return new InitResponseModel<KaNoBuInitResponseModel>
         {
             IsSuccess = true,
             Name = name,
-            PreparedField = preparedField
+            Response = new KaNoBuInitResponseModel(preparedField)
         };
     }
 
@@ -160,7 +156,7 @@ public class PlayerConsole : IPlayer
     private async Task<string> getName()
     {
         this.showMessage("Please enter your name (default - unnamed):");
-        var name = await Task.Run(()=>Console.ReadLine());
+        var name = await Task.Run(() => Console.ReadLine());
         if (string.IsNullOrWhiteSpace(name))
         {
             name = "unnamed";
@@ -179,36 +175,43 @@ public class PlayerConsole : IPlayer
         this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {status}.");
     }
 
-    public void playerTurnMade(int playerNumber, Move move, MoveResult? battle)
+    public void playerTurnMade(int playerNumber, KaNoBuMoveNotificationModel battle)
     {
-        if(move.Status == MoveStatus.SKIP_TURN)
+        var move = battle.move;
+        if (move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
         {
             this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' skip turn.");
             return;
         }
 
         this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move from {move.From} to {move.To}.");
-        if (battle == null)
+
+        var s = new StringBuilder();
+        s.AppendLine("Battle:");
+        if (battle.attackers != null)
         {
-            return;
+            s.AppendLine("  attackers:");
+            s.AppendJoin("\n", battle.attackers.Select(a => $"    {this.players[a.PlayerId]}.{getShipResource(a)}"));
+            s.AppendLine();
         }
 
-        StringBuilder s = new StringBuilder();
-        s.AppendLine("Battle:");
-        s.AppendLine("  attackers:");
-        s.AppendJoin("\n", battle.Value.attackers.Select(a => $"    {this.players[a.PlayerId]}.{getShipResource(a)}"));
-        s.AppendLine("\n  defenders:");
-        s.AppendJoin("\n", battle.Value.defenders.Select(a => $"    {this.players[a.PlayerId]}.{getShipResource(a)}"));
-        var winners = battle.Value.winners;
-        if (winners == null || winners.Count == 0)
+        if (battle.defenders != null){
+            s.AppendLine("\n  defenders:");
+            s.AppendJoin("\n", battle.defenders.Select(a => $"    {this.players[a.PlayerId]}.{getShipResource(a)}"));
+            s.AppendLine();
+        }
+
+        if (battle.winners == null || battle.winners.Count == 0)
         {
             s.AppendLine("\n  winner: None (draw)");
         }
         else
         {
             s.AppendLine("\n  winner:");
-            s.AppendJoin("\n", battle.Value.winners.Select(a => $"    {this.players[a.PlayerId]}.{getShipResource(a)}"));
+            s.AppendJoin("\n", battle.winners.Select(a => $"    {this.players[a.PlayerId]}.{getShipResource(a)}"));
+            s.AppendLine();
         }
+
         this.showMessage(s.ToString());
     }
 

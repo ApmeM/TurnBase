@@ -2,56 +2,51 @@ using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
 
-public class KaNoBuPlayerEasy : IPlayer
+public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
 {
     private Random r = new Random();
     private string name = "Computer easy";
     private int myNumber;
 
-    public async Task<InitResponseModel> Init(int playerNumber, InitModel model)
+    public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
     {
         await Task.Delay(0);
-        this.myNumber = playerNumber;
-        var ships = new List<IFigure>(model.AvailableFigures);
-        var preparedField = model.PreparingField.copyField();
+        this.myNumber = model.PlayerId;
+        var ships = new List<IFigure>(model.Request.AvailableFigures);
+        var preparedField = model.Request.PreparingField.copyField();
         this.generateField(preparedField, ships);
-        return new InitResponseModel
+        return new InitResponseModel<KaNoBuInitResponseModel>
         {
             IsSuccess = true,
             Name = name,
-            PreparedField = preparedField
+            Response = new KaNoBuInitResponseModel(preparedField)
         };
     }
 
-    public async Task<MakeTurnResponseModel> MakeTurn(MakeTurnModel model)
+    public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
     {
         await Task.Delay(0);
-        List<Move> from = this.findAllMovement(model.field);
+        var from = this.findAllMovement(model.Model.Field);
 
         if (from == null || from.Count == 0)
         {
-            return new MakeTurnResponseModel
-            {
-                isSuccess = true,
-                move = new Move
-                {
-                    Status = MoveStatus.SKIP_TURN
-                },
-            };
+            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
+                true,
+                new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
+            );
         }
 
         int movementNum = r.Next(from.Count);
 
-        return new MakeTurnResponseModel
-        {
-            isSuccess = true,
-            move = from[movementNum],
-        };
+        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
+                true,
+                from[movementNum]
+            );
     }
 
-    private List<Move> findAllMovement(IField field)
+    private List<KaNoBuMoveResponseModel> findAllMovement(IField field)
     {
-        var availableShips = new List<Move>();
+        var availableShips = new List<KaNoBuMoveResponseModel>();
         for (int x = 0; x < field.Width; x++)
         {
             for (int y = 0; y < field.Height; y++)
@@ -83,7 +78,7 @@ public class KaNoBuPlayerEasy : IPlayer
         return availableShips;
     }
 
-    private void tryAdd(List<Move> availableShips, IField field, Point from, int x, int y)
+    private void tryAdd(List<KaNoBuMoveResponseModel> availableShips, IField field, Point from, int x, int y)
     {
         if (x < 0 || y < 0 || x >= field.Width || y >= field.Height)
         {
@@ -94,12 +89,11 @@ public class KaNoBuPlayerEasy : IPlayer
         var shipTo = field.get(to);
         if (shipTo == null || shipTo.PlayerId != this.myNumber)
         {
-            availableShips.Add(new Move
-            {
-                From = from,
-                To = to,
-                Status = MoveStatus.MAKE_TURN
-            });
+            availableShips.Add(new KaNoBuMoveResponseModel(
+                KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
+                from,
+                to
+            ));
         }
     }
 

@@ -8,7 +8,7 @@ public class Program
     {
         var rules = new KaNoBuRules(8, 8);
         var player = new PlayerConsole();
-        var game = new Game(rules);
+        var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules);
         game.AddPlayer(player);
         game.AddPlayer(new KaNoBuPlayerEasy());
 

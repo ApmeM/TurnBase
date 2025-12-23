@@ -1,10 +1,10 @@
 namespace TurnBase.Core;
 
-public interface IGameEvents
+public interface IGameEvents<TMoveNotificationModel>
 {
     event Action<IField>? GameStarted;
     event Action<int, string>? GamePlayerInitialized;
     event Action<int, MoveValidationStatus>? GamePlayerWrongTurn;
     event Action<List<int>>? GameFinished;
-    event Action<int, Move, MoveResult?>? GamePlayerTurn;
+    event Action<int, TMoveNotificationModel>? GamePlayerTurn;
 }

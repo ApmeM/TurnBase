@@ -2,7 +2,7 @@ using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
 
-public class KaNoBuRules : IGameRules
+public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     private readonly int width;
     private readonly int height;
@@ -35,7 +35,7 @@ public class KaNoBuRules : IGameRules
         };
     }
 
-    public InitModel getInitializationData(int playerNumber)
+    public KaNoBuInitModel GetInitModel(int playerNumber)
     {
         var newFieldWidth = width;
         var newFieldHeight = height / 3;
@@ -52,18 +52,14 @@ public class KaNoBuRules : IGameRules
             if (shipN == 2) availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipPaper));
         }
 
-        return new InitModel
-        {
-            PreparingField = new FieldReadOnly(preparingField),
-            AvailableFigures = availableShips
-        };
+        return new KaNoBuInitModel(new FieldReadOnly(preparingField), availableShips);
     }
 
-    public bool CheckInitResponse(int playerNumber, InitResponseModel initResponse)
+    public bool TryApplyInitResponse(IField mainField, int playerNumber, KaNoBuInitResponseModel initResponse)
     {
         var preparedField = initResponse.PreparedField;
 
-        var ships = this.getInitializationData(playerNumber).AvailableFigures;
+        var ships = this.GetInitModel(playerNumber).AvailableFigures;
         var availableShips = new Dictionary<KaNoBuFigure.FigureTypes, int>();
         foreach (KaNoBuFigure s in ships)
         {
@@ -101,17 +97,17 @@ public class KaNoBuRules : IGameRules
             }
         }
 
-        return availableShips.Count() == 0;
-    }
+        if (availableShips.Count() != 0)
+        {
+            return false;
+        }
 
-    public void addPlayerToField(IField mainField, IField playerField, int playerNumber)
-    {
         var rotator = new FieldRotator(mainField, playerNumber, this.pointRotator);
 
         var mainHeight = mainField.Height;
         var mainWidth = mainField.Width;
-        var playerWidth = playerField.Width;
-        var playerHeight = playerField.Height;
+        var playerWidth = initResponse.PreparedField.Width;
+        var playerHeight = initResponse.PreparedField.Height;
 
         if (mainWidth != playerWidth)
         {
@@ -122,7 +118,7 @@ public class KaNoBuRules : IGameRules
         {
             for (var j = 0; j < playerHeight; j++)
             {
-                var playerShip = playerField.get(new Point { X = i, Y = j });
+                var playerShip = initResponse.PreparedField.get(new Point { X = i, Y = j });
                 var position = new Point
                 {
                     X = i,
@@ -133,9 +129,11 @@ public class KaNoBuRules : IGameRules
                 rotator.trySet(position, playerShip);
             }
         }
+
+        return true;
     }
 
-    public IField getFieldForPlayer(IField mainField, int playerNumber)
+    public KaNoBuMoveModel GetMoveModel(IField mainField, int playerNumber)
     {
         if (!this.fieldsCache.ContainsKey(playerNumber))
         {
@@ -145,17 +143,18 @@ public class KaNoBuRules : IGameRules
 
             this.fieldsCache[playerNumber] = readonlyField;
         }
-        return this.fieldsCache[playerNumber];
+
+        return new KaNoBuMoveModel(this.fieldsCache[playerNumber]);
     }
 
-    public Move getMoveForPlayer(IField mainField, Move move, int playerNumberToNotify)
-    {
-        Point from = this.pointRotator.RotatePoint(mainField, move.From, playerNumberToNotify);
-        Point to = this.pointRotator.RotatePoint(mainField, move.To, playerNumberToNotify);
-        return new Move { From = from, To = to };
-    }
+    // public KaNoBuMoveResponseModel getMoveForPlayer(IField mainField, KaNoBuMoveResponseModel move, int playerNumberToNotify)
+    // {
+    //     Point from = this.pointRotator.RotatePoint(mainField, move.From, playerNumberToNotify);
+    //     Point to = this.pointRotator.RotatePoint(mainField, move.To, playerNumberToNotify);
+    //     return new KaNoBuMoveResponseModel { From = from, To = to };
+    // }
 
-    public Move? autoMove(IField mainField, int playerNumber)
+    public KaNoBuMoveResponseModel? AutoMove(IField mainField, int playerNumber)
     {
         var mainWidth = mainField.Width;
         var mainHeight = mainField.Height;
@@ -190,16 +189,13 @@ public class KaNoBuRules : IGameRules
         }
         else
         {
-            return new Move
-            {
-                Status = MoveStatus.SKIP_TURN
-            };
+            return new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN);
         }
     }
 
-    public MoveValidationStatus checkMove(IField mainField, int playerNumber, Move playerMove)
+    public MoveValidationStatus CheckMove(IField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
     {
-        if (playerMove.Status == MoveStatus.SKIP_TURN)
+        if (playerMove.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
         {
             return MoveValidationStatus.OK;
         }
@@ -245,7 +241,7 @@ public class KaNoBuRules : IGameRules
         return MoveValidationStatus.OK;
     }
 
-    public MoveResult? makeMove(IField mainField, int playerNumber, Move playerMove)
+    public KaNoBuMoveNotificationModel MakeMove(IField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
     {
         var rotatedField = new FieldRotator(mainField, playerNumber, this.pointRotator);
         var from = (KaNoBuFigure?)rotatedField.get(playerMove.From);
@@ -260,31 +256,29 @@ public class KaNoBuRules : IGameRules
         {
             rotatedField.trySet(playerMove.To, from);
             rotatedField.trySet(playerMove.From, null);
-            return null;
+            return new KaNoBuMoveNotificationModel(playerMove);
         }
 
         var winner = this.battle(from, to);
 
         if (winner == null)
         {
-            return new MoveResult
-            {
-                attackers = new List<IFigure> { from },
-                defenders = new List<IFigure> { to },
-                winners = new List<IFigure>()
-            };
+            return new KaNoBuMoveNotificationModel(playerMove,
+                new List<IFigure> { from },
+                new List<IFigure> { to },
+                new List<IFigure>()
+            );
         }
 
         rotatedField.trySet(playerMove.From, null);
         rotatedField.trySet(playerMove.To, null);
         rotatedField.trySet(playerMove.To, winner);
 
-        return new MoveResult
-        {
-            attackers = new List<IFigure> { from },
-            defenders = new List<IFigure> { to },
-            winners = new List<IFigure> { winner }
-        };
+        return new KaNoBuMoveNotificationModel(playerMove,
+            new List<IFigure> { from },
+            new List<IFigure> { to },
+            new List<IFigure> { winner }
+        );
     }
 
     public List<int>? findWinners(IField mainField)

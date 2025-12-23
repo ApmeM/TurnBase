@@ -1,7 +1,7 @@
 namespace TurnBase.Core;
 
-public class InitResponseModel {
+public class InitResponseModel<TInitResponseModel> {
     public bool IsSuccess;
-    public string Name;
-    public IField PreparedField;
+    public string Name = string.Empty;
+    public TInitResponseModel? Response;
 }
