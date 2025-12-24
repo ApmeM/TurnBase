@@ -26,6 +26,11 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
         return 2;
     }
 
+    public int getMinPlayersCount()
+    {
+        return 2;
+    }
+
     public IPlayerRotator getRotator()
     {
         return new PlayerRotatorNormal
@@ -141,13 +146,6 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
         return new KaNoBuMoveModel(this.fieldsCache[playerNumber]);
     }
-
-    // public KaNoBuMoveResponseModel getMoveForPlayer(IField mainField, KaNoBuMoveResponseModel move, int playerNumberToNotify)
-    // {
-    //     Point from = this.pointRotator.RotatePoint(mainField, move.From, playerNumberToNotify);
-    //     Point to = this.pointRotator.RotatePoint(mainField, move.To, playerNumberToNotify);
-    //     return new KaNoBuMoveResponseModel { From = from, To = to };
-    // }
 
     public KaNoBuMoveResponseModel? AutoMove(IField mainField, int playerNumber)
     {

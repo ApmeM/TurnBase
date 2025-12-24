@@ -26,7 +26,7 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
     {
         if (this.players.Count >= this.rules.getMaxPlayersCount())
         {
-            throw new Exception("Too many players added to the game.");
+            throw new Exception($"Too many players added to the game. Maximum value is {this.rules.getMaxPlayersCount()}.");
         }
 
         if (this.GameIsRunning)
@@ -44,6 +44,11 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
 
     public async Task Play(bool parallelInit)
     {
+        if (this.players.Count < this.rules.getMinPlayersCount())
+        {
+            throw new Exception($"Too few players added to the game. Minimum value is {this.rules.getMinPlayersCount()}.");
+        }
+
         this.GameIsRunning = true;
         var initRequests = new List<Task>();
 

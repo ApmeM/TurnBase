@@ -5,6 +5,7 @@ public interface IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveRes
       // Preparing functions.
     IField generateGameField();
     int getMaxPlayersCount();
+    int getMinPlayersCount();
     IPlayerRotator getRotator();
 
     // Player initialization functions.
