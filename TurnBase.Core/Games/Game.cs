@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace TurnBase.Core;
 
 public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IGameEvents<TMoveNotificationModel>
@@ -8,17 +6,15 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
     {
         this.rules = rules;
         this.mainField = this.rules.generateGameField();
-        this.readonlyField = new FieldReadOnly(this.mainField);
         this.playerRotator = this.rules.getRotator();
     }
 
     private IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules;
     private IField mainField;
-    private IField readonlyField;
     private IPlayerRotator playerRotator;
     private List<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>> players = new List<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>>();
 
-    public event Action<IField>? GameStarted;
+    public event Action? GameStarted;
     public event Action<int, string>? GamePlayerInitialized;
     public event Action<int, MoveValidationStatus>? GamePlayerWrongTurn;
     public event Action<int, TMoveNotificationModel>? GamePlayerTurn;
@@ -28,8 +24,21 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
 
     public void AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
     {
-        Debug.Assert(this.players.Count <= this.rules.getMaxPlayersCount(), "Too many players added to the game");
-        Debug.Assert(!this.GameIsRunning, "Cannot add players after the game has started.");
+        if (this.players.Count >= this.rules.getMaxPlayersCount())
+        {
+            throw new Exception("Too many players added to the game.");
+        }
+
+        if (this.GameIsRunning)
+        {
+            throw new Exception("Cannot add players after the game has started.");
+        }
+
+        if(this.players.Contains(player))
+        {
+            throw new Exception("Player already added to the game.");
+        }
+
         this.players.Add(player);
     }
 
@@ -38,7 +47,7 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
         this.GameIsRunning = true;
         var initRequests = new List<Task>();
 
-        for (int i = 0; i < players.Count(); i++)
+        for (int i = 0; i < this.players.Count(); i++)
         {
             var initRequest = this.InitPlayer(i);
             if (parallelInit)
@@ -79,7 +88,7 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
 
     private async Task GameProcess()
     {
-        this.GameStarted?.Invoke(this.readonlyField);
+        this.GameStarted?.Invoke();
 
         while (true)
         {
@@ -120,12 +129,11 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
             this.playerRotator.MoveNext();
 
             var winners = this.rules.findWinners(this.mainField);
-            if(winners != null)
+            if (winners != null)
             {
                 this.GameFinished?.Invoke(winners);
                 break;
             }
         }
-
     }
 }

@@ -4,14 +4,16 @@ namespace TurnBase.KaNoBu;
 
 public class KaNoBuInitModel
 {
-    public KaNoBuInitModel(FieldReadOnly preparingField, List<IFigure> availableFigures)
+    public KaNoBuInitModel(int width, int height, List<IFigure> availableFigures)
     {
-        PreparingField = preparingField;
+        Width = width;
+        Height = height;
         AvailableFigures = availableFigures;
     }
 
-    public readonly FieldReadOnly PreparingField;
     public readonly List<IFigure> AvailableFigures;
+    public readonly int Width;
+    public readonly int Height;
 }
 
 public class KaNoBuInitResponseModel

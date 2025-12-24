@@ -13,7 +13,7 @@ public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel
         await Task.Delay(0);
         this.myNumber = model.PlayerId;
         var ships = new List<IFigure>(model.Request.AvailableFigures);
-        var preparedField = model.Request.PreparingField.copyField();
+        var preparedField = new Field2D(model.Request.Width, model.Request.Height);
         this.generateField(preparedField, ships);
         return new InitResponseModel<KaNoBuInitResponseModel>
         {

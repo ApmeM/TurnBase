@@ -8,7 +8,6 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
     private readonly int height;
 
     private readonly Dictionary<int, IField> fieldsCache;
-    private readonly IPointRotator pointRotator = new TwoPlayerPointRotator();
 
     public KaNoBuRules(int width, int height)
     {
@@ -37,12 +36,11 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
     public KaNoBuInitModel GetInitModel(int playerNumber)
     {
-        var newFieldWidth = width;
-        var newFieldHeight = height / 3;
-        var preparingField = new Field2D(newFieldWidth, newFieldHeight);
+        var initFieldWidth = width;
+        var initFieldHeight = height / 3;
 
         var availableShips = new List<IFigure>();
-        var fieldSize = newFieldWidth * newFieldHeight;
+        var fieldSize = initFieldWidth * initFieldHeight;
         availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipFlag));
         for (int i = 1; i < fieldSize; i++)
         {
@@ -52,7 +50,7 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
             if (shipN == 2) availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipPaper));
         }
 
-        return new KaNoBuInitModel(new FieldReadOnly(preparingField), availableShips);
+        return new KaNoBuInitModel(initFieldWidth, initFieldHeight, availableShips);
     }
 
     public bool TryApplyInitResponse(IField mainField, int playerNumber, KaNoBuInitResponseModel initResponse)
@@ -102,8 +100,6 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
             return false;
         }
 
-        var rotator = new FieldRotator(mainField, playerNumber, this.pointRotator);
-
         var mainHeight = mainField.Height;
         var mainWidth = mainField.Width;
         var playerWidth = initResponse.PreparedField.Width;
@@ -111,7 +107,7 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
         if (mainWidth != playerWidth)
         {
-            throw new Exception("Player field width does not match main field width.");
+            return false;
         }
 
         for (var i = 0; i < playerWidth; i++)
@@ -122,11 +118,11 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
                 var position = new Point
                 {
                     X = i,
-                    Y = mainHeight - playerHeight + j
+                    Y = playerNumber == 0 ? j : mainHeight - playerHeight + j
                 };
 
-                rotator.trySet(position, null);
-                rotator.trySet(position, playerShip);
+                mainField.trySet(position, null);
+                mainField.trySet(position, playerShip);
             }
         }
 
@@ -137,8 +133,7 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
     {
         if (!this.fieldsCache.ContainsKey(playerNumber))
         {
-            var rotator = new FieldRotator(mainField, playerNumber, this.pointRotator);
-            var concealer = new FieldConcealer(rotator, playerNumber);
+            var concealer = new FieldConcealer(mainField, playerNumber);
             var readonlyField = new FieldReadOnly(concealer);
 
             this.fieldsCache[playerNumber] = readonlyField;
@@ -200,9 +195,8 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
             return MoveValidationStatus.OK;
         }
 
-        var rotator = new FieldRotator(mainField, playerNumber, this.pointRotator);
-        var from = (KaNoBuFigure?)rotator.get(playerMove.From);
-        var to = (KaNoBuFigure?)rotator.get(playerMove.To);
+        var from = (KaNoBuFigure?)mainField.get(playerMove.From);
+        var to = (KaNoBuFigure?)mainField.get(playerMove.To);
 
         if (from == null)
         {
@@ -243,9 +237,8 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
     public KaNoBuMoveNotificationModel MakeMove(IField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
     {
-        var rotatedField = new FieldRotator(mainField, playerNumber, this.pointRotator);
-        var from = (KaNoBuFigure?)rotatedField.get(playerMove.From);
-        var to = (KaNoBuFigure?)rotatedField.get(playerMove.To);
+        var from = (KaNoBuFigure?)mainField.get(playerMove.From);
+        var to = (KaNoBuFigure?)mainField.get(playerMove.To);
 
         if (from == null)
         {
@@ -254,8 +247,8 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
         if (to == null)
         {
-            rotatedField.trySet(playerMove.To, from);
-            rotatedField.trySet(playerMove.From, null);
+            mainField.trySet(playerMove.To, from);
+            mainField.trySet(playerMove.From, null);
             return new KaNoBuMoveNotificationModel(playerMove);
         }
 
@@ -263,9 +256,9 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
         if (winner != null)
         {
-            rotatedField.trySet(playerMove.From, null);
-            rotatedField.trySet(playerMove.To, null);
-            rotatedField.trySet(playerMove.To, winner);
+            mainField.trySet(playerMove.From, null);
+            mainField.trySet(playerMove.To, null);
+            mainField.trySet(playerMove.To, winner);
         }
 
         return new KaNoBuMoveNotificationModel(playerMove, from, to, winner);

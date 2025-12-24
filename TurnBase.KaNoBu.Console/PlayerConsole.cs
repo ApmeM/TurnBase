@@ -97,7 +97,7 @@ public class PlayerConsole : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, K
         this.showMessage($"Your turn number: {model.PlayerId}");
         var name = await this.getName();
         var ships = new List<IFigure>(model.Request.AvailableFigures);
-        var preparedField = model.Request.PreparingField.copyField();
+        var preparedField = new Field2D(model.Request.Width, model.Request.Height);
 
         await this.fillField(preparedField, ships);
 
@@ -164,10 +164,9 @@ public class PlayerConsole : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, K
         return name!;
     }
 
-    public void gameStarted(IField startField)
+    public void gameStarted()
     {
         this.showMessage("Welcome to the game.");
-        this.showMessage(showField(startField));
     }
 
     public void playerWrongTurnMade(int playerNumber, MoveValidationStatus status)
