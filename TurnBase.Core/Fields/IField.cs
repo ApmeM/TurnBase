@@ -18,4 +18,6 @@ public interface IField
     SetStatus trySet(Point to, IFigure? figure);
 
     IField copyField();
+    
+    bool IsInBounds(Point point);
 }

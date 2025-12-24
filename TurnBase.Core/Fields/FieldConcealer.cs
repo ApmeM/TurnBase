@@ -34,4 +34,9 @@ public class FieldConcealer : IField {
     public IField copyField() {
         return new FieldConcealer(this.mainField.copyField(), this.playerNumber);
     }
+
+    public bool IsInBounds(Point point)
+    {
+        return this.mainField.IsInBounds(point);
+    }
 }

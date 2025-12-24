@@ -20,4 +20,22 @@ public class KaNoBuFigure : IFigure
         PlayerId = playerId;
         FigureType = figure;
     }
+
+    public bool IsMoveValid(KaNoBuMoveResponseModel playerMove)
+    {
+        if (this.FigureType == FigureTypes.ShipFlag)
+        {
+            return false;
+        }
+
+        var validMove =
+            (playerMove.From.X == playerMove.To.X && playerMove.From.Y <= playerMove.To.Y + 1 && playerMove.From.Y >= playerMove.To.Y - 1) ||
+            (playerMove.From.Y == playerMove.To.Y && playerMove.From.X <= playerMove.To.X + 1 && playerMove.From.X >= playerMove.To.X - 1);
+        if (!validMove)
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

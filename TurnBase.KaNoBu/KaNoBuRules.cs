@@ -193,6 +193,11 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
             return MoveValidationStatus.OK;
         }
 
+        if (!mainField.IsInBounds(playerMove.From) || !mainField.IsInBounds(playerMove.To))
+        {
+            return MoveValidationStatus.ERROR_OUTSIDE_FIELD;
+        }
+
         var from = (KaNoBuFigure?)mainField.get(playerMove.From);
         var to = (KaNoBuFigure?)mainField.get(playerMove.To);
 
@@ -206,15 +211,7 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
             return MoveValidationStatus.ERROR_INVALID_MOVE;
         }
 
-        if (from.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
-        {
-            return MoveValidationStatus.ERROR_INVALID_MOVE;
-        }
-
-        var validMove =
-            (playerMove.From.X == playerMove.To.X && playerMove.From.Y <= playerMove.To.Y + 1 && playerMove.From.Y >= playerMove.To.Y - 1) ||
-            (playerMove.From.Y == playerMove.To.Y && playerMove.From.X <= playerMove.To.X + 1 && playerMove.From.X >= playerMove.To.X - 1);
-        if (!validMove)
+        if (!from.IsMoveValid(playerMove))
         {
             return MoveValidationStatus.ERROR_INVALID_MOVE;
         }
@@ -223,12 +220,6 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
         {
             return MoveValidationStatus.ERROR_FIELD_OCCUPIED;
         }
-
-        // ToDo:
-        // if(rotator check for outside field)
-        // {
-        //     return MoveValidationStatus.ERROR_OUTSIDE_FIELD;
-        // }
 
         return MoveValidationStatus.OK;
     }

@@ -27,4 +27,9 @@ public class FieldReadOnly : IField
     {
         return this.mainField.copyField();
     }
+
+    public bool IsInBounds(Point point)
+    {
+        return this.mainField.IsInBounds(point);
+    }
 }

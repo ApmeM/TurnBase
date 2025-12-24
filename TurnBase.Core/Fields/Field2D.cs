@@ -56,4 +56,9 @@ public class Field2D : IField
         }
         return result;
     }
+
+    public bool IsInBounds(Point point)
+    {
+        return point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
+    }
 }
