@@ -33,7 +33,8 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
     public IPlayerRotator GetInitRotator()
     {
-        return new PlayerRotatorAllAtOnce();
+        return new PlayerRotatorNormal();
+        // return new PlayerRotatorAllAtOnce();
     }
 
     public IPlayerRotator GetMoveRotator()

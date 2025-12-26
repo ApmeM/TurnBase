@@ -10,7 +10,7 @@ public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel
 
     public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
     {
-        await Task.Delay(0);
+        await Task.Delay(200);
         this.myNumber = model.PlayerId;
         var ships = new List<IFigure>(model.Request.AvailableFigures);
         var preparedField = new Field2D(model.Request.Width, model.Request.Height);
@@ -20,8 +20,13 @@ public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel
 
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
     {
-        await Task.Delay(0);
+        await Task.Delay(200);
         var from = this.findAllMovement(model.Request.Field);
+
+        if(r.Next(2) < 1)
+        {
+            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>();
+        }
 
         if (from == null || from.Count == 0)
         {
