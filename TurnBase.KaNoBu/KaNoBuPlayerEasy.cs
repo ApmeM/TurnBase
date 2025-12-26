@@ -23,11 +23,6 @@ public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel
         await Task.Delay(200);
         var from = this.findAllMovement(model.Request.Field);
 
-        if(r.Next(2) < 1)
-        {
-            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>();
-        }
-
         if (from == null || from.Count == 0)
         {
             return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN));

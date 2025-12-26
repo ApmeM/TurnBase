@@ -3,19 +3,19 @@ using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
 
-public class PlayerConsoleListener : 
+public class KaNoBuListenerConsole : 
     IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     private Dictionary<int, string> players = new Dictionary<int, string>();
-
     private string showField(IField field)
     {
         string result = "";
         result += string.Format("   ");
         for (int j = 0; j < field.Width; j++)
         {
-            result += $"  {j}";
+            result += $"  {(char)('A' + j)}";
         }
+        result += string.Format("   ");
         result += "\n";
 
         for (int i = 0; i < field.Height; i++)
@@ -26,9 +26,23 @@ public class PlayerConsoleListener :
                 var ship = field.get(new Point { X = j, Y = i });
                 result += $" {getShipResource(ship)}";
             }
-            result += "\n";
+
+            result += $"   {i}\n";
         }
+
+        result += string.Format("   ");
+        for (int j = 0; j < field.Width; j++)
+        {
+            result += $"  {(char)('A' + j)}";
+        }
+        result += string.Format("   ");
+
         return result;
+    }
+
+    private string showPoint(Point point)
+    {
+        return $"({(char)('A' + point.X)}{point.Y})";
     }
 
     public void GameLogStarted(IField field)
@@ -40,7 +54,7 @@ public class PlayerConsoleListener :
 
     public void GameLogPlayerWrongTurn(int playerNumber, MoveValidationStatus status, KaNoBuMoveResponseModel moveResponseModel, IField field)
     {
-        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {moveResponseModel} with status {status}.");
+        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {showPoint(moveResponseModel.From)}-{showPoint(moveResponseModel.To)} with status {status}.");
     }
 
     public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveNotificationModel battle, KaNoBuMoveResponseModel moveResponseModel, IField field)
@@ -52,7 +66,7 @@ public class PlayerConsoleListener :
             return;
         }
 
-        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move from {move.From} to {move.To}.");
+        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move {showPoint(move.From)}-{showPoint(move.To)}.");
 
         if (battle.battle != null)
         {

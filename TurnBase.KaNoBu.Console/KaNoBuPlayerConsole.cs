@@ -3,7 +3,7 @@ using TurnBase.Core;
 
 namespace TurnBase.KaNoBu;
 
-public class PlayerConsole : 
+public class KaNoBuPlayerConsole : 
     IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>,
     IGameEventListener<KaNoBuMoveNotificationModel>
 {
@@ -13,18 +13,13 @@ public class PlayerConsole :
     {
         var field = makeTurnModel.Request.Field;
         this.showMessage(showField(field));
-        this.showMessage("Select ship to move.");
+        this.showMessage("Select your to move in format A0-A1.");
         Point? from = null;
-        while (from == null)
-        {
-            from = await readPoint();
-        }
-
-        this.showMessage("Select destination to move.");
         Point? to = null;
-        while (to == null)
+
+        while (from == null || to == null)
         {
-            to = await readPoint();
+            (from, to) = await readMove();
         }
 
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
@@ -92,37 +87,47 @@ public class PlayerConsole :
 
     private async Task<Point?> readPoint()
     {
-        var x = await readCoordinate("X");
-        var y = await readCoordinate("Y");
-        if (x == null || y == null)
-        {
-            return null;
-        }
-        else
-        {
-            return new Point { X = x.Value, Y = y.Value };
-        }
-    }
-
-    private async Task<int?> readCoordinate(string coordinate)
-    {
         while (true)
         {
-            Console.Write(coordinate + ": ");
-            var xS = await Task.Run(() => Console.ReadLine());
-            if (string.IsNullOrWhiteSpace(xS))
+            var input = await Task.Run(() => Console.ReadLine().ToUpper());
+            if (string.IsNullOrWhiteSpace(input))
             {
                 return null;
             }
 
-            try
+            if(input.Length != 2)
             {
-                return int.Parse(xS);
+                this.showMessage($"Invalid point value: {input}");
+                continue;
             }
-            catch
+
+            var x = input[0] - 'A';
+            var y = input[1] - '0';
+            return new Point { X = x, Y = y };
+        }
+    }
+
+    private async Task<(Point, Point)> readMove()
+    {
+        while (true)
+        {
+            var input = await Task.Run(() => Console.ReadLine().ToUpper());
+            if (string.IsNullOrWhiteSpace(input))
             {
-                this.showMessage("Invalid " + coordinate + " value: " + xS);
+                continue;
             }
+
+            if(input.Length != 5)
+            {
+                this.showMessage($"Invalid point value: {input}");
+                continue;
+            }
+
+            var x1 = input[0] - 'A';
+            var y1 = input[1] - '0';
+            var x2 = input[3] - 'A';
+            var y2 = input[4] - '0';
+            return (new Point { X = x1, Y = y1 }, new Point { X = x2, Y = y2 });
         }
     }
 
@@ -145,24 +150,39 @@ public class PlayerConsole :
     private string showField(IField field)
     {
         string result = "";
-        result += string.Format("  ");
+        result += string.Format("   ");
         for (int j = 0; j < field.Width; j++)
         {
-            result += $" {j}";
+            result += $"  {(char)('A' + j)}";
         }
+        result += string.Format("   ");
         result += "\n";
 
         for (int i = 0; i < field.Height; i++)
         {
-            result += $" {i}";
+            result += $"  {i}";
             for (int j = 0; j < field.Width; j++)
             {
                 var ship = field.get(new Point { X = j, Y = i });
-                result += $" {getShipResource(ship)}";
+                result += $"  {getShipResource(ship)}";
             }
-            result += "\n";
+
+            result += $"  {i}\n";
         }
+
+        result += string.Format("   ");
+        for (int j = 0; j < field.Width; j++)
+        {
+            result += $"  {(char)('A' + j)}";
+        }
+        result += string.Format("   ");
+
         return result;
+    }
+
+    private string showPoint(Point point)
+    {
+        return $"({(char)('A' + point.X)}{point.Y})";
     }
 
     private string getShipResource(IFigure? figure)
@@ -220,7 +240,7 @@ public class PlayerConsole :
             return;
         }
 
-        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move from {move.From} to {move.To}.");
+        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move {showPoint(move.From)}-{showPoint(move.To)}.");
 
         if (battle.battle != null)
         {
