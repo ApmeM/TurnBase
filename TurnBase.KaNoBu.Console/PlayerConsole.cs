@@ -211,6 +211,11 @@ public class PlayerConsole : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, K
         this.showMessage($"Player {playerName} initialized.");
     }
 
+    public void gameTurnFinished()
+    {
+        this.showMessage("Turn finished.");
+    }
+
     private void showMessage(string text)
     {
         Console.WriteLine(text);
@@ -231,19 +236,19 @@ public class PlayerConsole : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, K
 
         if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipPaper)
         {
-            return "🗎";
+            return "P";
         }
         else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipScissors)
         {
-            return "✂️";
+            return "S";
         }
         else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipStone)
         {
-            return "🪨";
+            return "R";
         }
         else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
         {
-            return "🚩";
+            return "F";
         }
 
         throw new Exception("Unknown ship type: " + ship.FigureType);

@@ -22,6 +22,7 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
     public event Action? GameStarted;
     public event Action<int>? GamePlayerDisconnected;
     public event Action<int, string>? GamePlayerInitialized;
+    public event Action? GameTurnFinished;
     public event Action<int, MoveValidationStatus>? GamePlayerWrongTurn;
     public event Action<int, TMoveNotificationModel>? GamePlayerTurn;
     public event Action<List<int>>? GameFinished;
@@ -71,6 +72,7 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
                 var playerData = this.players[(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)p];
                 playerData.IsInGame = false;
                 GamePlayerDisconnected?.Invoke(playerData.PlayerNumber);
+                this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
             }
         }
 
@@ -127,6 +129,7 @@ public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel
             if (nextPlayers.IsNewTurn)
             {
                 this.rules.TurnCompleted(this.mainField);
+                this.GameTurnFinished?.Invoke();
             }
         }
 

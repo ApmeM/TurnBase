@@ -154,6 +154,7 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
         var mainWidth = mainField.Width;
         var mainHeight = mainField.Height;
         var canMove = false;
+        var flagFound = false;
         for (var i = 0; i < mainWidth; i++)
         {
             for (var j = 0; j < mainHeight; j++)
@@ -171,6 +172,7 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
 
                 if (playerShip.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
                 {
+                    flagFound = true;
                     continue;
                 }
 
@@ -178,7 +180,7 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
             }
         }
 
-        if (canMove)
+        if (canMove && flagFound)
         {
             return null;
         }
@@ -310,5 +312,29 @@ public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, 
     public void TurnCompleted(IField mainField)
     {
         // Nothing to do here.
+    }
+
+    public void PlayerDisconnected(IField mainField, int playerNumber)
+    {
+        int mainWidth = mainField.Width;
+        int mainHeight = mainField.Height;
+        for (int i = 0; i < mainWidth; i++)
+        {
+            for (int j = 0; j < mainHeight; j++)
+            {
+                var point = new Point { X = i, Y = j };
+                var playerShip = (KaNoBuFigure?)mainField.get(point);
+                if (playerShip == null)
+                {
+                    continue;
+                }
+
+                // If the player is disconnected, remove their flag from the field => they lose.
+                if (playerShip.FigureType == KaNoBuFigure.FigureTypes.ShipFlag && playerShip.PlayerId == playerNumber)
+                {
+                    mainField.trySet(point, null);
+                }
+            }
+        }
     }
 }

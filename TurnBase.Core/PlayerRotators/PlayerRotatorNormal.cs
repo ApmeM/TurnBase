@@ -5,6 +5,15 @@ public class PlayerRotatorNormal : IPlayerRotator
 {
     public IPlayerRotator.PlayerRotationResult MoveNext(List<IPlayer>? current, List<IPlayer> allPlayers)
     {
+        if (allPlayers.Count == 0)
+        {
+            return new IPlayerRotator.PlayerRotationResult
+            {
+                IsNewTurn = true,
+                PlayersInTurn = new List<IPlayer>()
+            };
+        }
+
         if (current == null || current.Count == 0)
         {
             return new IPlayerRotator.PlayerRotationResult

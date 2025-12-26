@@ -20,4 +20,5 @@ public interface IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveRes
     TMoveNotificationModel MakeMove(IField mainField, int playerNumber, TMoveResponseModel playerMove);
     void TurnCompleted(IField mainField);
     List<int>? findWinners(IField mainField);
+    void PlayerDisconnected(IField mainField, int playerNumber);
 }

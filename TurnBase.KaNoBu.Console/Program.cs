@@ -15,6 +15,7 @@ public class Program
         game.GameStarted += player.gameStarted;
         game.GamePlayerInitialized += player.playerInitialized;
         game.GamePlayerDisconnected += player.playerDisconnected;
+        game.GameTurnFinished += player.gameTurnFinished;
         game.GamePlayerWrongTurn += player.playerWrongTurnMade;
         game.GamePlayerTurn += player.playerTurnMade;
         game.GameFinished += player.gameFinished;
