@@ -1,18 +1,20 @@
+using System.Threading.Tasks;
 using TurnBase.Core;
 
-namespace TurnBase.KaNoBu;
-
-public class KaNoBuPlayerLoose : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
+namespace TurnBase.KaNoBu
 {
-    public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
+    public class KaNoBuPlayerLoose : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
     {
-        await Task.Delay(1000);
-        return new InitResponseModel<KaNoBuInitResponseModel>();
-    }
+        public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
+        {
+            await Task.Delay(1000);
+            return new InitResponseModel<KaNoBuInitResponseModel>();
+        }
 
-    public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
-    {
-        await Task.Delay(1000);
-        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>();
+        public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
+        {
+            await Task.Delay(1000);
+            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>();
+        }
     }
 }

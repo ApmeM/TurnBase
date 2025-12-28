@@ -73,7 +73,7 @@ public class KaNoBuPlayerConsole :
             else
             {
                 var setStatus = preparedField.trySet(p.Value, ship);
-                if (setStatus != IField.SetStatus.OK)
+                if (setStatus != SetStatus.OK)
                 {
                     this.showMessage($"Cant set ship at this coordinate: {setStatus}");
                 }

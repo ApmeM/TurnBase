@@ -1,8 +1,10 @@
-namespace TurnBase.Core;
+using System.Collections.Generic;
 
-public interface IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+namespace TurnBase.Core
 {
-      // Preparing functions.
+  public interface IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+  {
+    // Preparing functions.
     IField generateGameField();
     int getMaxPlayersCount();
     int getMinPlayersCount();
@@ -14,11 +16,12 @@ public interface IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveRes
 
     // Game functions.
     IPlayerRotator GetMoveRotator();
-    TMoveResponseModel? AutoMove(IField mainField, int playerNumber);
+    TMoveResponseModel AutoMove(IField mainField, int playerNumber);
     TMoveModel GetMoveModel(IField mainField, int playerNumber);
     MoveValidationStatus CheckMove(IField mainField, int playerNumber, TMoveResponseModel move);
     TMoveNotificationModel MakeMove(IField mainField, int playerNumber, TMoveResponseModel playerMove);
     void TurnCompleted(IField mainField);
-    List<int>? findWinners(IField mainField);
+    List<int> findWinners(IField mainField);
     void PlayerDisconnected(IField mainField, int playerNumber);
+  }
 }

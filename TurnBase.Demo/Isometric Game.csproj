@@ -1,0 +1,13 @@
+<Project Sdk="Godot.NET.Sdk/3.3.0">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>IsometricGame</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GodotProjectDir Condition=" '$(SolutionDir)' != '' ">$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</GodotProjectDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TurnBase.Core\TurnBase.Core.csproj" />
+    <ProjectReference Include="..\TurnBase.KaNoBu\TurnBase.KaNoBu.csproj" />
+  </ItemGroup>
+</Project>

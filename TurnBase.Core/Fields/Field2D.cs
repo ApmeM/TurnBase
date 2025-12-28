@@ -1,64 +1,67 @@
-namespace TurnBase.Core;
+using System.Collections.Generic;
 
-public class Field2D : IField
+namespace TurnBase.Core
 {
-    Dictionary<Point, IFigure> realField;
-    public int Width{get; private set;}
-    public int Height{get; private set;}
-
-    public Field2D(int width, int height)
+    public class Field2D : IField
     {
-        this.Width = width;
-        this.Height = height;
-        this.realField = new Dictionary<Point, IFigure>();
-    }
+        Dictionary<Point, IFigure> realField;
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
-    public IFigure? get(Point from)
-    {
-        if (!realField.ContainsKey(from))
+        public Field2D(int width, int height)
         {
-            return null;
+            this.Width = width;
+            this.Height = height;
+            this.realField = new Dictionary<Point, IFigure>();
         }
 
-        return realField[from];
-    }
-
-    public IField.SetStatus trySet(Point to, IFigure? ship)
-    {
-        if (to.X < 0 || to.X >= Width || to.Y < 0 || to.Y >= Height)
+        public IFigure get(Point from)
         {
-            return IField.SetStatus.OUT_OF_BOUNDS;
+            if (!realField.ContainsKey(from))
+            {
+                return null;
+            }
+
+            return realField[from];
         }
 
-        if (ship != null && this.realField.ContainsKey(to))
+        public SetStatus trySet(Point to, IFigure ship)
         {
-            return IField.SetStatus.OCCUPIED;
+            if (to.X < 0 || to.X >= Width || to.Y < 0 || to.Y >= Height)
+            {
+                return SetStatus.OUT_OF_BOUNDS;
+            }
+
+            if (ship != null && this.realField.ContainsKey(to))
+            {
+                return SetStatus.OCCUPIED;
+            }
+
+            if (ship == null)
+            {
+                this.realField.Remove(to);
+                return SetStatus.OK;
+            }
+            else
+            {
+                this.realField[to] = ship;
+                return SetStatus.OK;
+            }
         }
 
-        if (ship == null)
+        public IField copyField()
         {
-            this.realField.Remove(to);
-            return IField.SetStatus.OK;
+            var result = new Field2D(this.Width, this.Height);
+            foreach (var point in this.realField.Keys)
+            {
+                result.trySet(point, this.realField[point]);
+            }
+            return result;
         }
-        else
-        {
-            this.realField[to] = ship;
-            return IField.SetStatus.OK;
-        }
-    }
 
-    public IField copyField()
-    {
-        var result = new Field2D(this.Width, this.Height);
-        foreach (var point in this.realField.Keys)
+        public bool IsInBounds(Point point)
         {
-            result.trySet(point, this.realField[point]);
+            return point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
         }
-        return result;
-    }
-
-    public bool IsInBounds(Point point)
-    {
-        return point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
     }
 }

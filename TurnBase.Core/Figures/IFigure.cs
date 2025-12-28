@@ -1,6 +1,7 @@
-namespace TurnBase.Core;
-
-public interface IFigure
+namespace TurnBase.Core
 {
-    int PlayerId { get; }
+    public interface IFigure
+    {
+        int PlayerId { get; }
+    }
 }

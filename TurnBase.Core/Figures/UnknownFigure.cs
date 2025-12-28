@@ -1,11 +1,12 @@
-namespace TurnBase.Core;
-
-public class UnknownFigure : IFigure
+namespace TurnBase.Core
 {
-    public UnknownFigure(int playerId)
+    public class UnknownFigure : IFigure
     {
-        PlayerId = playerId;
-    }
+        public UnknownFigure(int playerId)
+        {
+            PlayerId = playerId;
+        }
 
-    public int PlayerId { get; }
+        public int PlayerId { get; }
+    }
 }

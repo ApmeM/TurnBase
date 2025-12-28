@@ -1,41 +1,42 @@
 using TurnBase.Core;
 
-namespace TurnBase.KaNoBu;
-
-public class KaNoBuFigure : IFigure
+namespace TurnBase.KaNoBu
 {
-    public enum FigureTypes
+    public class KaNoBuFigure : IFigure
     {
-        ShipFlag = 1,
-        ShipStone = 2,
-        ShipPaper = 3,
-        ShipScissors = 4
-    }
-
-    public int PlayerId { get; private set; }
-    public FigureTypes FigureType { get; private set; }
-
-    public KaNoBuFigure(int playerId, FigureTypes figure)
-    {
-        PlayerId = playerId;
-        FigureType = figure;
-    }
-
-    public bool IsMoveValid(KaNoBuMoveResponseModel playerMove)
-    {
-        if (this.FigureType == FigureTypes.ShipFlag)
+        public enum FigureTypes
         {
-            return false;
+            ShipFlag = 1,
+            ShipStone = 2,
+            ShipPaper = 3,
+            ShipScissors = 4
         }
 
-        var validMove =
-            (playerMove.From.X == playerMove.To.X && playerMove.From.Y <= playerMove.To.Y + 1 && playerMove.From.Y >= playerMove.To.Y - 1) ||
-            (playerMove.From.Y == playerMove.To.Y && playerMove.From.X <= playerMove.To.X + 1 && playerMove.From.X >= playerMove.To.X - 1);
-        if (!validMove)
+        public int PlayerId { get; private set; }
+        public FigureTypes FigureType { get; private set; }
+
+        public KaNoBuFigure(int playerId, FigureTypes figure)
         {
-            return false;
+            PlayerId = playerId;
+            FigureType = figure;
         }
 
-        return true;
+        public bool IsMoveValid(KaNoBuMoveResponseModel playerMove)
+        {
+            if (this.FigureType == FigureTypes.ShipFlag)
+            {
+                return false;
+            }
+
+            var validMove =
+                (playerMove.From.X == playerMove.To.X && playerMove.From.Y <= playerMove.To.Y + 1 && playerMove.From.Y >= playerMove.To.Y - 1) ||
+                (playerMove.From.Y == playerMove.To.Y && playerMove.From.X <= playerMove.To.X + 1 && playerMove.From.X >= playerMove.To.X - 1);
+            if (!validMove)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

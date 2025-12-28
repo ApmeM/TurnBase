@@ -1,21 +1,13 @@
-namespace TurnBase.Core;
-
-public struct Point
+namespace TurnBase.Core
 {
-    public int X;
-    public int Y;
-
-    override public string ToString()
+    public struct Point
     {
-        return $"{X}x{Y}";
-    }
-}
+        public int X;
+        public int Y;
 
-public enum MoveValidationStatus
-{
-    OK,
-    ERROR_COMMUNICATION,
-    ERROR_OUTSIDE_FIELD,
-    ERROR_INVALID_MOVE,
-    ERROR_FIELD_OCCUPIED
+        override public string ToString()
+        {
+            return $"{X}x{Y}";
+        }
+    }
 }

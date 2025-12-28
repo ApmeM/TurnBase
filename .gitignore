@@ -7,3 +7,9 @@ obj/
 *.log
 TestResults/
 *.ide
+
+.import/
+.vs/
+.mono/
+build/
+*.import

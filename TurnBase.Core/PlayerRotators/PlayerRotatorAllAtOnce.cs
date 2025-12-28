@@ -1,14 +1,17 @@
 
-namespace TurnBase.Core;
+using System.Collections.Generic;
 
-public class PlayerRotatorAllAtOnce : IPlayerRotator
+namespace TurnBase.Core
 {
-    public IPlayerRotator.PlayerRotationResult MoveNext(List<IPlayer>? current, List<IPlayer> allPlayers)
+    public class PlayerRotatorAllAtOnce : IPlayerRotator
     {
-        return new IPlayerRotator.PlayerRotationResult 
-        { 
-            IsNewTurn = true,
-            PlayersInTurn = allPlayers 
-        };
+        public PlayerRotationResult MoveNext(List<IPlayer> current, List<IPlayer> allPlayers)
+        {
+            return new PlayerRotationResult
+            {
+                IsNewTurn = true,
+                PlayersInTurn = allPlayers
+            };
+        }
     }
 }

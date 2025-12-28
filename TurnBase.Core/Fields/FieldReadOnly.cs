@@ -1,35 +1,36 @@
-namespace TurnBase.Core;
-
-public class FieldReadOnly : IField
+namespace TurnBase.Core
 {
-    private IField mainField;
-
-    public FieldReadOnly(IField mainField)
+    public class FieldReadOnly : IField
     {
-        this.mainField = mainField;
-    }
+        private IField mainField;
 
-    public IFigure? get(Point from)
-    {
-        return this.mainField.get(from);
-    }
+        public FieldReadOnly(IField mainField)
+        {
+            this.mainField = mainField;
+        }
 
-    public IField.SetStatus trySet(Point to, IFigure? figure)
-    {
-        return IField.SetStatus.READ_ONLY;
-    }
+        public IFigure get(Point from)
+        {
+            return this.mainField.get(from);
+        }
 
-    public int Width => this.mainField.Width;
+        public SetStatus trySet(Point to, IFigure figure)
+        {
+            return SetStatus.READ_ONLY;
+        }
 
-    public int Height => this.mainField.Height;
+        public int Width => this.mainField.Width;
 
-    public IField copyField()
-    {
-        return this.mainField.copyField();
-    }
+        public int Height => this.mainField.Height;
 
-    public bool IsInBounds(Point point)
-    {
-        return this.mainField.IsInBounds(point);
+        public IField copyField()
+        {
+            return this.mainField.copyField();
+        }
+
+        public bool IsInBounds(Point point)
+        {
+            return this.mainField.IsInBounds(point);
+        }
     }
 }

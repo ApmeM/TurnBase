@@ -1,6 +1,7 @@
-namespace TurnBase.Core;
-
-public interface IPointRotator
+namespace TurnBase.Core
 {
-    Point RotatePoint(IField field, Point point, int playerNumber);
+    public interface IPointRotator
+    {
+        Point RotatePoint(IField field, Point point, int playerNumber);
+    }
 }

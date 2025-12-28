@@ -1,13 +1,16 @@
-namespace TurnBase.Core;
+using System.Threading.Tasks;
 
-public interface IPlayer
+namespace TurnBase.Core
 {
-    
-}
+    public interface IPlayer
+    {
 
-public interface IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> : IPlayer
-{
-    Task<InitResponseModel<TInitResponseModel>> Init(InitModel<TInitModel> model);
+    }
 
-    Task<MakeTurnResponseModel<TMoveResponseModel>> MakeTurn(MakeTurnModel<TMoveModel> model);
+    public interface IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> : IPlayer
+    {
+        Task<InitResponseModel<TInitResponseModel>> Init(InitModel<TInitModel> model);
+
+        Task<MakeTurnResponseModel<TMoveResponseModel>> MakeTurn(MakeTurnModel<TMoveModel> model);
+    }
 }

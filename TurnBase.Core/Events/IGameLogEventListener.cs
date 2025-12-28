@@ -1,13 +1,15 @@
-namespace TurnBase.Core;
+using System.Collections.Generic;
 
-public interface IGameLogEventListener<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>
+namespace TurnBase.Core
 {
-    public void GameLogStarted(IField field);
-    public void GameLogPlayerInitialized(int playerNumber, InitResponseModel<TInitResponseModel> initResponseModel, IField field);
-    public void GameLogPlayerDisconnected(int playerNumber, IField field);
-    public void GameLogTurnFinished(IField field);
-    public void GameLogPlayerWrongTurn(int playerNumber, MoveValidationStatus status, TMoveResponseModel moveResponseModel, IField field);
-    public void GameLogPlayerTurn(int playerNumber, TMoveNotificationModel moveNotificationModel, TMoveResponseModel moveResponseModel, IField field);
-    public void GameLogFinished(List<int> winners, IField field);
+    public interface IGameLogEventListener<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>
+    {
+        void GameLogStarted(IField field);
+        void GameLogPlayerInitialized(int playerNumber, InitResponseModel<TInitResponseModel> initResponseModel, IField field);
+        void GameLogPlayerDisconnected(int playerNumber, IField field);
+        void GameLogTurnFinished(IField field);
+        void GameLogPlayerWrongTurn(int playerNumber, MoveValidationStatus status, TMoveResponseModel moveResponseModel, IField field);
+        void GameLogPlayerTurn(int playerNumber, TMoveNotificationModel moveNotificationModel, TMoveResponseModel moveResponseModel, IField field);
+        void GameLogFinished(List<int> winners, IField field);
+    }
 }
-

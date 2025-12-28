@@ -1,13 +1,14 @@
-namespace TurnBase.Core;
-
-public class MakeTurnModel<TMoveModel> 
+namespace TurnBase.Core
 {
-    public MakeTurnModel(int tryNumber, TMoveModel request)
+    public class MakeTurnModel<TMoveModel>
     {
-        this.TryNumber = tryNumber;
-        this.Request = request;
-    }
+        public MakeTurnModel(int tryNumber, TMoveModel request)
+        {
+            this.TryNumber = tryNumber;
+            this.Request = request;
+        }
 
-    public int TryNumber;
-    public TMoveModel Request;
+        public int TryNumber;
+        public TMoveModel Request;
+    }
 }
