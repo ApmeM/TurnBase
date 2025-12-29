@@ -4,172 +4,198 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TurnBase.KaNoBu;
 
-public enum UnitType
-{
-    Unknown,
-    Stone,
-    Scissor,
-    Paper,
-    Flag
-}
-
 public class Unit : Node2D
 {
-    public Queue<IUnitAction> PendingActions = new Queue<IUnitAction>();
+    public Queue<Func<Task>> PendingTasks = new Queue<Func<Task>>();
+    public Task CurrentTask;
 
     private KaNoBuFigure.FigureTypes unitType = KaNoBuFigure.FigureTypes.ShipPaper;
-    private bool unitTypeRaw = true;
     private int playerNumber = 0;
-    private bool playerNumberRaw = true;
+    private bool isSelected = false;
     public Vector2? TargetPositionMap;
-
-    private AtlasTexture shipTexture;
-    private AtlasTexture shipTypeTexture;
-
-    [Export]
-    public Texture CannonBall;
-
-    [Export]
-    public float Speed = 100;
-
-    [Export]
-    public float Lifetime = 1;
 
     [Export]
     public KaNoBuFigure.FigureTypes UnitType
     {
         get => this.unitType;
-        set { this.unitType = value; this.unitTypeRaw = true; }
+        set
+        {
+            this.unitType = value;
+            if (IsInsideTree())
+            {
+
+                var shipTypeTexture = (AtlasTexture)this.GetNode<Sprite>("ShipTypeFlag").Texture;
+                switch (this.unitType)
+                {
+                    // case KaNoBuFigure.FigureTypes.Unknown:
+                    //     this.shipTypeTexture.Region = new Rect2(280, 170, 20, 20);
+                    //     break;
+                    case KaNoBuFigure.FigureTypes.ShipStone:
+                        shipTypeTexture.Region = new Rect2(300, 170, 20, 20);
+                        break;
+                    case KaNoBuFigure.FigureTypes.ShipScissors:
+                        shipTypeTexture.Region = new Rect2(280, 190, 20, 20);
+                        break;
+                    case KaNoBuFigure.FigureTypes.ShipPaper:
+                        shipTypeTexture.Region = new Rect2(300, 190, 20, 20);
+                        break;
+                    case KaNoBuFigure.FigureTypes.ShipFlag:
+                        shipTypeTexture.Region = new Rect2(320, 170, 20, 20);
+                        break;
+                }
+            }
+        }
     }
 
     [Export]
     public int PlayerNumber
     {
         get => this.playerNumber;
-        set { this.playerNumber = value; this.playerNumberRaw = true; }
+        set
+        {
+            this.playerNumber = value;
+            if (IsInsideTree())
+            {
+                var shipTexture = (AtlasTexture)this.GetNode<Sprite>("Ship").Texture;
+                shipTexture.Region = new Rect2(0, 120 * this.playerNumber, 66, 113);
+            }
+        }
     }
 
     [Export]
-    public bool IsSelected { get; set; }
-
-    [Signal]
-    public delegate void AllActionsDone();
-
-    public bool IsDead { get; private set; }
+    public bool IsSelected
+    {
+        get => this.isSelected; set
+        {
+            this.isSelected = value;
+            if (IsInsideTree())
+            {
+                this.GetNode<Sprite>("Flag").Visible = this.IsSelected;
+            }
+        }
+    }
 
     public override void _Ready()
     {
         base._Ready();
-        this.shipTexture = (AtlasTexture)this.GetNode<Sprite>("Ship").Texture;
-        this.shipTypeTexture = (AtlasTexture)this.GetNode<Sprite>("ShipTypeFlag").Texture;
+        this.IsSelected = this.isSelected;
+        this.PlayerNumber = this.playerNumber;
+        this.UnitType = this.unitType;
     }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
 
-        this.GetNode<Sprite>("Flag").Visible = this.IsSelected;
-        if (this.playerNumberRaw)
+        if (CurrentTask != null && CurrentTask.IsCompleted)
         {
-            this.playerNumberRaw = false;
-            this.shipTexture.Region = new Rect2(0, 120 * this.playerNumber, 66, 113);
+            CurrentTask = null;
         }
 
-        if (this.unitTypeRaw)
+        if (CurrentTask == null && PendingTasks.Count > 0)
         {
-            this.unitTypeRaw = false;
-            switch (this.unitType)
-            {
-                // case KaNoBuFigure.FigureTypes.Unknown:
-                //     this.shipTypeTexture.Region = new Rect2(280, 170, 20, 20);
-                //     break;
-                case KaNoBuFigure.FigureTypes.ShipStone:
-                    this.shipTypeTexture.Region = new Rect2(300, 170, 20, 20);
-                    break;
-                case KaNoBuFigure.FigureTypes.ShipScissors:
-                    this.shipTypeTexture.Region = new Rect2(280, 190, 20, 20);
-                    break;
-                case KaNoBuFigure.FigureTypes.ShipPaper:
-                    this.shipTypeTexture.Region = new Rect2(300, 190, 20, 20);
-                    break;
-                case KaNoBuFigure.FigureTypes.ShipFlag:
-                    this.shipTypeTexture.Region = new Rect2(320, 170, 20, 20);
-                    break;
-            }
-        }
-
-        if (PendingActions.Count > 0)
-        {
-            var action = PendingActions.Peek();
-            var isActionDone = action.Process(delta);
-            if (isActionDone)
-            {
-                PendingActions.Dequeue();
-                if (PendingActions.Count == 0)
-                {
-                    this.EmitSignal(nameof(AllActionsDone));
-                }
-            }
+            CurrentTask = PendingTasks.Dequeue().Invoke();
         }
     }
 
     public void UnitHit()
     {
-        this.IsDead = true;
-        this.PendingActions.Enqueue(new SinkUnitAction(this, this.shipTexture));
         this.TargetPositionMap = null;
+        this.PendingTasks.Enqueue(() => UnitHitAction());
+    }
+
+    public async Task UnitHitAction()
+    {
+        var texture = (AtlasTexture)this.GetNode<Sprite>("Ship").Texture;
+
+        texture.Region = new Rect2(70, texture.Region.Position.y, texture.Region.Size);
+        await Task.Delay(300);
+        texture.Region = new Rect2(140, texture.Region.Position.y, texture.Region.Size);
+        await Task.Delay(300);
+        texture.Region = new Rect2(210, texture.Region.Position.y, texture.Region.Size);
+        this.GetParent().MoveChild(this, 1);
     }
 
     public void Attack()
     {
-        this.PendingActions.Enqueue(new ShootUnitAction(this));
+        this.PendingTasks.Enqueue(() => AttackAction());
     }
 
-    public void MoveUnitTo(Vector2 newCell, Vector2 position)
+    public async Task AttackAction()
+    {
+        const float MOVE_SPEED = 200;
+
+        const float LIFETIME = 0.5f;
+
+        var cannonBall = (Sprite)this.GetNode("CannonBall").Duplicate();
+        cannonBall.Visible = true;
+        this.AddChild(cannonBall);
+
+        var tween = new Tween();
+        this.AddChild(tween);
+        tween.InterpolateProperty(cannonBall, "position", Vector2.Zero, Vector2.Down * MOVE_SPEED * LIFETIME, LIFETIME);
+        tween.Start();
+        await ToSignal(tween, "tween_all_completed");
+        tween.QueueFree();
+
+        cannonBall.QueueFree();
+    }
+
+    public void MoveUnitTo(Vector2 newCell, Vector2 newPosition)
     {
         this.TargetPositionMap = newCell;
-        this.PendingActions.Enqueue(new MoveUnitAction(this, position));
+        this.PendingTasks.Enqueue(() => MoveUnitToAction(newPosition));
+    }
+
+    public async Task MoveUnitToAction(Vector2 newPosition)
+    {
+        const float MOVE_SPEED = 160;
+
+        var tween = new Tween();
+        this.AddChild(tween);
+        tween.InterpolateProperty(this, "position", this.Position, newPosition, (this.Position - newPosition).Length() / MOVE_SPEED);
+        tween.Start();
+        await ToSignal(tween, "tween_all_completed");
+        tween.QueueFree();
     }
 
     public void RotateUnitTo(Vector2 lookAtPosition)
     {
-        this.PendingActions.Enqueue(new RotateUnitAction(this, lookAtPosition));
+        this.PendingTasks.Enqueue(() => RotateUnitToAction(lookAtPosition));
     }
 
-    public void CallbackForUnit(Action<Unit> callback)
+    public async Task RotateUnitToAction(Vector2 lookAtPosition)
     {
-        this.PendingActions.Enqueue(new CallbackUnitAction(this, callback));
+        var newRotation = (lookAtPosition - this.Position).Angle() - Mathf.Pi / 2;
+        var rotationDistance = Math.Abs(newRotation - this.Rotation);
+
+        if (Math.Abs(newRotation + Mathf.Pi * 2 - this.Rotation) < rotationDistance)
+        {
+            newRotation = newRotation + Mathf.Pi * 2;
+            rotationDistance = Math.Abs(newRotation + Mathf.Pi * 2 - this.Rotation);
+        } else if (Math.Abs(newRotation - this.Rotation) < rotationDistance)
+        {
+            newRotation = newRotation - Mathf.Pi * 2;
+            rotationDistance = Math.Abs(newRotation - this.Rotation);            
+        }
+
+        const float ROTATION_SPEED = 20f;
+
+        var tween = new Tween();
+        this.AddChild(tween);
+        tween.InterpolateProperty(this, "rotation", this.Rotation, newRotation, rotationDistance / ROTATION_SPEED);
+        tween.Start();
+        await ToSignal(tween, "tween_all_completed");
+        tween.QueueFree();
+    }
+
+    public void CallbackForUnit(Func<Unit, Task> callback)
+    {
+        this.PendingTasks.Enqueue(() => callback(this));
     }
 
     public void CancelActions()
     {
-        this.PendingActions.Clear();
-    }
-
-    public async Task Shoot()
-    {
-        if (CannonBall == null)
-        {
-            return;
-        }
-
-        var cannonBall = new Sprite
-        {
-            Texture = CannonBall,
-            Scale = Vector2.One * 2,
-            ZIndex = 1
-        };
-
-        var tween = new Tween
-        {
-        };
-
-        this.AddChild(tween);
-        this.AddChild(cannonBall);
-        tween.InterpolateProperty(cannonBall, "position", Vector2.Zero, Vector2.Right * this.Speed * this.Lifetime, this.Lifetime);
-        tween.Start();
-        await ToSignal(tween, "tween_all_completed");
-        tween.QueueFree();
-        cannonBall.QueueFree();
+        this.PendingTasks.Clear();
     }
 }

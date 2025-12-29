@@ -71,7 +71,12 @@ public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuM
 
     public void GameLogStarted(IField field)
     {
-        List<Node2D> allUnits = new List<Node2D>();
+        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        foreach(Unit unit in allUnits)
+        {
+            unit.QueueFree();
+        }
+
         for (var x = 0; x < field.Width; x++)
         {
             for (var y = 0; y < field.Height; y++)
@@ -92,7 +97,6 @@ public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuM
                 unitSceneInstance.Position = worldPos;
 
                 this.GetNode<Node2D>("Field").AddChild(unitSceneInstance);
-                allUnits.Add(unitSceneInstance);
                 unitSceneInstance.MoveUnitTo(mapPos, worldPos);
             }
         }
@@ -113,8 +117,8 @@ public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuM
 
         var rules = new KaNoBuRules(8, 8);
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules);
-        game.AddPlayer(new KaNoBuPlayerEasy());
-        game.AddPlayer(new KaNoBuPlayerEasy());
+        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 200));
+        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 200));
 
         GameEventListenerConnector.Connect(game, this);
 

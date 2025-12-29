@@ -13,7 +13,6 @@ namespace TurnBase.KaNoBu
 
         public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
         {
-            await Task.Delay(200);
             this.myNumber = model.PlayerId;
             var ships = new List<IFigure>(model.Request.AvailableFigures);
             var preparedField = new Field2D(model.Request.Width, model.Request.Height);
@@ -23,7 +22,6 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
         {
-            await Task.Delay(200);
             var from = this.findAllMovement(model.Request.Field);
 
             if (from == null || from.Count == 0)
