@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using TurnBase.Core;
+using TurnBase;
 using TurnBase.KaNoBu;
 
 public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>

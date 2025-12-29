@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using TurnBase.Core;
+using TurnBase;
 
 namespace TurnBase.KaNoBu
 {

@@ -1,4 +1,4 @@
-using TurnBase.Core;
+using TurnBase;
 
 namespace TurnBase.KaNoBu
 {

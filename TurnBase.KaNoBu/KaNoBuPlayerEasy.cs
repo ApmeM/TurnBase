@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TurnBase.Core;
+using TurnBase;
 
 namespace TurnBase.KaNoBu
 {

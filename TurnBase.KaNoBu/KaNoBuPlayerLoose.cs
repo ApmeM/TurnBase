@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using TurnBase.Core;
+using TurnBase;
 
 namespace TurnBase.KaNoBu
 {

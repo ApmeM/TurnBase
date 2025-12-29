@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TurnBase.Core\TurnBase.Core.csproj" />
+    <ProjectReference Include="..\TurnBase\TurnBase.csproj" />
     <ProjectReference Include="..\TurnBase.KaNoBu\TurnBase.KaNoBu.csproj" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,7 @@
     <GodotProjectDir Condition=" '$(SolutionDir)' != '' ">$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</GodotProjectDir>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TurnBase.Core\TurnBase.Core.csproj" />
+    <ProjectReference Include="..\TurnBase\TurnBase.csproj" />
     <ProjectReference Include="..\TurnBase.KaNoBu\TurnBase.KaNoBu.csproj" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TurnBase.Core\TurnBase.Core.csproj" />
+    <ProjectReference Include="..\TurnBase\TurnBase.csproj" />
   </ItemGroup>
 </Project>
