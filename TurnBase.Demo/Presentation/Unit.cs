@@ -109,9 +109,9 @@ public class Unit : Node2D
         var texture = (AtlasTexture)this.GetNode<Sprite>("Ship").Texture;
 
         texture.Region = new Rect2(70, texture.Region.Position.y, texture.Region.Size);
-        await Task.Delay(300);
+        await this.ToSignal(this.GetTree().CreateTimer(0.3f), "timeout");
         texture.Region = new Rect2(140, texture.Region.Position.y, texture.Region.Size);
-        await Task.Delay(300);
+        await this.ToSignal(this.GetTree().CreateTimer(0.3f), "timeout");
         texture.Region = new Rect2(210, texture.Region.Position.y, texture.Region.Size);
         this.GetParent().MoveChild(this, 1);
     }

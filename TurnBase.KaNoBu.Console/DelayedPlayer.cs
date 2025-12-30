@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace TurnBase
+namespace TurnBase.KaNoBu
 {
     public class DelayedPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> : IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>
     {
