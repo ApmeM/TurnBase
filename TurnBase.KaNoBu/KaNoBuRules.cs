@@ -139,15 +139,15 @@ namespace TurnBase.KaNoBu
                     {
                         position = new Point { X = i + initFieldHeight, Y = j };
                     }
-                    else if(playerNumber == 1)
+                    else if (playerNumber == 1)
                     {
                         position = new Point { X = i + initFieldHeight, Y = playerNumber == 0 ? j : mainHeight - playerHeight + j };
                     }
-                    else if(playerNumber == 2)
+                    else if (playerNumber == 2)
                     {
                         position = new Point { X = j, Y = i + initFieldHeight };
                     }
-                    else if(playerNumber == 3)
+                    else if (playerNumber == 3)
                     {
                         position = new Point { X = playerNumber == 0 ? j : mainWidth - playerHeight + j, Y = i + initFieldHeight };
                     }
@@ -258,13 +258,13 @@ namespace TurnBase.KaNoBu
 
         public KaNoBuMoveNotificationModel MakeMove(IField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
         {
+            if (playerMove.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
+            {
+                return new KaNoBuMoveNotificationModel(playerMove);
+            }
+
             var from = (KaNoBuFigure)mainField.get(playerMove.From);
             var to = (KaNoBuFigure)mainField.get(playerMove.To);
-
-            if (from == null)
-            {
-                throw new Exception("Move from empty field position");
-            }
 
             if (to == null)
             {
@@ -288,34 +288,25 @@ namespace TurnBase.KaNoBu
         public List<int> findWinners(IField mainField)
         {
             var winners = new List<int>();
-            int mainWidth = mainField.Width;
-            int mainHeight = mainField.Height;
-            for (int i = 0; i < mainWidth; i++)
+            for (var i = 0; i < getMaxPlayersCount(); i++)
             {
-                for (int j = 0; j < mainHeight; j++)
+                var automove = this.AutoMove(mainField, i);
+                if(automove == null)
                 {
-                    var playerShip = (KaNoBuFigure)mainField.get(new Point { X = i, Y = j });
-                    if (playerShip == null)
-                    {
-                        continue;
-                    }
-
-                    if (playerShip.FigureType != KaNoBuFigure.FigureTypes.ShipFlag)
-                    {
-                        continue;
-                    }
-
-                    winners.Add(playerShip.PlayerId);
+                    winners.Add(i);
                 }
             }
 
-            if (winners.Count == 1)
+            if(winners.Count > 1)
             {
-                return winners;
+                // 1+ winners means game not finished. 
+                return null;
             }
             else
             {
-                return null;
+                // 1 winner means someone won.
+                // 0 winners means draw.
+                return winners;
             }
         }
 
