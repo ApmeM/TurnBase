@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Presentation/Unit.cs" type="Script" id=1]
 [ext_resource path="res://assets/shipsMiscellaneous_sheet.png" type="Texture" id=2]
+[ext_resource path="res://assets/ui.png" type="Texture" id=3]
 
 [sub_resource type="AtlasTexture" id=54]
 resource_local_to_scene = true
@@ -30,6 +31,11 @@ flags = 4
 atlas = ExtResource( 2 )
 region = Rect2( 280, 90, 10, 10 )
 
+[sub_resource type="AtlasTexture" id=58]
+flags = 4
+atlas = ExtResource( 3 )
+region = Rect2( 5, 84, 6, 6 )
+
 [node name="Unit" type="Node2D"]
 scale = Vector2( 0.6, 0.55 )
 script = ExtResource( 1 )
@@ -57,3 +63,18 @@ position = Vector2( 0, 78.1818 )
 scale = Vector2( 2, 2 )
 z_index = 1
 texture = SubResource( 57 )
+
+[node name="Stars" type="GridContainer" parent="."]
+margin_left = -32.0
+margin_top = -69.0
+margin_right = 32.0
+margin_bottom = -56.0
+columns = 6
+
+[node name="StarExample" type="TextureRect" parent="Stars"]
+visible = false
+margin_right = 20.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 20, 20 )
+texture = SubResource( 58 )
+expand = true

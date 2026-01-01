@@ -102,6 +102,7 @@ public class Unit : Node2D
     {
         this.TargetPositionMap = null;
         this.PendingTasks.Enqueue(() => UnitHitAction());
+        var container = this.GetNode<GridContainer>("Stars");
     }
 
     public async Task UnitHitAction()
@@ -119,6 +120,10 @@ public class Unit : Node2D
     public void Attack()
     {
         this.PendingTasks.Enqueue(() => AttackAction());
+        var container = this.GetNode<GridContainer>("Stars");
+        var star = (TextureRect)container.GetNode<TextureRect>("StarExample").Duplicate();
+        star.Visible = true;
+        container.AddChild(star);
     }
 
     public async Task AttackAction()
