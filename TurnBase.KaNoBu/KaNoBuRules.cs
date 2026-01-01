@@ -6,26 +6,28 @@ namespace TurnBase.KaNoBu
 {
     public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
     {
-        private readonly int width;
-        private readonly int height;
-
         private readonly Dictionary<int, IField> fieldsCache;
+        private readonly int size;
 
-        public KaNoBuRules(int width, int height)
+        public KaNoBuRules(int size)
         {
-            this.width = width;
-            this.height = height;
+            if (size < 6)
+            {
+                throw new Exception("Min size is 6.");
+            }
+
             this.fieldsCache = new Dictionary<int, IField>();
+            this.size = size;
         }
 
         public IField generateGameField()
         {
-            return new Field2D(this.width, this.height);
+            return new Field2D(this.size, this.size);
         }
 
         public int getMaxPlayersCount()
         {
-            return 2;
+            return 4;
         }
 
         public int getMinPlayersCount()
@@ -36,7 +38,7 @@ namespace TurnBase.KaNoBu
         public IPlayerRotator GetInitRotator()
         {
             return new PlayerRotatorNormal();
-            // return new PlayerRotatorAllAtOnce();
+            // return new PlayerRotatorAllAtOnce(); // ToDo: fix it.
         }
 
         public IPlayerRotator GetMoveRotator()
@@ -46,8 +48,8 @@ namespace TurnBase.KaNoBu
 
         public KaNoBuInitModel GetInitModel(int playerNumber)
         {
-            var initFieldWidth = width;
-            var initFieldHeight = height / 3;
+            var initFieldHeight = size / 3;
+            var initFieldWidth = size - 2 * initFieldHeight;
 
             var availableShips = new List<IFigure>();
             var fieldSize = initFieldWidth * initFieldHeight;
@@ -87,20 +89,22 @@ namespace TurnBase.KaNoBu
                 for (var j = 0; j < preparedField.Height; j++)
                 {
                     var ship = (KaNoBuFigure)preparedField.get(new Point { X = i, Y = j });
-                    if (ship != null)
+                    if (ship == null)
                     {
-                        var shipType = ship.FigureType;
-                        if (!availableShips.ContainsKey(shipType))
-                        {
-                            return false;
-                        }
-                        var count = availableShips[shipType];
-                        count--;
-                        availableShips[shipType] = count;
-                        if (count == 0)
-                        {
-                            availableShips.Remove(shipType);
-                        }
+                        continue;
+                    }
+
+                    var shipType = ship.FigureType;
+                    if (!availableShips.ContainsKey(shipType))
+                    {
+                        return false;
+                    }
+                    var count = availableShips[shipType];
+                    count--;
+                    availableShips[shipType] = count;
+                    if (count == 0)
+                    {
+                        availableShips.Remove(shipType);
                     }
                 }
             }
@@ -110,12 +114,17 @@ namespace TurnBase.KaNoBu
                 return false;
             }
 
+
+            var initFieldHeight = size / 3;
+            var initFieldWidth = size - 2 * initFieldHeight;
+
             var mainHeight = mainField.Height;
             var mainWidth = mainField.Width;
+
             var playerWidth = initResponse.PreparedField.Width;
             var playerHeight = initResponse.PreparedField.Height;
 
-            if (mainWidth != playerWidth)
+            if (initFieldWidth != playerWidth || initFieldHeight != playerHeight)
             {
                 return false;
             }
@@ -125,11 +134,27 @@ namespace TurnBase.KaNoBu
                 for (var j = 0; j < playerHeight; j++)
                 {
                     var playerShip = initResponse.PreparedField.get(new Point { X = i, Y = j });
-                    var position = new Point
+                    Point position;
+                    if (playerNumber == 0)
                     {
-                        X = i,
-                        Y = playerNumber == 0 ? j : mainHeight - playerHeight + j
-                    };
+                        position = new Point { X = i + initFieldHeight, Y = j };
+                    }
+                    else if(playerNumber == 1)
+                    {
+                        position = new Point { X = i + initFieldHeight, Y = playerNumber == 0 ? j : mainHeight - playerHeight + j };
+                    }
+                    else if(playerNumber == 2)
+                    {
+                        position = new Point { X = j, Y = i + initFieldHeight };
+                    }
+                    else if(playerNumber == 3)
+                    {
+                        position = new Point { X = playerNumber == 0 ? j : mainWidth - playerHeight + j, Y = i + initFieldHeight };
+                    }
+                    else
+                    {
+                        throw new Exception("Unsupported number of players.");
+                    }
 
                     mainField.trySet(position, null);
                     mainField.trySet(position, playerShip);

@@ -163,10 +163,10 @@ namespace TurnBase
         {
             var playerNumber = this.players[player].PlayerNumber;
 
-            var field = this.rules.GetMoveModel(mainField, playerNumber);
+            var field = this.rules.GetMoveModel(this.mainField, playerNumber);
             var tryNumber = 0;
 
-            var move = this.rules.AutoMove(mainField, playerNumber);
+            var move = this.rules.AutoMove(this.mainField, playerNumber);
             while (move == null)
             {
                 var makeTurnResponseModel = await player.MakeTurn(new MakeTurnModel<TMoveModel>(tryNumber, field));
@@ -177,7 +177,7 @@ namespace TurnBase
                     return false;
                 }
 
-                var validTurnStatus = this.rules.CheckMove(mainField, playerNumber, makeTurnResponseModel.Response);
+                var validTurnStatus = this.rules.CheckMove(this.mainField, playerNumber, makeTurnResponseModel.Response);
 
                 if (validTurnStatus != MoveValidationStatus.OK)
                 {
