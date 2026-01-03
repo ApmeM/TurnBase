@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Godot;
 using TurnBase;
@@ -139,29 +140,85 @@ public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuM
 
     public async override void _Ready()
     {
-        this.GetNode<Button>("StartButton").Connect("pressed", this, nameof(StartButonClicked));
+        this.GetNode<OptionButton>("UI/GameType").Connect("item_selected", this, nameof(GameTypeChanged));
+        this.GetNode<Button>("UI/StartButton").Connect("pressed", this, nameof(StartButonClicked));
+    }
+
+    private void GameTypeChanged(int selectedId)
+    {
+        switch (this.GetNode<OptionButton>("UI/GameType").GetSelectedId())
+        {
+            case 0:
+                // server
+                this.GetNode<OptionButton>("UI/ServerPlayer1").Visible = true;
+                this.GetNode<OptionButton>("UI/ServerPlayer2").Visible = true;
+                this.GetNode<OptionButton>("UI/ServerPlayer3").Visible = true;
+                this.GetNode<OptionButton>("UI/ServerPlayer4").Visible = true;
+                this.GetNode<OptionButton>("UI/ClientPlayer").Visible = false;
+                break;
+            case 1:
+                // client
+                this.GetNode<OptionButton>("UI/ServerPlayer1").Visible = false;
+                this.GetNode<OptionButton>("UI/ServerPlayer2").Visible = false;
+                this.GetNode<OptionButton>("UI/ServerPlayer3").Visible = false;
+                this.GetNode<OptionButton>("UI/ServerPlayer4").Visible = false;
+                this.GetNode<OptionButton>("UI/ClientPlayer").Visible = true;
+                break;
+            default:
+                throw new Exception("Unknown game type");
+        }
     }
 
     private async void StartButonClicked()
     {
-        this.GetNode<Button>("StartButton").Visible = false;
 
         var rules = new KaNoBuRules(8);
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules);
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
+
+        switch (this.GetNode<OptionButton>("UI/GameType").GetSelectedId())
+        {
+            case 0:
+                // server
+                var playerTypes = Enumerable.Range(1, 4)
+                    .Select(a => $"UI/ServerPlayer{a}")
+                    .Select(a => this.GetNode<OptionButton>(a))
+                    .Select(a => a.GetSelectedId());
+
+                foreach (var playertype in playerTypes)
+                {
+                    switch (playertype)
+                    {
+                        case 0:
+                            continue;
+                        case 1:
+                            GD.Print("Player type 'Human' is not implemented yet.");
+                            return;
+                        case 2:
+                            game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
+                            break;
+                        case 3:
+                            GD.Print("Player type 'Remote' is not implemented yet.");
+                            return;
+                        default:
+                            throw new InvalidOperationException("Unknown Player Type");
+                    }
+                }
+                break;
+            case 1:
+                GD.Print("Game type 'client' is not implemented yet.");
+                return;
+            default:
+                throw new InvalidOperationException("Unknown game type");
+        }
+
+        this.GetNode<Control>("UI").Visible = false;
 
         GameEventListenerConnector.Connect(game, this);
 
         await game.Play();
 
-        this.GetNode<Button>("StartButton").Visible = true;
+        this.GetNode<Control>("UI").Visible = true;
     }
-
-
-
 
     private string showPoint(Point point)
     {
