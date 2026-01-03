@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Godot;
 using TurnBase;
@@ -29,6 +28,7 @@ public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuM
 
     public void GameLogPlayerDisconnected(int playerNumber, IField field)
     {
+        GD.Print($"Player {playerNumber} disconnected.");
     }
 
     public void GameLogPlayerInitialized(int playerNumber, InitResponseModel<KaNoBuInitResponseModel> initResponseModel, IField field)
@@ -171,7 +171,6 @@ public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuM
 
     private async void StartButonClicked()
     {
-
         var rules = new KaNoBuRules(8);
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules);
 
@@ -189,13 +188,14 @@ public class Main : Node, IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuM
                     switch (playertype)
                     {
                         case 0:
+                            game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>());
                             continue;
                         case 1:
                             GD.Print("Player type 'Human' is not implemented yet.");
                             return;
                         case 2:
                             game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
-                            break;
+                            continue;
                         case 3:
                             GD.Print("Player type 'Remote' is not implemented yet.");
                             return;

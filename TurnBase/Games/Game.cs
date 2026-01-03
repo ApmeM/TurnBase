@@ -47,31 +47,33 @@ namespace TurnBase
         private bool GameIsRunning = false;
         private IField mainField;
 
-        public void AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
         {
             if (this.players.Count >= this.rules.getMaxPlayersCount())
             {
-                throw new Exception($"Too many players added to the game. Maximum value is {this.rules.getMaxPlayersCount()}.");
+                return AddPlayerStatus.MAX_PLAYERS_REACHED;
             }
 
             if (this.GameIsRunning)
             {
-                throw new Exception("Cannot add players after the game has started.");
+                return AddPlayerStatus.GAME_ALREADY_STARTED;
             }
 
             if (this.players.ContainsKey(player))
             {
-                throw new Exception("Player already added to the game.");
+                return AddPlayerStatus.PLAYER_ALREADY_ADDED;
             }
 
             this.players.Add(player, new PlayerData { IsInGame = true, PlayerNumber = this.players.Count });
+            return AddPlayerStatus.OK;
         }
 
         public async Task Play()
         {
-            if (this.players.Count < this.rules.getMinPlayersCount())
+            for (var i = this.players.Count; i < this.rules.getMinPlayersCount(); i++)
             {
-                throw new Exception($"Too few players added to the game. Minimum value is {this.rules.getMinPlayersCount()}.");
+                // Add enough players, but all of them will loose.
+                this.AddPlayer(new PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>());
             }
 
             this.GameIsRunning = true;
@@ -82,31 +84,40 @@ namespace TurnBase
 
         private Task GroupAction(List<IPlayer> nextPlayers, Func<IPlayer, Task<bool>> action)
         {
-            async Task SingleAction(IPlayer p)
+            async Task SingleAction(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> p)
             {
-                if (!await action(p))
+                if (await action(p))
                 {
-                    var playerData = this.players[(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)p];
-                    playerData.IsInGame = false;
-                    this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
-                    this.GamePlayerDisconnected?.Invoke(playerData.PlayerNumber);
-                    this.GameLogPlayerDisconnected?.Invoke(playerData.PlayerNumber, this.mainField);
+                    return;
                 }
+
+                var playerData = this.players[p];
+                playerData.IsInGame = false;
+                this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
+                this.GamePlayerDisconnected?.Invoke(playerData.PlayerNumber);
+                this.GameLogPlayerDisconnected?.Invoke(playerData.PlayerNumber, this.mainField);
             }
 
-            return Task.WhenAll(nextPlayers.Select(SingleAction).ToArray());
+            return Task.WhenAll(
+                nextPlayers
+                    .Select(a => (IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)a)
+                    .Where(a => this.players[a].IsInGame)
+                    .Select(SingleAction)
+                    .ToArray());
         }
 
         private async Task InitPlayers()
         {
             var rotator = this.rules.GetInitRotator();
-            var nextPlayers = rotator.MoveNext(null, this.players.Where(a => a.Value.IsInGame).Select(a => a.Key).Cast<IPlayer>().ToList());
+            var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
+
+            var nextPlayers = rotator.MoveNext(null, allPlayers);
             Task<bool> action(IPlayer player) => this.InitPlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)player);
 
             do
             {
                 await GroupAction(nextPlayers.PlayersInTurn, action);
-                nextPlayers = rotator.MoveNext(nextPlayers.PlayersInTurn, this.players.Where(a => a.Value.IsInGame).Select(a => a.Key).Cast<IPlayer>().ToList());
+                nextPlayers = rotator.MoveNext(nextPlayers.PlayersInTurn, allPlayers);
             } while (nextPlayers.IsNewTurn == false);
         }
 
@@ -139,14 +150,16 @@ namespace TurnBase
             this.GameLogStarted?.Invoke(this.mainField);
 
             var rotator = this.rules.GetMoveRotator();
-            var nextPlayers = rotator.MoveNext(null, this.players.Where(a => a.Value.IsInGame).Select(a => a.Key).Cast<IPlayer>().ToList());
+            var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
+
+            var nextPlayers = rotator.MoveNext(null, allPlayers);
             Task<bool> action(IPlayer player) => this.MovePlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)player);
 
             while (this.rules.findWinners(this.mainField) == null)
             {
                 await GroupAction(nextPlayers.PlayersInTurn, action);
 
-                nextPlayers = rotator.MoveNext(nextPlayers.PlayersInTurn, this.players.Where(a => a.Value.IsInGame).Select(a => a.Key).Cast<IPlayer>().ToList());
+                nextPlayers = rotator.MoveNext(nextPlayers.PlayersInTurn, allPlayers);
                 if (nextPlayers.IsNewTurn)
                 {
                     this.rules.TurnCompleted(this.mainField);
