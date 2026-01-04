@@ -66,10 +66,16 @@ namespace TurnBase.KaNoBu
 
     public class KaNoBuMoveNotificationModel
     {
-        public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move, IFigure attacker, IFigure defender, IFigure winner)
+        public enum BattleResult {
+            Draw,
+            AttackerWon,
+            DefenderWon
+        }
+
+        public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move, BattleResult attackerWon, bool isDefenderFlag)
         {
             this.move = move;
-            this.battle = (attacker, defender, winner);
+            this.battle = (attackerWon, isDefenderFlag);
         }
 
         public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move)
@@ -79,6 +85,6 @@ namespace TurnBase.KaNoBu
         }
 
         public readonly KaNoBuMoveResponseModel move;
-        public readonly (IFigure, IFigure, IFigure)? battle;
+        public readonly (BattleResult, bool)? battle;
     }
 }

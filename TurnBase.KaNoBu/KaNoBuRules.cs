@@ -282,7 +282,13 @@ namespace TurnBase.KaNoBu
                 mainField.trySet(playerMove.To, winner);
             }
 
-            return new KaNoBuMoveNotificationModel(playerMove, from, to, winner);
+            return new KaNoBuMoveNotificationModel(playerMove,
+                winner == null ? KaNoBuMoveNotificationModel.BattleResult.Draw :
+                winner == from ? KaNoBuMoveNotificationModel.BattleResult.AttackerWon :
+                winner == to ? KaNoBuMoveNotificationModel.BattleResult.DefenderWon :
+                throw new Exception("Invalid battle calculation."),
+                to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag
+            );
         }
 
         public List<int> findWinners(IField mainField)
@@ -291,13 +297,13 @@ namespace TurnBase.KaNoBu
             for (var i = 0; i < getMaxPlayersCount(); i++)
             {
                 var automove = this.AutoMove(mainField, i);
-                if(automove == null)
+                if (automove == null)
                 {
                     winners.Add(i);
                 }
             }
 
-            if(winners.Count > 1)
+            if (winners.Count > 1)
             {
                 // 1+ winners means game not finished. 
                 return null;

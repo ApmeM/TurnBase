@@ -3,7 +3,7 @@ using TurnBase;
 
 namespace TurnBase.KaNoBu;
 
-public class KaNoBuPlayerConsole : 
+public class KaNoBuPlayerConsole :
     IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>,
     IGameEventListener<KaNoBuMoveNotificationModel>
 {
@@ -91,7 +91,7 @@ public class KaNoBuPlayerConsole :
                 return null;
             }
 
-            if(input.Length != 2)
+            if (input.Length != 2)
             {
                 this.showMessage($"Invalid point value: {input}");
                 continue;
@@ -113,7 +113,7 @@ public class KaNoBuPlayerConsole :
                 continue;
             }
 
-            if(input.Length != 5)
+            if (input.Length != 5)
             {
                 this.showMessage($"Invalid point value: {input}");
                 continue;
@@ -215,7 +215,7 @@ public class KaNoBuPlayerConsole :
     }
 
 
-#region IGameEventListener implementation
+    #region IGameEventListener implementation
 
     public void GameStarted()
     {
@@ -240,16 +240,7 @@ public class KaNoBuPlayerConsole :
 
         if (battle.battle != null)
         {
-            var s = new StringBuilder();
-            s.AppendLine("Battle:");
-            s.AppendLine($"  attacker: {this.players[battle.battle.Value.Item1.PlayerId]}.{getShipResource(battle.battle.Value.Item1)}");
-            s.AppendLine($"  defender: {this.players[battle.battle.Value.Item2.PlayerId]}.{getShipResource(battle.battle.Value.Item2)}");
-            if (battle.battle.Value.Item3 != null)
-                s.AppendLine($"  winner: {this.players[battle.battle.Value.Item3.PlayerId]}.{getShipResource(battle.battle.Value.Item3)}");
-            else
-                s.AppendLine("  winner: None (draw)");
-
-            this.showMessage(s.ToString());
+            this.showMessage($"Battle result: {battle.battle.Value.Item1} (IsFlag = {battle.battle.Value.Item2})");
         }
     }
 
@@ -274,6 +265,6 @@ public class KaNoBuPlayerConsole :
         this.showMessage("Turn finished.");
     }
 
-#endregion
+    #endregion
 
 }

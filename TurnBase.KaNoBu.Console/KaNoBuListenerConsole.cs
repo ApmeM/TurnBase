@@ -3,7 +3,7 @@ using TurnBase;
 
 namespace TurnBase.KaNoBu;
 
-public class KaNoBuListenerConsole : 
+public class KaNoBuListenerConsole :
     IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     private Dictionary<int, string> players = new Dictionary<int, string>();
@@ -70,16 +70,7 @@ public class KaNoBuListenerConsole :
 
         if (battle.battle != null)
         {
-            var s = new StringBuilder();
-            s.AppendLine("Battle:");
-            s.AppendLine($"  attacker: {this.players[battle.battle.Value.Item1.PlayerId]}.{getShipResource(battle.battle.Value.Item1)}");
-            s.AppendLine($"  defender: {this.players[battle.battle.Value.Item2.PlayerId]}.{getShipResource(battle.battle.Value.Item2)}");
-            if (battle.battle.Value.Item3 != null)
-                s.AppendLine($"  winner: {this.players[battle.battle.Value.Item3.PlayerId]}.{getShipResource(battle.battle.Value.Item3)}");
-            else
-                s.AppendLine("  winner: None (draw)");
-
-            this.showMessage(s.ToString());
+            this.showMessage($"Battle result: {battle.battle.Value.Item1} (IsFlag = {battle.battle.Value.Item2})");
         }
     }
 
