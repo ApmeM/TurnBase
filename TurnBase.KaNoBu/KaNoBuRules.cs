@@ -282,6 +282,28 @@ namespace TurnBase.KaNoBu
                 mainField.trySet(playerMove.To, winner);
             }
 
+            if (to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+            {
+                // Change all figures of this player to the player that captures the flag.
+                for (int i = 0; i < mainField.Width; i++)
+                {
+                    for (int j = 0; j < mainField.Height; j++)
+                    {
+                        var point = new Point { X = i, Y = j };
+                        var playerShip = (KaNoBuFigure)mainField.get(point);
+                        if (playerShip == null)
+                        {
+                            continue;
+                        }
+
+                        if (playerShip.PlayerId == to.PlayerId)
+                        {
+                            playerShip.PlayerId = from.PlayerId;
+                        }
+                    }
+                }
+            }
+
             return new KaNoBuMoveNotificationModel(playerMove,
                 winner == null ? KaNoBuMoveNotificationModel.BattleResult.Draw :
                 winner == from ? KaNoBuMoveNotificationModel.BattleResult.AttackerWon :
@@ -341,11 +363,9 @@ namespace TurnBase.KaNoBu
 
         public void PlayerDisconnected(IField mainField, int playerNumber)
         {
-            int mainWidth = mainField.Width;
-            int mainHeight = mainField.Height;
-            for (int i = 0; i < mainWidth; i++)
+            for (int i = 0; i < mainField.Width; i++)
             {
-                for (int j = 0; j < mainHeight; j++)
+                for (int j = 0; j < mainField.Height; j++)
                 {
                     var point = new Point { X = i, Y = j };
                     var playerShip = (KaNoBuFigure)mainField.get(point);

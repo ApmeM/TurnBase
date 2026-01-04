@@ -106,13 +106,14 @@ public class Main : Node,
                     {
                         defenderUnit.UnitType = KaNoBuFigure.FigureTypes.ShipFlag;
                         // Attacker is unknown - any ship can beat the flag.
+                        // All the units under this player control changes the owner.
+                        allUnits.Cast<Unit>().Where(a => a.PlayerNumber == defenderUnit.PlayerNumber).ToList().ForEach(a => a.PlayerNumber = movedUnit.PlayerNumber);
                     }
                     else
                     {
                         if (movedUnit.UnitType != null) defenderUnit.UnitType = Looser[movedUnit.UnitType.Value];
                         if (defenderUnit.UnitType != null) movedUnit.UnitType = Winner[defenderUnit.UnitType.Value];
                     }
-
                     break;
                 case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                     GD.Print($"Set new position for unit at {movedUnit.TargetPositionMap} to {null}");
@@ -219,6 +220,10 @@ public class Main : Node,
                 unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
             }
         }
+        else
+        {
+            this.UpdateKnownShips(model.Request.Field);
+        }
 
         var drag = this.GetNode<DragControl>("Drag");
         var level = this.GetNode<TileMap>("Water");
@@ -235,6 +240,22 @@ public class Main : Node,
                 new Point { X = (int)from.x, Y = (int)from.y },
                 new Point { X = (int)to.x, Y = (int)to.y }
             ));
+    }
+
+    private void UpdateKnownShips(IField field)
+    {
+        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        foreach (Unit unit in allUnits)
+        {
+            if (unit.TargetPositionMap == null)
+            {
+                continue;
+            }
+
+            var figure = field.get(new Point { X = (int)unit.TargetPositionMap.Value.x, Y = (int)unit.TargetPositionMap.Value.y });
+            unit.PlayerNumber = figure.PlayerId;
+            unit.UnitType = unit.UnitType ?? (figure as KaNoBuFigure)?.FigureType;
+        }
     }
 
     private Unit unit;

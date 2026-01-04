@@ -12,7 +12,7 @@ namespace TurnBase.KaNoBu
             ShipScissors = 4
         }
 
-        public int PlayerId { get; private set; }
+        public int PlayerId { get; set; }
         public FigureTypes FigureType { get; private set; }
 
         public KaNoBuFigure(int playerId, FigureTypes figure)
