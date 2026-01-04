@@ -39,16 +39,16 @@ namespace TurnBase.KaNoBu
 
     public class KaNoBuMoveResponseModel
     {
-        public KaNoBuMoveResponseModel(MoveStatus status, Point from, Point to)
+        public KaNoBuMoveResponseModel(Point from, Point to)
         {
-            Status = status;
+            Status = MoveStatus.MAKE_TURN;
             From = from;
             To = to;
         }
 
-        public KaNoBuMoveResponseModel(MoveStatus status)
+        public KaNoBuMoveResponseModel()
         {
-            Status = status;
+            Status = MoveStatus.SKIP_TURN;
             From = new Point();
             To = new Point();
         }

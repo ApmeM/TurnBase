@@ -22,11 +22,7 @@ public class KaNoBuPlayerConsole :
             (from, to) = await readMove();
         }
 
-        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
-            new KaNoBuMoveResponseModel(
-                KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
-                from.Value,
-                to.Value));
+        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel(from.Value, to.Value));
     }
 
     public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)

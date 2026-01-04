@@ -9,13 +9,15 @@ public class Unit : Node2D
     public Queue<Func<Task>> PendingTasks = new Queue<Func<Task>>();
     public Task CurrentTask;
 
-    private KaNoBuFigure.FigureTypes unitType = KaNoBuFigure.FigureTypes.ShipPaper;
+    private KaNoBuFigure.FigureTypes? unitType = KaNoBuFigure.FigureTypes.ShipPaper;
     private int playerNumber = 0;
     private bool isSelected = false;
     public Vector2? TargetPositionMap;
 
-    [Export]
-    public KaNoBuFigure.FigureTypes UnitType
+    [Signal]
+    public delegate void UnitClicked();
+
+    public KaNoBuFigure.FigureTypes? UnitType
     {
         get => this.unitType;
         set
@@ -27,9 +29,9 @@ public class Unit : Node2D
                 var shipTypeTexture = (AtlasTexture)this.GetNode<Sprite>("ShipTypeFlag").Texture;
                 switch (this.unitType)
                 {
-                    // case KaNoBuFigure.FigureTypes.Unknown:
-                    //     this.shipTypeTexture.Region = new Rect2(280, 170, 20, 20);
-                    //     break;
+                    case null:
+                        shipTypeTexture.Region = new Rect2(280, 170, 20, 20);
+                        break;
                     case KaNoBuFigure.FigureTypes.ShipStone:
                         shipTypeTexture.Region = new Rect2(300, 170, 20, 20);
                         break;
@@ -95,6 +97,15 @@ public class Unit : Node2D
         if (CurrentTask == null && PendingTasks.Count > 0)
         {
             CurrentTask = PendingTasks.Dequeue().Invoke();
+        }
+
+        if (Input.IsActionJustPressed("left_click"))
+        {
+            var ship = this.GetNode<Sprite>("Ship");
+            if (ship.GetRect().HasPoint(ship.GetLocalMousePosition()))
+            {
+                EmitSignal(nameof(UnitClicked));
+            }
         }
     }
 
@@ -178,10 +189,11 @@ public class Unit : Node2D
         {
             newRotation = newRotation + Mathf.Pi * 2;
             rotationDistance = Math.Abs(newRotation + Mathf.Pi * 2 - this.Rotation);
-        } else if (Math.Abs(newRotation - this.Rotation) < rotationDistance)
+        }
+        else if (Math.Abs(newRotation - this.Rotation) < rotationDistance)
         {
             newRotation = newRotation - Mathf.Pi * 2;
-            rotationDistance = Math.Abs(newRotation - this.Rotation);            
+            rotationDistance = Math.Abs(newRotation - this.Rotation);
         }
 
         const float ROTATION_SPEED = 20f;

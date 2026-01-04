@@ -2,7 +2,7 @@ namespace TurnBase
 {
     public class GameEventListenerConnector
     {
-        public static void Connect<TMoveNotificationModel>(
+        public static void ConnectPlayer<TMoveNotificationModel>(
             IGameEvents<TMoveNotificationModel> game,
             IGameEventListener<TMoveNotificationModel> listener)
         {
@@ -15,7 +15,7 @@ namespace TurnBase
             game.GamePlayerTurn += listener.GamePlayerTurn;
         }
 
-        public static void Connect<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>(
+        public static void ConnectListener<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>(
             IGameLogEvents<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel> game,
             IGameLogEventListener<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel> listener)
         {

@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Presentation/DragControl.cs" type="Script" id=1]
+
+[sub_resource type="Curve" id=29]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0.245455 ), 0.0, 0.0, 0, 0 ]
+
+[node name="DragControl" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="DragIndicator" type="Line2D" parent="."]
+z_index = 10
+points = PoolVector2Array( 0, 0, 10, 10 )
+width = 5.0
+width_curve = SubResource( 29 )
+default_color = Color( 0, 0, 0, 1 )

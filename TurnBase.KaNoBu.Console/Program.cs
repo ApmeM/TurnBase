@@ -14,8 +14,8 @@ public class Program
 
         // var listener = new KaNoBuListenerConsole();
 
-        GameEventListenerConnector.Connect(game, player);
-        // GameEventListenerConnector.Connect(game, listener);
+        GameEventListenerConnector.ConnectPlayer(game, player);
+        // GameEventListenerConnector.ConnectListener(game, listener);
         
         await game.Play();
     }

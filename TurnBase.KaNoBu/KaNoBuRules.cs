@@ -214,7 +214,7 @@ namespace TurnBase.KaNoBu
             }
             else
             {
-                return new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN);
+                return new KaNoBuMoveResponseModel();
             }
         }
 
@@ -235,17 +235,17 @@ namespace TurnBase.KaNoBu
 
             if (from == null)
             {
-                return MoveValidationStatus.ERROR_INVALID_MOVE;
+                return MoveValidationStatus.ERROR_MOVE_FROM_NOWHERE;
             }
 
             if (from.PlayerId != playerNumber)
             {
-                return MoveValidationStatus.ERROR_INVALID_MOVE;
+                return MoveValidationStatus.ERROR_INVALID_PLAYER;
             }
 
             if (!from.IsMoveValid(playerMove))
             {
-                return MoveValidationStatus.ERROR_INVALID_MOVE;
+                return MoveValidationStatus.ERROR_INVALID_FIGURE_MOVE;
             }
 
             if (to != null && to.PlayerId == from.PlayerId)
