@@ -234,7 +234,6 @@ public class Main : Node,
         var from = level.WorldToMap(level.ToLocal((Vector2)dragRes[0]));
         var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
 
-        GD.Print($"Drag Finished from {from} to {to} for unit {unit.PlayerNumber} at {unit.TargetPositionMap}");
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
             new KaNoBuMoveResponseModel(
                 new Point { X = (int)from.x, Y = (int)from.y },
@@ -258,11 +257,8 @@ public class Main : Node,
         }
     }
 
-    private Unit unit;
-
     private void OnUnitClicked(Unit unit)
     {
-        this.unit = unit;
         var drag = this.GetNode<DragControl>("Drag");
         drag.StartDragging();
     }
