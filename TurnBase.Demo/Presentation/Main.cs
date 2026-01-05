@@ -176,14 +176,14 @@ public class Main : Node,
                 var mapPos = new Vector2(x, y);
                 var worldPos = level.MapToWorld(mapPos);
                 var unit = (Unit)UnitScene.Instance();
-                unit.PlayerNumber = originalShip.PlayerId;
+                
+                unit.TargetPositionMap = mapPos;
                 unit.Rotation = Mathf.Pi;
                 unit.Position = worldPos + level.CellSize / 2;
-
+                unit.PlayerNumber = originalShip.PlayerId;
                 unit.UnitType = (originalShip as KaNoBuFigure)?.FigureType;
 
                 this.GetNode<Node2D>("Field").AddChild(unit);
-                unit.MoveUnitTo(mapPos, unit.Position);
             }
         }
     }

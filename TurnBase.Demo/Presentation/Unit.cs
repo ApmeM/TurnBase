@@ -25,6 +25,10 @@ public class Unit : Node2D
             this.unitType = value;
             if (IsInsideTree())
             {
+                if (TargetPositionMap == null)
+                {
+                    return;
+                }
 
                 var shipTypeTexture = (AtlasTexture)this.GetNode<Sprite>("ShipTypeFlag").Texture;
                 switch (this.unitType)
@@ -58,6 +62,11 @@ public class Unit : Node2D
             this.playerNumber = value;
             if (IsInsideTree())
             {
+                if (this.TargetPositionMap == null)
+                {
+                    return;
+                }
+
                 var shipTexture = (AtlasTexture)this.GetNode<Sprite>("Ship").Texture;
                 shipTexture.Region = new Rect2(0, 120 * this.playerNumber, 66, 113);
             }
