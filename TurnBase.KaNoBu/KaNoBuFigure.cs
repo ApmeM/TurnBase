@@ -6,6 +6,7 @@ namespace TurnBase.KaNoBu
     {
         public enum FigureTypes
         {
+            Unknown = 0,
             ShipFlag = 1,
             ShipStone = 2,
             ShipPaper = 3,
@@ -23,7 +24,7 @@ namespace TurnBase.KaNoBu
 
         public bool IsMoveValid(KaNoBuMoveResponseModel playerMove)
         {
-            if (this.FigureType == FigureTypes.ShipFlag)
+            if (this.FigureType == FigureTypes.ShipFlag || this.FigureType == FigureTypes.Unknown)
             {
                 return false;
             }

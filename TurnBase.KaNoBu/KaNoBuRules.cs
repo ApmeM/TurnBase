@@ -51,15 +51,15 @@ namespace TurnBase.KaNoBu
             var initFieldHeight = size / 3;
             var initFieldWidth = size - 2 * initFieldHeight;
 
-            var availableShips = new List<IFigure>();
+            var availableShips = new List<KaNoBuFigure.FigureTypes>();
             var fieldSize = initFieldWidth * initFieldHeight;
-            availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipFlag));
+            availableShips.Add(KaNoBuFigure.FigureTypes.ShipFlag);
             for (int i = 1; i < fieldSize; i++)
             {
                 var shipN = i % 3;
-                if (shipN == 0) availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipStone));
-                if (shipN == 1) availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipScissors));
-                if (shipN == 2) availableShips.Add(new KaNoBuFigure(playerNumber, KaNoBuFigure.FigureTypes.ShipPaper));
+                if (shipN == 0) availableShips.Add(KaNoBuFigure.FigureTypes.ShipStone);
+                if (shipN == 1) availableShips.Add(KaNoBuFigure.FigureTypes.ShipScissors);
+                if (shipN == 2) availableShips.Add(KaNoBuFigure.FigureTypes.ShipPaper);
             }
 
             return new KaNoBuInitModel(initFieldWidth, initFieldHeight, availableShips);
@@ -71,10 +71,9 @@ namespace TurnBase.KaNoBu
 
             var ships = this.GetInitModel(playerNumber).AvailableFigures;
             var availableShips = new Dictionary<KaNoBuFigure.FigureTypes, int>();
-            foreach (KaNoBuFigure s in ships)
+            foreach (KaNoBuFigure.FigureTypes shipType in ships)
             {
                 var count = 0;
-                var shipType = s.FigureType;
                 if (availableShips.ContainsKey(shipType))
                 {
                     count = availableShips[shipType];
@@ -84,17 +83,11 @@ namespace TurnBase.KaNoBu
                 availableShips[shipType] = count;
             }
 
-            for (var i = 0; i < preparedField.Width; i++)
+            for (var i = 0; i < preparedField.GetLength(0); i++)
             {
-                for (var j = 0; j < preparedField.Height; j++)
+                for (var j = 0; j < preparedField.GetLength(1); j++)
                 {
-                    var ship = (KaNoBuFigure)preparedField.get(new Point { X = i, Y = j });
-                    if (ship == null)
-                    {
-                        continue;
-                    }
-
-                    var shipType = ship.FigureType;
+                    var shipType = preparedField[i, j];
                     if (!availableShips.ContainsKey(shipType))
                     {
                         return false;
@@ -121,8 +114,8 @@ namespace TurnBase.KaNoBu
             var mainHeight = mainField.Height;
             var mainWidth = mainField.Width;
 
-            var playerWidth = initResponse.PreparedField.Width;
-            var playerHeight = initResponse.PreparedField.Height;
+            var playerWidth = initResponse.PreparedField.GetLength(0);
+            var playerHeight = initResponse.PreparedField.GetLength(1);
 
             if (initFieldWidth != playerWidth || initFieldHeight != playerHeight)
             {
@@ -133,7 +126,7 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < playerHeight; j++)
                 {
-                    var playerShip = initResponse.PreparedField.get(new Point { X = i, Y = j });
+                    var playerShip = initResponse.PreparedField[i, j];
                     Point position;
                     if (playerNumber == 0)
                     {
@@ -157,7 +150,7 @@ namespace TurnBase.KaNoBu
                     }
 
                     mainField.trySet(position, null);
-                    mainField.trySet(position, playerShip);
+                    mainField.trySet(position, new KaNoBuFigure(playerNumber, playerShip));
                 }
             }
 
@@ -166,15 +159,32 @@ namespace TurnBase.KaNoBu
 
         public KaNoBuMoveModel GetMoveModel(IField mainField, int playerNumber)
         {
-            if (!this.fieldsCache.ContainsKey(playerNumber))
+            var field = new FieldConcealer(mainField, playerNumber);
+            var result = new KaNoBuMoveModel.FigureModel?[field.Width, field.Height];
+            for (var x = 0; x < field.Width; x++)
             {
-                var concealer = new FieldConcealer(mainField, playerNumber);
-                var readonlyField = new FieldReadOnly(concealer);
-
-                this.fieldsCache[playerNumber] = readonlyField;
+                for (var y = 0; y < field.Height; y++)
+                {
+                    var ship = field.get(new Point { X = x, Y = y });
+                    if (ship == null)
+                        result[x, y] = null;
+                    else if (ship is UnknownFigure)
+                        result[x, y] = new KaNoBuMoveModel.FigureModel
+                        {
+                            FigureType = KaNoBuFigure.FigureTypes.Unknown,
+                            PlayerNumber = ship.PlayerId
+                        };
+                    else if (ship is KaNoBuFigure kaNoBu)
+                        result[x, y] = new KaNoBuMoveModel.FigureModel
+                        {
+                            FigureType = kaNoBu.FigureType,
+                            PlayerNumber = kaNoBu.PlayerId
+                        };
+                }
             }
 
-            return new KaNoBuMoveModel(this.fieldsCache[playerNumber]);
+
+            return new KaNoBuMoveModel(result);
         }
 
         public KaNoBuMoveResponseModel AutoMove(IField mainField, int playerNumber)

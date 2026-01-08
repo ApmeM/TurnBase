@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TurnBase;
 
 namespace TurnBase.KaNoBu
 {
@@ -14,9 +13,18 @@ namespace TurnBase.KaNoBu
         public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
         {
             this.myNumber = model.PlayerId;
-            var ships = new List<IFigure>(model.Request.AvailableFigures);
-            var preparedField = new Field2D(model.Request.Width, model.Request.Height);
-            this.generateField(preparedField, ships);
+
+            var preparedField = new KaNoBuFigure.FigureTypes[model.Request.Width,model.Request.Height];
+            for (var i = 0; i < model.Request.Width; i++)
+            {
+                for (var j = 0; j < model.Request.Height; j++)
+                {
+                    var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
+                    preparedField[i,j] = ship; 
+                    model.Request.AvailableFigures.Remove(ship);
+                }
+            }
+
             return new InitResponseModel<KaNoBuInitResponseModel>(name, new KaNoBuInitResponseModel(preparedField));
         }
 
@@ -34,26 +42,26 @@ namespace TurnBase.KaNoBu
             return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(from[movementNum]);
         }
 
-        private List<KaNoBuMoveResponseModel> findAllMovement(IField field)
+        private List<KaNoBuMoveResponseModel> findAllMovement(KaNoBuMoveModel.FigureModel?[,] field)
         {
             var availableShips = new List<KaNoBuMoveResponseModel>();
-            for (int x = 0; x < field.Width; x++)
+            for (int x = 0; x < field.GetLength(0); x++)
             {
-                for (int y = 0; y < field.Height; y++)
+                for (int y = 0; y < field.GetLength(1); y++)
                 {
                     var from = new Point { X = x, Y = y };
-                    var shipFrom = field.get(from) as KaNoBuFigure;
+                    var shipFrom = field[x,y];
                     if (shipFrom == null)
                     {
                         continue;
                     }
 
-                    if (shipFrom.PlayerId != this.myNumber)
+                    if (shipFrom.Value.PlayerNumber != this.myNumber)
                     {
                         continue;
                     }
 
-                    if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+                    if (shipFrom.Value.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
                     {
                         continue;
                     }
@@ -68,33 +76,18 @@ namespace TurnBase.KaNoBu
             return availableShips;
         }
 
-        private void tryAdd(List<KaNoBuMoveResponseModel> availableShips, IField field, Point from, int x, int y)
+        private void tryAdd(List<KaNoBuMoveResponseModel> availableShips, KaNoBuMoveModel.FigureModel?[,] field, Point from, int x, int y)
         {
-            if (x < 0 || y < 0 || x >= field.Width || y >= field.Height)
+            if (x < 0 || y < 0 || x >= field.GetLength(0) || y >= field.GetLength(1))
             {
                 return;
             }
 
             var to = new Point { X = x, Y = y };
-            var shipTo = field.get(to);
-            if (shipTo == null || shipTo.PlayerId != this.myNumber)
+            var shipTo = field[x,y];
+            if (shipTo == null || shipTo.Value.PlayerNumber != this.myNumber)
             {
                 availableShips.Add(new KaNoBuMoveResponseModel(from, to));
-            }
-        }
-
-        private void generateField(IField preparedField, List<IFigure> ships)
-        {
-            var width = preparedField.Width;
-            var height = preparedField.Height;
-            for (var i = 0; i < width; i++)
-            {
-                for (var j = 0; j < height; j++)
-                {
-                    var ship = ships[r.Next(ships.Count)];
-                    preparedField.trySet(new Point { X = i, Y = j }, ship);
-                    ships.Remove(ship);
-                }
             }
         }
     }

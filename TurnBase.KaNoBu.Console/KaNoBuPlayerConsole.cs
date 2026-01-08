@@ -29,56 +29,57 @@ public class KaNoBuPlayerConsole :
     {
         this.showMessage($"Your turn number: {model.PlayerId}");
         var name = await this.getName();
-        var ships = new List<IFigure>(model.Request.AvailableFigures);
-        var preparedField = new Field2D(model.Request.Width, model.Request.Height);
 
-        await this.fillField(preparedField, ships);
+        var preparedField = await this.fillField(model.Request);
 
         return new InitResponseModel<KaNoBuInitResponseModel>(name, new KaNoBuInitResponseModel(preparedField));
     }
 
-    private async Task fillField(IField preparedField, List<IFigure> ships)
+    private async Task<KaNoBuFigure.FigureTypes[,]> fillField(KaNoBuInitModel model)
     {
+        var ships = model.AvailableFigures;
+        var preparedField = new KaNoBuFigure.FigureTypes[model.Width, model.Height];
+        var preparedFieldSet = new bool[model.Width, model.Height];
         this.showMessage($"Initializing field with {ships.Count} ships.");
-        var width = preparedField.Width;
-        var height = preparedField.Height;
         var r = new Random();
 
         while (ships.Count != 0)
         {
             this.showMessage(showField(preparedField));
             var ship = ships[0];
-            this.showMessage("Select position for " + getShipResource(ship) + ", empty value = random.");
+            this.showMessage($"Select position for {ship}, empty value = random.");
             Point? p = await readPoint();
             if (p == null)
             {
                 while (true)
                 {
-                    var x = r.Next(width);
-                    var y = r.Next(height);
-                    p = new Point { X = x, Y = y };
-                    if (preparedField.get(p.Value) != null)
+                    var x = r.Next(model.Width);
+                    var y = r.Next(model.Height);
+                    if (preparedFieldSet[x, y])
                     {
                         continue;
                     }
-                    preparedField.trySet(p.Value, ship);
+                    preparedField[x, y] = ship;
+                    preparedFieldSet[x, y] = true;
                     break;
                 }
                 ships.RemoveAt(0);
             }
             else
             {
-                var setStatus = preparedField.trySet(p.Value, ship);
-                if (setStatus != SetStatus.OK)
+                if (preparedFieldSet[p.Value.X, p.Value.Y])
                 {
-                    this.showMessage($"Cant set ship at this coordinate: {setStatus}");
+                    this.showMessage("Cant place on this field. It is already occupied.");
+                    continue;
                 }
-                else
-                {
-                    ships.RemoveAt(0);
-                }
+                preparedField[p.Value.X, p.Value.Y] = ship;
+                preparedFieldSet[p.Value.X, p.Value.Y] = true;
+                // ToDo: check if field already occupied.
+                ships.RemoveAt(0);
             }
         }
+
+        return preparedField;
     }
 
     private async Task<Point?> readPoint()
@@ -143,23 +144,23 @@ public class KaNoBuPlayerConsole :
         Console.WriteLine(text);
     }
 
-    private string showField(IField field)
+    private string showField(KaNoBuFigure.FigureTypes[,] field)
     {
         string result = "";
         result += string.Format("   ");
-        for (int j = 0; j < field.Width; j++)
+        for (int j = 0; j < field.GetLength(0); j++)
         {
             result += $"  {(char)('A' + j)}";
         }
         result += string.Format("   ");
         result += "\n";
 
-        for (int i = 0; i < field.Height; i++)
+        for (int i = 0; i < field.GetLength(1); i++)
         {
             result += $"  {i}";
-            for (int j = 0; j < field.Width; j++)
+            for (int j = 0; j < field.GetLength(0); j++)
             {
-                var ship = field.get(new Point { X = j, Y = i });
+                var ship = field[j, i];
                 result += $"  {getShipResource(ship)}";
             }
 
@@ -167,7 +168,40 @@ public class KaNoBuPlayerConsole :
         }
 
         result += string.Format("   ");
-        for (int j = 0; j < field.Width; j++)
+        for (int j = 0; j < field.GetLength(0); j++)
+        {
+            result += $"  {(char)('A' + j)}";
+        }
+        result += string.Format("   ");
+
+        return result;
+    }
+    
+    private string showField(KaNoBuMoveModel.FigureModel?[,] field)
+    {
+        string result = "";
+        result += string.Format("   ");
+        for (int j = 0; j < field.GetLength(0); j++)
+        {
+            result += $"  {(char)('A' + j)}";
+        }
+        result += string.Format("   ");
+        result += "\n";
+
+        for (int i = 0; i < field.GetLength(1); i++)
+        {
+            result += $"  {i}";
+            for (int j = 0; j < field.GetLength(0); j++)
+            {
+                var ship = field[j, i];
+                result += $"  {getShipResource(ship?.FigureType)}";
+            }
+
+            result += $"  {i}\n";
+        }
+
+        result += string.Format("   ");
+        for (int j = 0; j < field.GetLength(0); j++)
         {
             result += $"  {(char)('A' + j)}";
         }
@@ -181,37 +215,34 @@ public class KaNoBuPlayerConsole :
         return $"({(char)('A' + point.X)}{point.Y})";
     }
 
-    private string getShipResource(IFigure? figure)
+    private string getShipResource(KaNoBuFigure.FigureTypes? figureType)
     {
-        if (figure == null)
+        if(figureType == null)
         {
             return " ";
         }
-        else if (figure is UnknownFigure)
+        if (figureType == KaNoBuFigure.FigureTypes.Unknown)
         {
             return "?";
         }
-
-        var ship = (KaNoBuFigure)figure;
-
-        if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipPaper)
+        if (figureType == KaNoBuFigure.FigureTypes.ShipPaper)
         {
             return "P";
         }
-        else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipScissors)
+        else if (figureType == KaNoBuFigure.FigureTypes.ShipScissors)
         {
             return "S";
         }
-        else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipStone)
+        else if (figureType == KaNoBuFigure.FigureTypes.ShipStone)
         {
             return "R";
         }
-        else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+        else if (figureType == KaNoBuFigure.FigureTypes.ShipFlag)
         {
             return "F";
         }
 
-        throw new Exception("Unknown ship type: " + ship.FigureType);
+        throw new Exception("Unknown ship type: " + figureType);
     }
 
 
@@ -240,7 +271,7 @@ public class KaNoBuPlayerConsole :
 
         if (battle.battle != null)
         {
-            this.showMessage($"Battle result: {battle.battle.Value.Item1} (IsFlag = {battle.battle.Value.Item2})");
+            this.showMessage($"Battle result: {battle.battle.Value.battleResult} (IsFlag = {battle.battle.Value.isDefenderFlag})");
         }
     }
 

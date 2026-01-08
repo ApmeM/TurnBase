@@ -70,7 +70,7 @@ public class KaNoBuListenerConsole :
 
         if (battle.battle != null)
         {
-            this.showMessage($"Battle result: {battle.battle.Value.Item1} (IsFlag = {battle.battle.Value.Item2})");
+            this.showMessage($"Battle result: {battle.battle.Value.battleResult} (IsFlag = {battle.battle.Value.isDefenderFlag})");
         }
     }
 

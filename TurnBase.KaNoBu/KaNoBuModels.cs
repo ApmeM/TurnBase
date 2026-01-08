@@ -1,40 +1,45 @@
 using System.Collections.Generic;
-using TurnBase;
 
 namespace TurnBase.KaNoBu
 {
     public class KaNoBuInitModel
     {
-        public KaNoBuInitModel(int width, int height, List<IFigure> availableFigures)
+        public KaNoBuInitModel(int width, int height, List<KaNoBuFigure.FigureTypes> availableFigures)
         {
             Width = width;
             Height = height;
             AvailableFigures = availableFigures;
         }
 
-        public readonly List<IFigure> AvailableFigures;
+        public readonly List<KaNoBuFigure.FigureTypes> AvailableFigures;
         public readonly int Width;
         public readonly int Height;
     }
 
     public class KaNoBuInitResponseModel
     {
-        public KaNoBuInitResponseModel(IField preparedField)
+        public KaNoBuInitResponseModel(KaNoBuFigure.FigureTypes[,] preparedField)
         {
             PreparedField = preparedField;
         }
 
-        public readonly IField PreparedField;
+        public readonly KaNoBuFigure.FigureTypes[,] PreparedField;
     }
 
     public class KaNoBuMoveModel
     {
-        public KaNoBuMoveModel(IField field)
+        public struct FigureModel
+        {
+            public KaNoBuFigure.FigureTypes FigureType;
+            public int PlayerNumber;
+        }
+
+        public KaNoBuMoveModel(FigureModel?[,] field)
         {
             Field = field;
         }
 
-        public readonly IField Field;
+        public readonly FigureModel?[,] Field;
     }
 
     public class KaNoBuMoveResponseModel
@@ -66,16 +71,23 @@ namespace TurnBase.KaNoBu
 
     public class KaNoBuMoveNotificationModel
     {
-        public enum BattleResult {
+        public struct Battle
+        {
+            public BattleResult battleResult;
+            public bool isDefenderFlag;
+        }
+
+        public enum BattleResult
+        {
             Draw,
             AttackerWon,
             DefenderWon
         }
 
-        public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move, BattleResult attackerWon, bool isDefenderFlag)
+        public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move, BattleResult battleResult, bool isDefenderFlag)
         {
             this.move = move;
-            this.battle = (attackerWon, isDefenderFlag);
+            this.battle = new Battle { battleResult = battleResult, isDefenderFlag = isDefenderFlag };
         }
 
         public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move)
@@ -85,6 +97,6 @@ namespace TurnBase.KaNoBu
         }
 
         public readonly KaNoBuMoveResponseModel move;
-        public readonly (BattleResult, bool)? battle;
+        public readonly Battle? battle;
     }
 }

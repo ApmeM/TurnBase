@@ -9,14 +9,16 @@ namespace TurnBase
         IGameEvents<TMoveNotificationModel>,
         IGameLogEvents<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>
     {
+        public string GameId { get; private set; }
         private class PlayerData
         {
             public bool IsInGame;
             public int PlayerNumber;
         }
 
-        public Game(IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules)
+        public Game(IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules, string gameId)
         {
+            this.GameId = gameId;
             this.rules = rules;
             this.mainField = this.rules.generateGameField();
         }

@@ -9,7 +9,7 @@ public class Unit : Node2D
     public Queue<Func<Task>> PendingTasks = new Queue<Func<Task>>();
     public Task CurrentTask;
 
-    private KaNoBuFigure.FigureTypes? unitType = KaNoBuFigure.FigureTypes.ShipPaper;
+    private KaNoBuFigure.FigureTypes unitType = KaNoBuFigure.FigureTypes.ShipPaper;
     private int playerNumber = 0;
     private bool isSelected = false;
     public Vector2? TargetPositionMap;
@@ -17,7 +17,7 @@ public class Unit : Node2D
     [Signal]
     public delegate void UnitClicked();
 
-    public KaNoBuFigure.FigureTypes? UnitType
+    public KaNoBuFigure.FigureTypes UnitType
     {
         get => this.unitType;
         set
@@ -33,7 +33,7 @@ public class Unit : Node2D
                 var shipTypeTexture = (AtlasTexture)this.GetNode<Sprite>("ShipTypeFlag").Texture;
                 switch (this.unitType)
                 {
-                    case null:
+                    case KaNoBuFigure.FigureTypes.Unknown:
                         shipTypeTexture.Region = new Rect2(280, 170, 20, 20);
                         break;
                     case KaNoBuFigure.FigureTypes.ShipStone:
