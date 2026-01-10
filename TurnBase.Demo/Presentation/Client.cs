@@ -16,7 +16,7 @@ public class Client : Node
     [Export]
     public string ServerUrl = "http://localhost:8080";
 
-    public async Task StartPolling<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>(
+    public async Task StartPolling<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>(
         IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player, string gameId)
     {
         var gameIdQueryString = new Godot.Collections.Dictionary { { "gameId", gameId } };
@@ -29,21 +29,43 @@ public class Client : Node
         {
             GD.Print($"Sending wait action.");
             var result = await SendAction("wait-action", playerIdQueryString);
-            GD.Print($"Received wait action response with code {result.code}");
 
             if (result.code == 200)
             {
+                GD.Print($"It is {result.body?.GetType()?.Name ?? "UNKNOWN"}");
                 if (result.body is InitModel<TInitModel> init)
                 {
-                    GD.Print($"It is init");
                     var response = await player.Init(init);
                     await this.SendAction("answer", playerIdQueryString, response);
                 }
                 else if (result.body is MakeTurnModel<TMoveModel> turn)
                 {
-                    GD.Print($"It is move");
                     var response = await player.MakeTurn(turn);
                     await this.SendAction("answer", playerIdQueryString, response);
+                }
+                else if (result.body is GameStartedCommunicationModel gameStarted)
+                {
+                    (player as IGameEventListener<TMoveNotificationModel>)?.GameStarted();
+                }
+                else if (result.body is GamePlayerInitCommunicationModel gamePlayerInit)
+                {
+                    (player as IGameEventListener<TMoveNotificationModel>)?.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
+                }
+                else if (result.body is GamePlayerTurnCommunicationModel gamePlayerTurn)
+                {
+                    (player as IGameEventListener<TMoveNotificationModel>)?.GamePlayerTurn(gamePlayerTurn.playerNumber, (TMoveNotificationModel)gamePlayerTurn.notification);
+                }
+                else if (result.body is GameTurnFinishedCommunicationModel gameTurnFinished)
+                {
+                    (player as IGameEventListener<TMoveNotificationModel>)?.GameTurnFinished();
+                }
+                else if (result.body is GamePlayerDisconnectedCommunicationModel gamePlayerDisconnected)
+                {
+                    (player as IGameEventListener<TMoveNotificationModel>)?.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber);
+                }
+                else if (result.body is GameFinishedCommunicationModel gameFinished)
+                {
+                    (player as IGameEventListener<TMoveNotificationModel>)?.GameFinished(gameFinished.winners);
                 }
                 else
                 {
@@ -75,13 +97,14 @@ public class Client : Node
         }
 
         var result = await ToSignal(req, "request_completed");
-
+        var response = Encoding.UTF8.GetString((byte[])result[3]);
+        GD.Print($"Received response with code {(int)result[1]}: {response}");
         return new Response
         {
             result = (int)result[0],
             code = (int)result[1],
             headers = (string[])result[2],
-            body = CommunicationSerializer.DeserializeObject<object>(Encoding.UTF8.GetString((byte[])result[3]))
+            body = CommunicationSerializer.DeserializeObject<object>(response)
         };
     }
 }

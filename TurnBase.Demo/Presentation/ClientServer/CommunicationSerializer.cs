@@ -1,13 +1,20 @@
+using Godot;
 using Newtonsoft.Json;
 
 public class CommunicationSerializer
 {
     public static T DeserializeObject<T>(string value)
     {
-        return (T)JsonConvert.DeserializeObject<CommunicationModel>(value, new JsonSerializerSettings()
+        GD.Print($"ORIGINAL: {value}");
+
+        var result = (T)JsonConvert.DeserializeObject<CommunicationModel>(value, new JsonSerializerSettings()
         {
             TypeNameHandling = TypeNameHandling.Auto
         }).Data;
+
+        GD.Print($"RESULT: {SerializeObject(result)}");
+
+        return result;
     }
     public static string SerializeObject(object value)
     {

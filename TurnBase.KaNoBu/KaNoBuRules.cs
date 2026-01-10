@@ -224,7 +224,7 @@ namespace TurnBase.KaNoBu
             }
             else
             {
-                return new KaNoBuMoveResponseModel();
+                return new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN, default, default);
             }
         }
 
@@ -314,12 +314,15 @@ namespace TurnBase.KaNoBu
                 }
             }
 
-            return new KaNoBuMoveNotificationModel(playerMove,
-                winner == null ? KaNoBuMoveNotificationModel.BattleResult.Draw :
-                winner == from ? KaNoBuMoveNotificationModel.BattleResult.AttackerWon :
-                winner == to ? KaNoBuMoveNotificationModel.BattleResult.DefenderWon :
-                throw new Exception("Invalid battle calculation."),
-                to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag
+            return new KaNoBuMoveNotificationModel(playerMove, new KaNoBuMoveNotificationModel.Battle
+            {
+                battleResult =
+                    winner == null ? KaNoBuMoveNotificationModel.BattleResult.Draw :
+                    winner == from ? KaNoBuMoveNotificationModel.BattleResult.AttackerWon :
+                    winner == to ? KaNoBuMoveNotificationModel.BattleResult.DefenderWon :
+                    throw new Exception("Invalid battle calculation."),
+                isDefenderFlag = to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag
+            }
             );
         }
 

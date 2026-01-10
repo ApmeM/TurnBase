@@ -7,54 +7,85 @@ using TurnBase;
 using TurnBase.KaNoBu;
 
 public class Main : Node,
-    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>,
+    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel>,
     IGameEventListener<KaNoBuMoveNotificationModel>,
     IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
 {
     [Export]
     public PackedScene UnitScene;
 
-    public void GameLogFinished(List<int> winners, IField field)
+
+    #region IPlayer region
+
+    public Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
     {
-        this.GameFinished(winners);
+        GD.Print("Init start");
+        return new KaNoBuPlayerEasy().Init(model);
     }
 
-    public void GameFinished(List<int> winners)
+    public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
     {
-        if (winners.Count == 1)
+        GD.Print("MakeTurn start");
+        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+
+        if (allUnits.Count == 0)
         {
-            GD.Print($"Player {winners[0]} won.");
-        }
-        else if (winners.Count == 0)
-        {
-            GD.Print($"Draw.");
+            this.InitializeField(model.Request.Field);
+
+            allUnits = this.GetNode<Node2D>("Field").GetChildren();
+            foreach (Unit unit in allUnits)
+            {
+                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
+            }
         }
         else
         {
-            throw new Exception("Unexpected number of winners.");
+            this.UpdateKnownShips(model.Request.Field);
+        }
+
+        var drag = this.GetNode<DragControl>("Drag");
+        var level = this.GetNode<TileMap>("Water");
+
+        GD.Print("Waiting for drag finished");
+        var dragRes = await drag.ToSignal(drag, nameof(DragControl.DragFinished));
+        GD.Print($"Drag finished from {(Vector2)dragRes[0]} to {(Vector2)dragRes[1]}");
+        var from = level.WorldToMap(level.ToLocal((Vector2)dragRes[0]));
+        var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
+        GD.Print($"Move {from} to {to}");
+
+        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
+            new KaNoBuMoveResponseModel(
+                KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
+                new Point { X = (int)from.x, Y = (int)from.y },
+                new Point { X = (int)to.x, Y = (int)to.y }
+            ));
+    }
+
+    #endregion
+
+    #region IGameEventListener region
+
+    public void GameStarted()
+    {
+        GD.Print("Game Started.");
+    }
+
+    public void GamePlayerInit(int playerNumber, string playerName)
+    {
+        GD.Print($"Player {playerNumber} initialized.");
+
+        var field = this.GetNode<Node2D>("Field");
+        var allUnits = field.GetChildren();
+        foreach (Node2D unit in allUnits)
+        {
+            field.RemoveChild(unit);
+            unit.QueueFree();
         }
     }
 
-    public void GameLogPlayerDisconnected(int playerNumber, IField field)
+    public void GameLogPlayerInit(int playerNumber, KaNoBuInitResponseModel initResponseModel)
     {
-    }
-
-    public void GamePlayerDisconnected(int playerNumber)
-    {
-    }
-
-    public void GameLogPlayerInitialized(int playerNumber, InitResponseModel<KaNoBuInitResponseModel> initResponseModel, IField field)
-    {
-    }
-
-    public void GamePlayerInitialized(int playerNumber, string playerName)
-    {
-    }
-
-    public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification, KaNoBuMoveResponseModel moveResponseModel, IField field)
-    {
-        this.GamePlayerTurn(playerNumber, notification);
-        GD.Print(showField(field));
+        GD.Print($"Log: Player {playerNumber} initialized.");
     }
 
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
@@ -136,6 +167,80 @@ public class Main : Node,
         }
     }
 
+    public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveResponseModel moveResponseModel, MoveValidationStatus status)
+    {
+        if (status != MoveValidationStatus.OK)
+        {
+            GD.Print($"Wrong turn made: {status}");
+        }
+        else
+        {
+            GD.Print("Correct turn made.");
+        }
+    }
+
+    public void GameTurnFinished()
+    {
+        GD.Print($"Turn finished.");
+    }
+
+    public void GameFinished(List<int> winners)
+    {
+        if (winners.Count == 1)
+        {
+            GD.Print($"Player {winners[0]} won.");
+        }
+        else if (winners.Count == 0)
+        {
+            GD.Print($"Draw.");
+        }
+        else
+        {
+            throw new Exception("Unexpected number of winners.");
+        }
+    }
+
+    public void GamePlayerDisconnected(int playerNumber)
+    {
+        GD.Print($"Player disconnected.");
+    }
+
+    public void GameLogCurrentField(IField field)
+    {
+        GD.Print(showField(field));
+        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+
+        if (allUnits.Count == 0)
+        {
+            var level = this.GetNode<TileMap>("Water");
+            for (var x = 0; x < field.Width; x++)
+            {
+                for (var y = 0; y < field.Height; y++)
+                {
+                    var originalShip = field.get(new Point { X = x, Y = y });
+                    if (originalShip == null)
+                    {
+                        continue;
+                    }
+
+                    var mapPos = new Vector2(x, y);
+                    var worldPos = level.MapToWorld(mapPos);
+                    var unit = (Unit)UnitScene.Instance();
+
+                    unit.TargetPositionMap = mapPos;
+                    unit.Rotation = Mathf.Pi;
+                    unit.Position = worldPos + level.CellSize / 2;
+                    unit.PlayerNumber = originalShip.PlayerId;
+                    unit.UnitType = (originalShip as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown;
+
+                    this.GetNode<Node2D>("Field").AddChild(unit);
+                }
+            }
+        }
+    }
+
+    #endregion
+
     private Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes> Winner = new Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes>
     {
         {KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipScissors},
@@ -149,45 +254,7 @@ public class Main : Node,
         {KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipScissors},
     };
 
-    public void GameLogPlayerWrongTurn(int playerNumber, MoveValidationStatus status, KaNoBuMoveResponseModel moveResponseModel, IField field)
-    {
-        this.GamePlayerWrongTurn(playerNumber, status);
-    }
-
-    public void GamePlayerWrongTurn(int playerNumber, MoveValidationStatus status)
-    {
-        GD.Print($"Wrong turn made: {status}");
-    }
-
-    public void GameLogStarted(IField field)
-    {
-        var level = this.GetNode<TileMap>("Water");
-        for (var x = 0; x < field.Width; x++)
-        {
-            for (var y = 0; y < field.Height; y++)
-            {
-                var originalShip = field.get(new Point { X = x, Y = y });
-                if (originalShip == null)
-                {
-                    continue;
-                }
-
-                var mapPos = new Vector2(x, y);
-                var worldPos = level.MapToWorld(mapPos);
-                var unit = (Unit)UnitScene.Instance();
-
-                unit.TargetPositionMap = mapPos;
-                unit.Rotation = Mathf.Pi;
-                unit.Position = worldPos + level.CellSize / 2;
-                unit.PlayerNumber = originalShip.PlayerId;
-                unit.UnitType = (originalShip as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown;
-
-                this.GetNode<Node2D>("Field").AddChild(unit);
-            }
-        }
-    }
-
-    public void InitializeField(KaNoBuMoveModel.FigureModel?[,] field)
+    private void InitializeField(KaNoBuMoveModel.FigureModel?[,] field)
     {
         var level = this.GetNode<TileMap>("Water");
         for (var x = 0; x < field.GetLength(0); x++)
@@ -213,59 +280,6 @@ public class Main : Node,
                 this.GetNode<Node2D>("Field").AddChild(unit);
             }
         }
-    }
-
-    public void GameStarted()
-    {
-    }
-
-    public void GameLogTurnFinished(IField field)
-    {
-    }
-
-    public void GameTurnFinished()
-    {
-    }
-
-    public Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
-    {
-        return new KaNoBuPlayerEasy().Init(model);
-    }
-
-    public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
-    {
-        GD.Print("MakeTurn start");
-        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
-
-        if (allUnits.Count == 0)
-        {
-            this.InitializeField(model.Request.Field);
-
-            allUnits = this.GetNode<Node2D>("Field").GetChildren();
-            foreach (Unit unit in allUnits)
-            {
-                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
-            }
-        }
-        else
-        {
-            this.UpdateKnownShips(model.Request.Field);
-        }
-
-        var drag = this.GetNode<DragControl>("Drag");
-        var level = this.GetNode<TileMap>("Water");
-
-        GD.Print("Waiting for drag finished");
-        var dragRes = await drag.ToSignal(drag, nameof(DragControl.DragFinished));
-        GD.Print($"Drag finished from {(Vector2)dragRes[0]} to {(Vector2)dragRes[1]}");
-        var from = level.WorldToMap(level.ToLocal((Vector2)dragRes[0]));
-        var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
-
-        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
-            new KaNoBuMoveResponseModel(
-                new Point { X = (int)from.x, Y = (int)from.y },
-                new Point { X = (int)to.x, Y = (int)to.y }
-            ));
     }
 
     private void UpdateKnownShips(KaNoBuMoveModel.FigureModel?[,] field)
@@ -352,9 +366,11 @@ public class Main : Node,
                     switch (playertype)
                     {
                         case 0:
+                            // None
                             game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>());
                             continue;
                         case 1:
+                            // Human
                             if (humanFound)
                             {
                                 GD.Print("2 Human players are not implemented yet.");
@@ -364,32 +380,34 @@ public class Main : Node,
                             game.AddPlayer(this);
                             continue;
                         case 2:
+                            // Computer Easy
                             game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
                             continue;
                         case 3:
+                            // Remote
                             var server = this.GetNode<Server>("Server");
                             server.StartServer();
-                            game.AddPlayer(new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(server, game.GameId));
+                            var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, game.GameId);
+                            game.AddPlayer(player);
+                            game.AddGameListener(player);
                             continue;
                         default:
                             throw new InvalidOperationException("Unknown Player Type");
                     }
                 }
 
-                if (humanFound)
+                game.AddGameListener(this);
+                if (!humanFound)
                 {
-                    GameEventListenerConnector.ConnectPlayer(game, this);
+                    game.AddGameLogListener(this);
                 }
-                else
-                {
-                    GameEventListenerConnector.ConnectListener(game, this);
-                }
+
                 await game.Play();
 
                 break;
             case 1:
                 var client = this.GetNode<Client>("Client");
-                await client.StartPolling(this, "test");
+                await client.StartPolling<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this, "test");
                 return;
             default:
                 throw new InvalidOperationException("Unknown game type");
@@ -468,5 +486,4 @@ public class Main : Node,
 
         throw new Exception("Unknown ship type: " + ship.FigureType);
     }
-
 }

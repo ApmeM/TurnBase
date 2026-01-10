@@ -52,6 +52,10 @@ pointing/emulate_touch_from_mouse=true
 
 project/assembly_name="TurnBase.Demo"
 
+[network]
+
+limits/debugger_stdout/max_chars_per_second=20480
+
 [rasterizer]
 
 use_pixel_snap=true

@@ -34,7 +34,7 @@ namespace TurnBase.KaNoBu
 
             if (from == null || from.Count == 0)
             {
-                return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel());
+                return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN, default, default));
             }
 
             int movementNum = r.Next(from.Count);
@@ -87,7 +87,7 @@ namespace TurnBase.KaNoBu
             var shipTo = field[x,y];
             if (shipTo == null || shipTo.Value.PlayerNumber != this.myNumber)
             {
-                availableShips.Add(new KaNoBuMoveResponseModel(from, to));
+                availableShips.Add(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN, from, to));
             }
         }
     }

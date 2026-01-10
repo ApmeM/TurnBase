@@ -36,6 +36,12 @@ public class Server : Node
         {
             var (peer, timeout, playerId) = waitingPeers[i];
 
+            if (peer.GetStatus() != StreamPeerTCP.Status.Connected)
+            {
+                waitingPeers.RemoveAt(i);
+                continue;
+            }
+
             var model = this.Actions.PopModel(playerId);
             if (model != null)
             {
@@ -63,9 +69,14 @@ public class Server : Node
         for (int i = incomingPeers.Count - 1; i >= 0; i--)
         {
             var peer = incomingPeers[i];
+            if (peer.GetStatus() != StreamPeerTCP.Status.Connected)
+            {
+                incomingPeers.RemoveAt(i);
+                continue;
+            }
+
             if (peer.GetAvailableBytes() == 0)
             {
-                GD.Print($"Data not ready yet.");
                 continue;
             }
 
@@ -131,6 +142,8 @@ public class Server : Node
             "Content-Type: application/json\r\n" +
             "Access-Control-Allow-Origin: *\r\n" +
             $"Content-Length: {Encoding.UTF8.GetByteCount(body)}\r\n\r\n";
+
+        GD.Print($"Response sent {body}");
 
         peer.PutData(Encoding.UTF8.GetBytes(header + body));
     }

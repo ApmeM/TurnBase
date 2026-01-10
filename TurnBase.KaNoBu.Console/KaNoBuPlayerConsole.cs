@@ -5,9 +5,12 @@ namespace TurnBase.KaNoBu;
 
 public class KaNoBuPlayerConsole :
     IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>,
+    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel>,
     IGameEventListener<KaNoBuMoveNotificationModel>
 {
     private Dictionary<int, string> players = new Dictionary<int, string>();
+
+    #region IPlayer region
 
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> makeTurnModel)
     {
@@ -22,7 +25,7 @@ public class KaNoBuPlayerConsole :
             (from, to) = await readMove();
         }
 
-        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel(from.Value, to.Value));
+        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN, from.Value, to.Value));
     }
 
     public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
@@ -34,6 +37,73 @@ public class KaNoBuPlayerConsole :
 
         return new InitResponseModel<KaNoBuInitResponseModel>(name, new KaNoBuInitResponseModel(preparedField));
     }
+
+    #endregion
+
+    #region IGameEventListener region
+
+    public void GameStarted()
+    {
+        this.showMessage("Welcome to the game.");
+    }
+
+    public void GamePlayerInit(int playerNumber, string playerName)
+    {
+        this.players[playerNumber] = playerName;
+        this.showMessage($"Player {playerName} initialized.");
+    }
+
+    public void GameLogPlayerInit(int playerNumber, KaNoBuInitResponseModel initResponseModel)
+    {
+    }
+
+    public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel battle)
+    {
+        var move = battle.move;
+        if (move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
+        {
+            this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' skip turn.");
+            return;
+        }
+
+        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move {showPoint(move.From)}-{showPoint(move.To)}.");
+
+        if (battle.battle != null)
+        {
+            this.showMessage($"Battle result: {battle.battle.Value.battleResult} (IsFlag = {battle.battle.Value.isDefenderFlag})");
+        }
+    }
+
+    public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveResponseModel moveResponseModel, MoveValidationStatus status)
+    {
+        if (status != MoveValidationStatus.OK)
+        {
+            this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {showPoint(moveResponseModel.From)}-{showPoint(moveResponseModel.To)} with status {status}.");
+        }
+    }
+
+    public void GameTurnFinished()
+    {
+        this.showMessage("Turn finished.");
+    }
+
+    public void GameFinished(List<int> winners)
+    {
+        this.showMessage($"Player {this.players[winners[0]]} win.");
+    }
+
+    public void GamePlayerDisconnected(int playerNumber)
+    {
+        this.showMessage($"Player {playerNumber} disconnected.");
+    }
+
+    public void GameLogCurrentField(IField field)
+    {
+        this.showMessage("Field:");
+        this.showMessage(this.showField(field));
+    }
+
+    #endregion
 
     private async Task<KaNoBuFigure.FigureTypes[,]> fillField(KaNoBuInitModel model)
     {
@@ -176,7 +246,7 @@ public class KaNoBuPlayerConsole :
 
         return result;
     }
-    
+
     private string showField(KaNoBuMoveModel.FigureModel?[,] field)
     {
         string result = "";
@@ -210,6 +280,39 @@ public class KaNoBuPlayerConsole :
         return result;
     }
 
+    private string showField(IField field)
+    {
+        string result = "";
+        result += string.Format("   ");
+        for (int j = 0; j < field.Width; j++)
+        {
+            result += $"  {(char)('A' + j)}";
+        }
+        result += string.Format("   ");
+        result += "\n";
+
+        for (int i = 0; i < field.Height; i++)
+        {
+            result += $"  {i}";
+            for (int j = 0; j < field.Width; j++)
+            {
+                var ship = field.get(new Point { X = j, Y = i });
+                result += $"  {getShipResource((ship == null) ? null : ((ship as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown))}";
+            }
+
+            result += $"   {i}\n";
+        }
+
+        result += string.Format("   ");
+        for (int j = 0; j < field.Width; j++)
+        {
+            result += $"  {(char)('A' + j)}";
+        }
+        result += string.Format("   ");
+
+        return result;
+    }
+
     private string showPoint(Point point)
     {
         return $"({(char)('A' + point.X)}{point.Y})";
@@ -217,7 +320,7 @@ public class KaNoBuPlayerConsole :
 
     private string getShipResource(KaNoBuFigure.FigureTypes? figureType)
     {
-        if(figureType == null)
+        if (figureType == null)
         {
             return " ";
         }
@@ -244,58 +347,5 @@ public class KaNoBuPlayerConsole :
 
         throw new Exception("Unknown ship type: " + figureType);
     }
-
-
-    #region IGameEventListener implementation
-
-    public void GameStarted()
-    {
-        this.showMessage("Welcome to the game.");
-    }
-
-    public void GamePlayerWrongTurn(int playerNumber, MoveValidationStatus status)
-    {
-        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {status}.");
-    }
-
-    public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel battle)
-    {
-        var move = battle.move;
-        if (move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
-        {
-            this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' skip turn.");
-            return;
-        }
-
-        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move {showPoint(move.From)}-{showPoint(move.To)}.");
-
-        if (battle.battle != null)
-        {
-            this.showMessage($"Battle result: {battle.battle.Value.battleResult} (IsFlag = {battle.battle.Value.isDefenderFlag})");
-        }
-    }
-
-    public void GameFinished(List<int> winners)
-    {
-        this.showMessage($"Player {this.players[winners[0]]} win.");
-    }
-
-    public void GamePlayerInitialized(int playerNumber, string playerName)
-    {
-        this.players[playerNumber] = playerName;
-        this.showMessage($"Player {playerName} initialized.");
-    }
-
-    public void GamePlayerDisconnected(int playerNumber)
-    {
-        this.showMessage($"Player {playerNumber} disconnected.");
-    }
-
-    public void GameTurnFinished()
-    {
-        this.showMessage("Turn finished.");
-    }
-
-    #endregion
 
 }

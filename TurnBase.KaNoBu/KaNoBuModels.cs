@@ -44,18 +44,11 @@ namespace TurnBase.KaNoBu
 
     public class KaNoBuMoveResponseModel
     {
-        public KaNoBuMoveResponseModel(Point from, Point to)
+        public KaNoBuMoveResponseModel(MoveStatus status, Point from, Point to)
         {
-            Status = MoveStatus.MAKE_TURN;
+            Status = status;
             From = from;
             To = to;
-        }
-
-        public KaNoBuMoveResponseModel()
-        {
-            Status = MoveStatus.SKIP_TURN;
-            From = new Point();
-            To = new Point();
         }
 
         public enum MoveStatus
@@ -84,16 +77,10 @@ namespace TurnBase.KaNoBu
             DefenderWon
         }
 
-        public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move, BattleResult battleResult, bool isDefenderFlag)
+        public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move, Battle? battle = null)
         {
             this.move = move;
-            this.battle = new Battle { battleResult = battleResult, isDefenderFlag = isDefenderFlag };
-        }
-
-        public KaNoBuMoveNotificationModel(KaNoBuMoveResponseModel move)
-        {
-            this.move = move;
-            this.battle = null;
+            this.battle = battle;
         }
 
         public readonly KaNoBuMoveResponseModel move;
