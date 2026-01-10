@@ -5,11 +5,8 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
-        IGameEvents<TMoveNotificationModel>,
-        IGameLogEvents<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>
+    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
-        public string GameId { get; private set; }
         private class PlayerData
         {
             public bool IsInGame;
@@ -23,29 +20,12 @@ namespace TurnBase
             this.mainField = this.rules.generateGameField();
         }
 
+        public string GameId { get; private set; }
+
         private IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules;
         private Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>, PlayerData> players = new Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>, PlayerData>();
-
-        #region IGameEvents implementation
-        public event Action GameStarted;
-        public event Action<int> GamePlayerDisconnected;
-        public event Action<int, string> GamePlayerInitialized;
-        public event Action GameTurnFinished;
-        public event Action<int, MoveValidationStatus> GamePlayerWrongTurn;
-        public event Action<int, TMoveNotificationModel> GamePlayerTurn;
-        public event Action<List<int>> GameFinished;
-        #endregion
-
-        #region IGameLogEvents implementation
-        public event Action<IField> GameLogStarted;
-        public event Action<int, InitResponseModel<TInitResponseModel>, IField> GameLogPlayerInitialized;
-        public event Action<IField> GameLogTurnFinished;
-        public event Action<int, IField> GameLogPlayerDisconnected;
-        public event Action<int, MoveValidationStatus, TMoveResponseModel, IField> GameLogPlayerWrongTurn;
-        public event Action<int, TMoveNotificationModel, TMoveResponseModel, IField> GameLogPlayerTurn;
-        public event Action<List<int>, IField> GameLogFinished;
-        #endregion
-
+        private List<IGameLogEventListener<TInitResponseModel, TMoveResponseModel>> gameLogListeners = new List<IGameLogEventListener<TInitResponseModel, TMoveResponseModel>>();
+        private List<IGameEventListener<TMoveNotificationModel>> gameListeners = new List<IGameEventListener<TMoveNotificationModel>>();
         private bool GameIsRunning = false;
         private IField mainField;
 
@@ -70,6 +50,16 @@ namespace TurnBase
             return AddPlayerStatus.OK;
         }
 
+        public void AddGameListener(IGameEventListener<TMoveNotificationModel> gameListener)
+        {
+            this.gameListeners.Add(gameListener);
+        }
+
+        public void AddGameLogListener(IGameLogEventListener<TInitResponseModel, TMoveResponseModel> gameLogListener)
+        {
+            this.gameLogListeners.Add(gameLogListener);
+        }
+
         public async Task Play()
         {
             for (var i = this.players.Count; i < this.rules.getMinPlayersCount(); i++)
@@ -79,6 +69,8 @@ namespace TurnBase
             }
 
             this.GameIsRunning = true;
+
+            this.gameListeners.ForEach(a => a.GameStarted());
 
             await this.InitPlayers();
             await this.MovePlayers();
@@ -96,8 +88,7 @@ namespace TurnBase
                 var playerData = this.players[p];
                 playerData.IsInGame = false;
                 this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
-                this.GamePlayerDisconnected?.Invoke(playerData.PlayerNumber);
-                this.GameLogPlayerDisconnected?.Invoke(playerData.PlayerNumber, this.mainField);
+                this.gameListeners.ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
             }
 
             return Task.WhenAll(
@@ -141,15 +132,15 @@ namespace TurnBase
                 return false;
             }
 
-            this.GamePlayerInitialized?.Invoke(playerNumber, initResponseModel.Name);
-            this.GameLogPlayerInitialized?.Invoke(playerNumber, initResponseModel, this.mainField);
+            this.gameListeners.ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
+            this.gameLogListeners.ForEach(a => a.GameLogPlayerInit(playerNumber, initResponseModel.Response));
+            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
             return true;
         }
 
         private async Task MovePlayers()
         {
-            this.GameStarted?.Invoke();
-            this.GameLogStarted?.Invoke(this.mainField);
+            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
 
             var rotator = this.rules.GetMoveRotator();
             var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
@@ -165,13 +156,13 @@ namespace TurnBase
                 if (nextPlayers.IsNewTurn)
                 {
                     this.rules.TurnCompleted(this.mainField);
-                    this.GameTurnFinished?.Invoke();
-                    this.GameLogTurnFinished?.Invoke(this.mainField);
+                    this.gameListeners.ForEach(a => a.GameTurnFinished());
+                    this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
                 }
             }
 
-            this.GameFinished?.Invoke(this.rules.findWinners(this.mainField));
-            this.GameLogFinished?.Invoke(this.rules.findWinners(this.mainField), this.mainField);
+            this.gameListeners.ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
+            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
         }
 
         private async Task<bool> MovePlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
@@ -196,8 +187,7 @@ namespace TurnBase
 
                 if (validTurnStatus != MoveValidationStatus.OK)
                 {
-                    this.GamePlayerWrongTurn?.Invoke(playerNumber, validTurnStatus);
-                    this.GameLogPlayerWrongTurn?.Invoke(playerNumber, validTurnStatus, makeTurnResponseModel.Response, this.mainField);
+                    this.gameLogListeners.ForEach(a => a.GameLogPlayerTurn(playerNumber, makeTurnResponseModel.Response, validTurnStatus));
                     continue;
                 }
 
@@ -205,8 +195,9 @@ namespace TurnBase
             }
 
             var moveResult = this.rules.MakeMove(this.mainField, playerNumber, move);
-            this.GamePlayerTurn?.Invoke(playerNumber, moveResult);
-            this.GameLogPlayerTurn?.Invoke(playerNumber, moveResult, move, this.mainField);
+            this.gameListeners.ForEach(a => a.GamePlayerTurn(playerNumber, moveResult));
+            this.gameLogListeners.ForEach(a => a.GameLogPlayerTurn(playerNumber, move, MoveValidationStatus.OK));
+            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
             return true;
         }
     }
