@@ -319,19 +319,13 @@ public class Main : Node,
         {
             case 0:
                 // server
-                this.GetNode<OptionButton>("UI/ServerPlayer1").Visible = true;
-                this.GetNode<OptionButton>("UI/ServerPlayer2").Visible = true;
-                this.GetNode<OptionButton>("UI/ServerPlayer3").Visible = true;
-                this.GetNode<OptionButton>("UI/ServerPlayer4").Visible = true;
-                this.GetNode<OptionButton>("UI/ClientPlayer").Visible = false;
+                this.GetNode<Control>("UI/Server").Visible = true;
+                this.GetNode<Control>("UI/Client").Visible = false;
                 break;
             case 1:
                 // client
-                this.GetNode<OptionButton>("UI/ServerPlayer1").Visible = false;
-                this.GetNode<OptionButton>("UI/ServerPlayer2").Visible = false;
-                this.GetNode<OptionButton>("UI/ServerPlayer3").Visible = false;
-                this.GetNode<OptionButton>("UI/ServerPlayer4").Visible = false;
-                this.GetNode<OptionButton>("UI/ClientPlayer").Visible = true;
+                this.GetNode<Control>("UI/Server").Visible = false;
+                this.GetNode<Control>("UI/Client").Visible = true;
                 break;
             default:
                 throw new Exception("Unknown game type");
@@ -356,7 +350,7 @@ public class Main : Node,
                 var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
                 var playerTypes = Enumerable.Range(1, 4)
-                    .Select(a => $"UI/ServerPlayer{a}")
+                    .Select(a => $"UI/Server/ServerPlayer{a}")
                     .Select(a => this.GetNode<OptionButton>(a))
                     .Select(a => a.GetSelectedId());
 
