@@ -26,6 +26,7 @@ public class Main : Node,
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
     {
         GD.Print("MakeTurn start");
+        this.GetNode<Label>("YourTurnLabel").Visible = true;
         var allUnits = this.GetNode<Node2D>("Field").GetChildren();
 
         if (allUnits.Count == 0)
@@ -53,6 +54,7 @@ public class Main : Node,
         var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
         GD.Print($"Move {from} to {to}");
 
+        this.GetNode<Label>("YourTurnLabel").Visible = false;
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
             new KaNoBuMoveResponseModel(
                 KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
@@ -90,6 +92,13 @@ public class Main : Node,
 
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
     {
+        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        if (allUnits.Count == 0)
+        {
+            // Field is not yet initialized.
+            return;
+        }
+
         if (notification.move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
         {
             GD.Print($"Move {playerNumber} Skip turn.");
@@ -97,7 +106,6 @@ public class Main : Node,
         }
         GD.Print($"Move {playerNumber} from {showPoint(notification.move.From)} to {showPoint(notification.move.To)}");
 
-        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
 
         if (notification.battle != null)
         {
@@ -186,13 +194,15 @@ public class Main : Node,
 
     public void GameFinished(List<int> winners)
     {
+        this.GetNode<Control>("UI").Visible = true;
+
         if (winners.Count == 1)
         {
-            GD.Print($"Player {winners[0]} won.");
+            this.GetNode<TimerLabel>("TimerLabel").ShowMessage($"Player {winners[0]} won.", 5);
         }
         else if (winners.Count == 0)
         {
-            GD.Print($"Draw.");
+            this.GetNode<TimerLabel>("TimerLabel").ShowMessage($"Draw.", 5);
         }
         else
         {
@@ -202,7 +212,7 @@ public class Main : Node,
 
     public void GamePlayerDisconnected(int playerNumber)
     {
-        GD.Print($"Player disconnected.");
+        this.GetNode<TimerLabel>("TimerLabel").ShowMessage($"Player {playerNumber} disconnected.", 5);
     }
 
     public void GameLogCurrentField(IField field)
@@ -311,6 +321,9 @@ public class Main : Node,
     {
         this.GetNode<OptionButton>("UI/GameType").Connect("item_selected", this, nameof(GameTypeChanged));
         this.GetNode<Button>("UI/StartButton").Connect("pressed", this, nameof(StartButonClicked));
+
+
+        this.GetNode<Label>("UI/Server/ServerIp").Text = string.Join("\n", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
     }
 
     private void GameTypeChanged(int selectedId)
@@ -401,6 +414,7 @@ public class Main : Node,
                 break;
             case 1:
                 var client = this.GetNode<Client>("Client");
+                client.ServerUrl = $"http://{this.GetNode<TextEdit>("UI/Client/ServerIp").Text}:8080";
                 await client.StartPolling<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this, "test");
                 return;
             default:

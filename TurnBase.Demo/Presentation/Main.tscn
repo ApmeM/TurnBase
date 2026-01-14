@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Presentation/Main.cs" type="Script" id=1]
 [ext_resource path="res://Presentation/Unit.tscn" type="PackedScene" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://Presentation/DragControl.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Presentation/Client.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Presentation/Server.tscn" type="PackedScene" id=7]
+[ext_resource path="res://gd-timerLabel/TimerLabel.tscn" type="PackedScene" id=8]
 
 [node name="Main" type="Node"]
 script = ExtResource( 1 )
@@ -40,10 +41,11 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -62.5
-margin_top = -70.0
-margin_right = 62.5
-margin_bottom = 70.0
+margin_left = -119.5
+margin_top = -153.0
+margin_right = 5.5
+margin_bottom = 5.0
+rect_scale = Vector2( 2, 2 )
 
 [node name="GameType" type="OptionButton" parent="UI"]
 margin_right = 125.0
@@ -57,65 +59,69 @@ margin_top = 24.0
 margin_right = 125.0
 margin_bottom = 134.0
 
-[node name="ServerIp" type="Label" parent="UI/Server"]
-margin_right = 125.0
-margin_bottom = 14.0
-text = "127.0.0.1"
-
 [node name="ServerPlayer1" type="OptionButton" parent="UI/Server"]
-margin_top = 18.0
 margin_right = 125.0
-margin_bottom = 38.0
+margin_bottom = 20.0
 text = "Human"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 1
 
 [node name="ServerPlayer2" type="OptionButton" parent="UI/Server"]
-margin_top = 42.0
+margin_top = 24.0
 margin_right = 125.0
-margin_bottom = 62.0
+margin_bottom = 44.0
 text = "Computer easy"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 2
 
 [node name="ServerPlayer3" type="OptionButton" parent="UI/Server"]
-margin_top = 66.0
+margin_top = 48.0
 margin_right = 125.0
-margin_bottom = 86.0
+margin_bottom = 68.0
 text = "Computer easy"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 2
 
 [node name="ServerPlayer4" type="OptionButton" parent="UI/Server"]
-margin_top = 90.0
+margin_top = 72.0
 margin_right = 125.0
-margin_bottom = 110.0
+margin_bottom = 92.0
 text = "Computer easy"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 2
 
+[node name="ServerIp" type="Label" parent="UI/Server"]
+margin_top = 96.0
+margin_right = 125.0
+margin_bottom = 110.0
+text = "127.0.0.1"
+autowrap = true
+
 [node name="Client" type="VBoxContainer" parent="UI"]
+visible = false
 margin_top = 138.0
 margin_right = 125.0
-margin_bottom = 138.0
+margin_bottom = 182.0
 
 [node name="ServerIp" type="TextEdit" parent="UI/Client"]
 margin_right = 125.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 0, 20 )
+rect_clip_content = true
 text = "127.0.0.1"
 
 [node name="ClientPlayer" type="OptionButton" parent="UI/Client"]
-visible = false
-margin_top = -24.0
+margin_top = 24.0
 margin_right = 125.0
-margin_bottom = -4.0
+margin_bottom = 44.0
 text = "Human"
 items = [ "Human", null, false, 1, null, "Computer easy", null, false, 2, null ]
 selected = 0
 
 [node name="StartButton" type="Button" parent="UI"]
-margin_top = 142.0
+margin_top = 138.0
 margin_right = 125.0
-margin_bottom = 162.0
+margin_bottom = 158.0
 text = "Start"
 
 [node name="Drag" parent="." instance=ExtResource( 5 )]
@@ -123,3 +129,28 @@ text = "Start"
 [node name="Server" parent="." instance=ExtResource( 7 )]
 
 [node name="Client" parent="." instance=ExtResource( 6 )]
+
+[node name="YourTurnLabel" type="Label" parent="."]
+visible = false
+margin_left = 166.0
+margin_top = -5.0
+margin_right = 226.0
+margin_bottom = 9.0
+rect_scale = Vector2( 5, 5 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+text = "Your Turn"
+
+[node name="TimerLabel" parent="." instance=ExtResource( 8 )]
+margin_left = 1.0
+margin_top = 66.0
+margin_right = 129.0
+margin_bottom = 80.0
+rect_scale = Vector2( 5, 5 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "Timer label"
+align = 1
+valign = 1
