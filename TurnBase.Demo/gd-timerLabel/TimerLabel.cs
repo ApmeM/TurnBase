@@ -1,21 +1,23 @@
 using Godot;
 
-public class TimerLabel : Label
+[SceneReference("TimerLabel.tscn")]
+public partial class TimerLabel
 {
     public override void _Ready()
     {
         base._Ready();
+        this.FillMembers();        
 
         this.Text = "";
-        this.GetNode<Timer>("MessageTimer").OneShot = true;
-        this.GetNode<Timer>("MessageTimer").Connect("timeout", this, nameof(OnMessageTimerTimeout));
+        this.messageTimer.OneShot = true;
+        this.messageTimer.Connect(CommonSignals.Timeout, this, nameof(OnMessageTimerTimeout));
     }
 
     public void ShowMessage(string text, float timeout)
     {
         this.Text = text;
-        this.GetNode<Timer>("MessageTimer").WaitTime = timeout;
-        this.GetNode<Timer>("MessageTimer").Start();
+        this.messageTimer.WaitTime = timeout;
+        this.messageTimer.Start();
     }
 
     private void OnMessageTimerTimeout()

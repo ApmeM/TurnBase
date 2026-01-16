@@ -1,20 +1,20 @@
-name: Build and test
+name: Build
 
 on:
   push:
     paths-ignore:
       - '**.md'
-  pull_request:
-    paths-ignore:
-      - '**.md'
+    branches:
+      - 'main'
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
-  packages: write
-
+  packages: read
 
 # Allow one concurrent deployment
 concurrency:
@@ -24,11 +24,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    name: Build artifacts
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+          submodules: true
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
@@ -36,51 +38,29 @@ jobs:
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        
-      - name: Restore packages
-        run: dotnet restore
-      
-      - name: Build
-        run: dotnet build
-      
-      - name: Test
-        run: dotnet test
-      
-      - name: Pack for version
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: dotnet pack -c Release -p:PackageVersion=${GITHUB_REF:11}
 
-      - name: Pack without version
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-        run: dotnet pack -c Release -p:PackageVersion=1.0.0.0
-
-      - name: Upload windows artifact
-        uses: actions/upload-artifact@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          name: nuget
-          path: ./TurnBase/bin/Release/TurnBase.*.nupkg
+          java-version: '17'
+          distribution: 'temurin'
 
-
-  godot:
-    needs: build
-    runs-on: ubuntu-latest
-    name: Build godot artifacts
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
         with:
-          fetch-depth: 0
-
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
-        with:
-          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          cmdline-tools-version: 12266719
 
       - name: Restore packages
         run: |
           dotnet restore "./TurnBase.Demo/TurnBase.Demo.sln"
+
+      - name: Update presets config
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+        run: |
+          sed -i "s/RELEASE_KEYSTORE_PASSWORD_PLACEHOLDER/$RELEASE_KEYSTORE_PASSWORD/" ./TurnBase.Demo/export_presets.cfg 
+          sed -i "s/version\/code=1/version\/code=$GITHUB_RUN_NUMBER/" ./TurnBase.Demo/export_presets.cfg 
+          sed -i "s/version\/name=\"1.0.0\"/version\/name=\"1.$GITHUB_RUN_NUMBER.0\"/" ./TurnBase.Demo/export_presets.cfg 
 
       - name: Export game
         id: export
@@ -100,9 +80,32 @@ jobs:
         with:
           path: ${{ steps.export.outputs.build_directory }}/HTML5
 
+      - name: Upload html artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: html5
+          path: ${{ steps.export.outputs.build_directory }}/HTML5
+
+      - name: Upload android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: ${{ steps.export.outputs.build_directory }}/Android
+
+      - name: Upload windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: ${{ steps.export.outputs.build_directory }}/Windows Desktop
+
+      - name: Upload linux x11 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: ${{ steps.export.outputs.build_directory }}/LinuxX11
 
   deploy_html5:
-    needs: godot
+    needs: build
     name: Deploy to github pages
     environment:
       name: github-pages
@@ -115,30 +118,25 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  pack:
+  deploy_android:
     needs: build
-    name: deploy
-    runs-on: windows-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    name: Deploy to google play
+    runs-on: ubuntu-latest
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: nuget
-          path: ./artifacts
+          name: android
+          path: ./android
 
-      - name: Setup nuget
-        uses: nuget/setup-nuget@v2
+      - name: Deploy to Google Play
+        uses: r0adkll/upload-google-play@v1
+        if: "${{ env.SERVICE_ACCOUNT_JSON != ''}}"
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON }}
         with:
-          nuget-version: 'latest'
-
-      - name: Setup nuget config
-        run: nuget.exe sources add -name github -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -username ${{ github.actor }} -password ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload to GitHub Packages
-        run: |
-            for f in ./artifacts/*.nupkg
-            do
-              nuget push $f -Source "github"
-            done
-        shell: bash
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: org.apmem.games.TurnBase
+          releaseFiles: ./android/GodotTurnBase.aab
+          track: production
+          status: completed
