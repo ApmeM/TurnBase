@@ -135,6 +135,7 @@ public partial class Unit
         await this.ToSignal(this.GetTree().CreateTimer(0.3f), "timeout");
         texture.Region = new Rect2(210, texture.Region.Position.y, texture.Region.Size);
         this.GetParent().MoveChild(this, 1);
+        this.waveGenerator.Stop();
     }
 
     public void Attack()
@@ -169,6 +170,7 @@ public partial class Unit
     {
         this.TargetPositionMap = newCell;
         this.PendingTasks.Enqueue(() => MoveUnitToAction(newPosition));
+        this.waveGenerator.Start();
     }
 
     public async Task MoveUnitToAction(Vector2 newPosition)
