@@ -3,7 +3,8 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBase;
 
-public class Client : Node
+[SceneReference("Client.tscn")]
+public partial class Client
 {
     private struct Response
     {
@@ -77,13 +78,11 @@ public class Client : Node
 
     private async Task<Response> SendAction(string action, Godot.Collections.Dictionary playerId, object body = null)
     {
-        var req = this.GetNode<HTTPRequest>("Http");
-
         var queryString = new HTTPClient().QueryStringFromDict(playerId);
         var url = $"{ServerUrl}/{action}?{queryString}";
         if (body != null)
         {
-            req.Request(
+            this.http.Request(
                 url,
                 new[] { "Content-Type: application/json" },
                 false,
@@ -93,10 +92,10 @@ public class Client : Node
         }
         else
         {
-            req.Request(url);
+            this.http.Request(url);
         }
 
-        var result = await ToSignal(req, "request_completed");
+        var result = await ToSignal(this.http, "request_completed");
         var response = Encoding.UTF8.GetString((byte[])result[3]);
         GD.Print($"Received response with code {(int)result[1]}: {response}");
         return new Response

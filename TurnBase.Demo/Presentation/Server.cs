@@ -3,7 +3,8 @@ using System.Text;
 using System.Collections.Generic;
 using System;
 
-public class Server : Node
+[SceneReference("Server.tscn")]
+public partial class Server
 {
     private readonly TCP_Server server = new TCP_Server();
     private const int Port = 8080;
@@ -12,6 +13,11 @@ public class Server : Node
     private readonly List<StreamPeerTCP> incomingPeers = new List<StreamPeerTCP>();
     private readonly List<(StreamPeerTCP, float, string)> waitingPeers = new List<(StreamPeerTCP, float, string)>();
 
+    public override void _Ready()
+    {
+        base._Ready();
+        this.FillMembers();
+    }
     public void StartServer()
     {
         if (server.IsListening())

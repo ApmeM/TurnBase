@@ -61,19 +61,19 @@ text = "Server"
 items = [ "Server", null, false, 0, null, "Client", null, false, 1, null ]
 selected = 0
 
-[node name="Server" type="VBoxContainer" parent="UI"]
+[node name="ServerGameType" type="VBoxContainer" parent="UI"]
 margin_top = 24.0
 margin_right = 125.0
 margin_bottom = 134.0
 
-[node name="ServerPlayer1" type="OptionButton" parent="UI/Server"]
+[node name="ServerPlayer1" type="OptionButton" parent="UI/ServerGameType"]
 margin_right = 125.0
 margin_bottom = 20.0
 text = "Human"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 1
 
-[node name="ServerPlayer2" type="OptionButton" parent="UI/Server"]
+[node name="ServerPlayer2" type="OptionButton" parent="UI/ServerGameType"]
 margin_top = 24.0
 margin_right = 125.0
 margin_bottom = 44.0
@@ -81,7 +81,7 @@ text = "Computer easy"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 2
 
-[node name="ServerPlayer3" type="OptionButton" parent="UI/Server"]
+[node name="ServerPlayer3" type="OptionButton" parent="UI/ServerGameType"]
 margin_top = 48.0
 margin_right = 125.0
 margin_bottom = 68.0
@@ -89,7 +89,7 @@ text = "Computer easy"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 2
 
-[node name="ServerPlayer4" type="OptionButton" parent="UI/Server"]
+[node name="ServerPlayer4" type="OptionButton" parent="UI/ServerGameType"]
 margin_top = 72.0
 margin_right = 125.0
 margin_bottom = 92.0
@@ -97,27 +97,27 @@ text = "Computer easy"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
 selected = 2
 
-[node name="ServerIp" type="Label" parent="UI/Server"]
+[node name="ServerIpInfo" type="Label" parent="UI/ServerGameType"]
 margin_top = 96.0
 margin_right = 125.0
 margin_bottom = 110.0
 text = "127.0.0.1"
 autowrap = true
 
-[node name="Client" type="VBoxContainer" parent="UI"]
+[node name="ClientGameType" type="VBoxContainer" parent="UI"]
 visible = false
 margin_top = 138.0
 margin_right = 125.0
 margin_bottom = 182.0
 
-[node name="ServerIp" type="TextEdit" parent="UI/Client"]
+[node name="ServerIpInput" type="TextEdit" parent="UI/ClientGameType"]
 margin_right = 125.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 0, 20 )
 rect_clip_content = true
 text = "127.0.0.1"
 
-[node name="ClientPlayer" type="OptionButton" parent="UI/Client"]
+[node name="ClientPlayer" type="OptionButton" parent="UI/ClientGameType"]
 margin_top = 24.0
 margin_right = 125.0
 margin_bottom = 44.0

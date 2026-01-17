@@ -6,7 +6,9 @@ using Godot;
 using TurnBase;
 using TurnBase.KaNoBu;
 
-public class Main : Node,
+
+[SceneReference("Main.tscn")]
+public partial class Main :
     IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel>,
     IGameEventListener<KaNoBuMoveNotificationModel>,
     IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
@@ -26,14 +28,14 @@ public class Main : Node,
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
     {
         GD.Print("MakeTurn start");
-        this.GetNode<Label>("YourTurnLabel").Visible = true;
-        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        this.yourTurnLabel.Visible = true;
+        var allUnits = this.field.GetChildren();
 
         if (allUnits.Count == 0)
         {
             this.InitializeField(model.Request.Field);
 
-            allUnits = this.GetNode<Node2D>("Field").GetChildren();
+            allUnits = this.field.GetChildren();
             foreach (Unit unit in allUnits)
             {
                 unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
@@ -44,17 +46,16 @@ public class Main : Node,
             this.UpdateKnownShips(model.Request.Field);
         }
 
-        var drag = this.GetNode<DragControl>("Drag");
-        var level = this.GetNode<TileMap>("Water");
+        var level = this.water;
 
         GD.Print("Waiting for drag finished");
-        var dragRes = await drag.ToSignal(drag, nameof(DragControl.DragFinished));
+        var dragRes = await this.drag.ToSignal(this.drag, nameof(DragControl.DragFinished));
         GD.Print($"Drag finished from {(Vector2)dragRes[0]} to {(Vector2)dragRes[1]}");
         var from = level.WorldToMap(level.ToLocal((Vector2)dragRes[0]));
         var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
         GD.Print($"Move {from} to {to}");
 
-        this.GetNode<Label>("YourTurnLabel").Visible = false;
+        this.yourTurnLabel.Visible = false;
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
             new KaNoBuMoveResponseModel(
                 KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
@@ -76,7 +77,7 @@ public class Main : Node,
     {
         GD.Print($"Player {playerNumber} initialized.");
 
-        var field = this.GetNode<Node2D>("Field");
+        var field = this.field;
         var allUnits = field.GetChildren();
         foreach (Node2D unit in allUnits)
         {
@@ -92,7 +93,7 @@ public class Main : Node,
 
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
     {
-        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        var allUnits = this.field.GetChildren();
         if (allUnits.Count == 0)
         {
             // Field is not yet initialized.
@@ -114,7 +115,7 @@ public class Main : Node,
 
         var fromMapPos = new Vector2(notification.move.From.X, notification.move.From.Y);
         var toMapPos = new Vector2(notification.move.To.X, notification.move.To.Y);
-        var level = this.GetNode<TileMap>("Water");
+        var level = this.water;
         var toWorldPos = level.MapToWorld(toMapPos) + level.CellSize / 2;
 
         GD.Print($"Looking for unit of player {playerNumber} at {fromMapPos}");
@@ -194,15 +195,15 @@ public class Main : Node,
 
     public void GameFinished(List<int> winners)
     {
-        this.GetNode<Control>("UI").Visible = true;
+        this.uI.Visible = true;
 
         if (winners.Count == 1)
         {
-            this.GetNode<TimerLabel>("TimerLabel").ShowMessage($"Player {winners[0]} won.", 5);
+            this.timerLabel.ShowMessage($"Player {winners[0]} won.", 5);
         }
         else if (winners.Count == 0)
         {
-            this.GetNode<TimerLabel>("TimerLabel").ShowMessage($"Draw.", 5);
+            this.timerLabel.ShowMessage($"Draw.", 5);
         }
         else
         {
@@ -212,17 +213,17 @@ public class Main : Node,
 
     public void GamePlayerDisconnected(int playerNumber)
     {
-        this.GetNode<TimerLabel>("TimerLabel").ShowMessage($"Player {playerNumber} disconnected.", 5);
+        this.timerLabel.ShowMessage($"Player {playerNumber} disconnected.", 5);
     }
 
     public void GameLogCurrentField(IField field)
     {
         GD.Print(showField(field));
-        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        var allUnits = this.field.GetChildren();
 
         if (allUnits.Count == 0)
         {
-            var level = this.GetNode<TileMap>("Water");
+            var level = this.water;
             for (var x = 0; x < field.Width; x++)
             {
                 for (var y = 0; y < field.Height; y++)
@@ -243,7 +244,7 @@ public class Main : Node,
                     unit.PlayerNumber = originalShip.PlayerId;
                     unit.UnitType = (originalShip as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown;
 
-                    this.GetNode<Node2D>("Field").AddChild(unit);
+                    this.field.AddChild(unit);
                 }
             }
         }
@@ -266,7 +267,7 @@ public class Main : Node,
 
     private void InitializeField(KaNoBuMoveModel.FigureModel?[,] field)
     {
-        var level = this.GetNode<TileMap>("Water");
+        var level = this.water;
         for (var x = 0; x < field.GetLength(0); x++)
         {
             for (var y = 0; y < field.GetLength(1); y++)
@@ -287,14 +288,14 @@ public class Main : Node,
                 unit.PlayerNumber = originalShip.Value.PlayerNumber;
                 unit.UnitType = originalShip.Value.FigureType;
 
-                this.GetNode<Node2D>("Field").AddChild(unit);
+                this.field.AddChild(unit);
             }
         }
     }
 
     private void UpdateKnownShips(KaNoBuMoveModel.FigureModel?[,] field)
     {
-        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        var allUnits = this.field.GetChildren();
         foreach (Unit unit in allUnits)
         {
             if (unit.TargetPositionMap == null)
@@ -313,32 +314,34 @@ public class Main : Node,
 
     private void OnUnitClicked(Unit unit)
     {
-        var drag = this.GetNode<DragControl>("Drag");
+        var drag = this.drag;
         drag.StartDragging();
     }
 
     public override void _Ready()
     {
-        this.GetNode<OptionButton>("UI/GameType").Connect("item_selected", this, nameof(GameTypeChanged));
-        this.GetNode<Button>("UI/StartButton").Connect("pressed", this, nameof(StartButonClicked));
+        this.FillMembers();        
+
+        this.gameType.Connect("item_selected", this, nameof(GameTypeChanged));
+        this.startButton.Connect("pressed", this, nameof(StartButonClicked));
 
 
-        this.GetNode<Label>("UI/Server/ServerIp").Text = string.Join("\n", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
+        this.serverIpInfo.Text = string.Join("\n", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
     }
 
     private void GameTypeChanged(int selectedId)
     {
-        switch (this.GetNode<OptionButton>("UI/GameType").GetSelectedId())
+        switch (this.gameType.GetSelectedId())
         {
             case 0:
                 // server
-                this.GetNode<Control>("UI/Server").Visible = true;
-                this.GetNode<Control>("UI/Client").Visible = false;
+                this.serverGameType.Visible = true;
+                this.clientGameType.Visible = false;
                 break;
             case 1:
                 // client
-                this.GetNode<Control>("UI/Server").Visible = false;
-                this.GetNode<Control>("UI/Client").Visible = true;
+                this.serverGameType.Visible = false;
+                this.clientGameType.Visible = true;
                 break;
             default:
                 throw new Exception("Unknown game type");
@@ -347,30 +350,32 @@ public class Main : Node,
 
     private async void StartButonClicked()
     {
-        var allUnits = this.GetNode<Node2D>("Field").GetChildren();
+        var allUnits = this.field.GetChildren();
         foreach (Unit unit in allUnits)
         {
             unit.QueueFree();
         }
 
-        this.GetNode<Control>("UI").Visible = false;
+        this.uI.Visible = false;
 
-        switch (this.GetNode<OptionButton>("UI/GameType").GetSelectedId())
+        switch (this.gameType.GetSelectedId())
         {
             case 0:
                 // server
                 var rules = new KaNoBuRules(8);
                 var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
-                var playerTypes = Enumerable.Range(1, 4)
-                    .Select(a => $"UI/Server/ServerPlayer{a}")
-                    .Select(a => this.GetNode<OptionButton>(a))
-                    .Select(a => a.GetSelectedId());
+                var playerTypes = new[]{
+                    this.serverPlayer1,
+                    this.serverPlayer2,
+                    this.serverPlayer3,
+                    this.serverPlayer4,
+                };
 
                 var humanFound = false;
                 foreach (var playertype in playerTypes)
                 {
-                    switch (playertype)
+                    switch (playertype.GetSelectedId())
                     {
                         case 0:
                             // None
@@ -392,8 +397,7 @@ public class Main : Node,
                             continue;
                         case 3:
                             // Remote
-                            var server = this.GetNode<Server>("Server");
-                            server.StartServer();
+                            this.server.StartServer();
                             var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, game.GameId);
                             game.AddPlayer(player);
                             game.AddGameListener(player);
@@ -413,15 +417,14 @@ public class Main : Node,
 
                 break;
             case 1:
-                var client = this.GetNode<Client>("Client");
-                client.ServerUrl = $"http://{this.GetNode<TextEdit>("UI/Client/ServerIp").Text}:8080";
-                await client.StartPolling<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this, "test");
+                this.client.ServerUrl = $"http://{this.serverIpInput.Text}:8080";
+                await this.client.StartPolling<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this, "test");
                 return;
             default:
                 throw new InvalidOperationException("Unknown game type");
         }
 
-        this.GetNode<Control>("UI").Visible = true;
+        this.uI.Visible = true;
     }
 
     private string showPoint(Point point)

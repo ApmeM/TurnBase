@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TurnBase.KaNoBu;
 
-public class Unit : Node2D
+[SceneReference("Unit.tscn")]
+public partial class Unit
 {
     public Queue<Func<Task>> PendingTasks = new Queue<Func<Task>>();
     public Task CurrentTask;
@@ -30,7 +31,7 @@ public class Unit : Node2D
                     return;
                 }
 
-                var shipTypeTexture = (AtlasTexture)this.GetNode<Sprite>("ShipTypeFlag").Texture;
+                var shipTypeTexture = (AtlasTexture)this.shipTypeFlag.Texture;
                 switch (this.unitType)
                 {
                     case KaNoBuFigure.FigureTypes.Unknown:
@@ -67,7 +68,7 @@ public class Unit : Node2D
                     return;
                 }
 
-                var shipTexture = (AtlasTexture)this.GetNode<Sprite>("Ship").Texture;
+                var shipTexture = (AtlasTexture)this.ship.Texture;
                 shipTexture.Region = new Rect2(0, 120 * this.playerNumber, 66, 113);
             }
         }
@@ -81,7 +82,7 @@ public class Unit : Node2D
             this.isSelected = value;
             if (IsInsideTree())
             {
-                this.GetNode<Sprite>("Flag").Visible = this.IsSelected;
+                this.flag.Visible = this.IsSelected;
             }
         }
     }
@@ -89,6 +90,7 @@ public class Unit : Node2D
     public override void _Ready()
     {
         base._Ready();
+        this.FillMembers();
         this.IsSelected = this.isSelected;
         this.PlayerNumber = this.playerNumber;
         this.UnitType = this.unitType;
@@ -110,8 +112,7 @@ public class Unit : Node2D
 
         if (Input.IsActionJustPressed("left_click"))
         {
-            var ship = this.GetNode<Sprite>("Ship");
-            if (ship.GetRect().HasPoint(ship.GetLocalMousePosition()))
+            if (this.ship.GetRect().HasPoint(ship.GetLocalMousePosition()))
             {
                 EmitSignal(nameof(UnitClicked));
             }
@@ -122,12 +123,11 @@ public class Unit : Node2D
     {
         this.TargetPositionMap = null;
         this.PendingTasks.Enqueue(() => UnitHitAction());
-        var container = this.GetNode<GridContainer>("Stars");
     }
 
     public async Task UnitHitAction()
     {
-        var texture = (AtlasTexture)this.GetNode<Sprite>("Ship").Texture;
+        var texture = (AtlasTexture)this.ship.Texture;
 
         texture.Region = new Rect2(70, texture.Region.Position.y, texture.Region.Size);
         await this.ToSignal(this.GetTree().CreateTimer(0.3f), "timeout");
@@ -140,10 +140,9 @@ public class Unit : Node2D
     public void Attack()
     {
         this.PendingTasks.Enqueue(() => AttackAction());
-        var container = this.GetNode<GridContainer>("Stars");
-        var star = (TextureRect)container.GetNode<TextureRect>("StarExample").Duplicate();
+        var star = (TextureRect)this.starExample.Duplicate();
         star.Visible = true;
-        container.AddChild(star);
+        this.stars.AddChild(star);
     }
 
     public async Task AttackAction()
@@ -152,7 +151,7 @@ public class Unit : Node2D
 
         const float LIFETIME = 0.5f;
 
-        var cannonBall = (Sprite)this.GetNode("CannonBall").Duplicate();
+        var cannonBall = (Sprite)this.cannonBall.Duplicate();
         cannonBall.Visible = true;
         this.AddChild(cannonBall);
 
