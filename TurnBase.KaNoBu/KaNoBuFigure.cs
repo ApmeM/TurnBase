@@ -10,16 +10,19 @@ namespace TurnBase.KaNoBu
             ShipFlag = 1,
             ShipStone = 2,
             ShipPaper = 3,
-            ShipScissors = 4
+            ShipScissors = 4,
+            ShipUniversal = 5
         }
 
         public int PlayerId { get; set; }
-        public FigureTypes FigureType { get; private set; }
+        public FigureTypes FigureType { get; set; }
+        public int WinNumber { get; set; }
 
         public KaNoBuFigure(int playerId, FigureTypes figure)
         {
             PlayerId = playerId;
             FigureType = figure;
+            WinNumber = 0;
         }
 
         public bool IsMoveValid(KaNoBuMoveResponseModel playerMove)

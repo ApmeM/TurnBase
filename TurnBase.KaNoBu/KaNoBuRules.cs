@@ -1,12 +1,24 @@
 using System;
 using System.Collections.Generic;
-using TurnBase;
 
 namespace TurnBase.KaNoBu
 {
     public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
     {
-        private readonly Dictionary<int, IField> fieldsCache;
+        public static readonly Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes> Winner = new Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes>
+        {
+            {KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipScissors},
+            {KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipStone},
+            {KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipPaper},
+        };
+
+        public static readonly Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes> Looser = new Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes>
+        {
+            {KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipStone},
+            {KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipPaper},
+            {KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipScissors},
+        };
+
         private readonly int size;
 
         public KaNoBuRules(int size)
@@ -16,7 +28,6 @@ namespace TurnBase.KaNoBu
                 throw new Exception("Min size is 6.");
             }
 
-            this.fieldsCache = new Dictionary<int, IField>();
             this.size = size;
         }
 
@@ -290,6 +301,11 @@ namespace TurnBase.KaNoBu
                 mainField.trySet(playerMove.From, null);
                 mainField.trySet(playerMove.To, null);
                 mainField.trySet(playerMove.To, winner);
+                winner.WinNumber++;
+                if(winner.WinNumber % 3 == 0)
+                {
+                    winner.FigureType = KaNoBuFigure.FigureTypes.ShipUniversal;
+                }
             }
 
             if (to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
@@ -357,15 +373,31 @@ namespace TurnBase.KaNoBu
             {
                 return null;
             }
-            else if ((defender.FigureType == KaNoBuFigure.FigureTypes.ShipStone && attacker.FigureType == KaNoBuFigure.FigureTypes.ShipScissors) ||
-                    (defender.FigureType == KaNoBuFigure.FigureTypes.ShipScissors && attacker.FigureType == KaNoBuFigure.FigureTypes.ShipPaper) ||
-                    (defender.FigureType == KaNoBuFigure.FigureTypes.ShipPaper && attacker.FigureType == KaNoBuFigure.FigureTypes.ShipStone))
+            else if(defender.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+            {
+                return attacker;
+            }
+            else if(defender.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
+            {
+                defender.FigureType = Winner[attacker.FigureType];
+                return defender;
+            }
+            else if(attacker.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
+            {
+                attacker.FigureType = Winner[defender.FigureType];
+                return attacker;
+            }
+            else if (attacker.FigureType == Winner[defender.FigureType])
+            {
+                return attacker;
+            }
+            else if (defender.FigureType == Winner[attacker.FigureType])
             {
                 return defender;
             }
             else
             {
-                return attacker;
+                return null;
             }
         }
 

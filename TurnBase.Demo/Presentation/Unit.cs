@@ -49,6 +49,9 @@ public partial class Unit
                     case KaNoBuFigure.FigureTypes.ShipFlag:
                         shipTypeTexture.Region = new Rect2(320, 170, 20, 20);
                         break;
+                    case KaNoBuFigure.FigureTypes.ShipUniversal:
+                        shipTypeTexture.Region = new Rect2(320, 190, 20, 20);
+                        break;
                 }
             }
         }
@@ -144,6 +147,10 @@ public partial class Unit
         var star = (TextureRect)this.starExample.Duplicate();
         star.Visible = true;
         this.stars.AddChild(star);
+        if ((this.stars.GetChildCount() - 1) % 3 == 0)
+        {
+            this.UnitType = KaNoBuFigure.FigureTypes.ShipUniversal;
+        }
     }
 
     public async Task AttackAction()

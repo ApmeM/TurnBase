@@ -107,7 +107,6 @@ public partial class Main :
         }
         GD.Print($"Move {playerNumber} from {showPoint(notification.move.From)} to {showPoint(notification.move.To)}");
 
-
         if (notification.battle != null)
         {
             GD.Print($"Battle result: {notification.battle.Value.battleResult} (IsFlag = {notification.battle.Value.isDefenderFlag})");
@@ -118,13 +117,14 @@ public partial class Main :
         var level = this.water;
         var toWorldPos = level.MapToWorld(toMapPos) + level.CellSize / 2;
 
-        GD.Print($"Looking for unit of player {playerNumber} at {fromMapPos}");
         var movedUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == fromMapPos && a.PlayerNumber == playerNumber);
 
         if (notification.battle.HasValue)
         {
-            GD.Print($"Looking for defender unit at {toMapPos}");
             var defenderUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == toMapPos);
+
+            GD.Print($"moved unit {movedUnit.PlayerNumber} {movedUnit.UnitType}");
+            GD.Print($"defender unit {defenderUnit.PlayerNumber} {defenderUnit.UnitType}");
 
             switch (notification.battle.Value.battleResult)
             {
@@ -133,10 +133,12 @@ public partial class Main :
                     if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = defenderUnit.UnitType;
                     break;
                 case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
-                    GD.Print($"Set new position for unit at {movedUnit.TargetPositionMap} to {toMapPos}");
-                    GD.Print($"Set new position for unit at {defenderUnit.TargetPositionMap} to {null}");
                     // Attacker won
 
+                    if (movedUnit.UnitType == KaNoBuFigure.FigureTypes.ShipUniversal)
+                    {
+                        movedUnit.UnitType = KaNoBuFigure.FigureTypes.Unknown;
+                    }
                     if (notification.battle.Value.isDefenderFlag)
                     {
                         defenderUnit.UnitType = KaNoBuFigure.FigureTypes.ShipFlag;
@@ -146,8 +148,8 @@ public partial class Main :
                     }
                     else
                     {
-                        if (movedUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.UnitType = Looser[movedUnit.UnitType];
-                        if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = Winner[defenderUnit.UnitType];
+                        if (movedUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.UnitType = KaNoBuRules.Looser[movedUnit.UnitType];
+                        if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = KaNoBuRules.Winner[defenderUnit.UnitType];
                     }
 
                     movedUnit.RotateUnitTo(toWorldPos);
@@ -156,10 +158,14 @@ public partial class Main :
                     movedUnit.MoveUnitTo(toMapPos, toWorldPos);
                     break;
                 case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
-                    GD.Print($"Set new position for unit at {movedUnit.TargetPositionMap} to {null}");
                     // Defender won
-                    if (movedUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.UnitType = Winner[movedUnit.UnitType];
-                    if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = Looser[defenderUnit.UnitType];
+                    if (defenderUnit.UnitType == KaNoBuFigure.FigureTypes.ShipUniversal)
+                    {
+                        defenderUnit.UnitType = KaNoBuFigure.FigureTypes.Unknown;
+                    }
+
+                    if (movedUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.UnitType = KaNoBuRules.Winner[movedUnit.UnitType];
+                    if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = KaNoBuRules.Looser[defenderUnit.UnitType];
 
                     defenderUnit.RotateUnitTo(movedUnit.Position);
                     defenderUnit.Attack();
@@ -169,7 +175,6 @@ public partial class Main :
         }
         else
         {
-            GD.Print($"Set new position for unit at {movedUnit.TargetPositionMap} to {toMapPos}");
             // No battle - swim here.
             movedUnit.RotateUnitTo(toWorldPos);
             movedUnit.MoveUnitTo(toMapPos, toWorldPos);
@@ -252,18 +257,6 @@ public partial class Main :
 
     #endregion
 
-    private Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes> Winner = new Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes>
-    {
-        {KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipScissors},
-        {KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipStone},
-        {KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipPaper},
-    };
-    private Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes> Looser = new Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes>
-    {
-        {KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipStone},
-        {KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipPaper},
-        {KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipScissors},
-    };
 
     private void InitializeField(KaNoBuMoveModel.FigureModel?[,] field)
     {
@@ -283,7 +276,6 @@ public partial class Main :
                 var unit = (Unit)UnitScene.Instance();
 
                 unit.TargetPositionMap = mapPos;
-                unit.Rotation = Mathf.Pi;
                 unit.Position = worldPos + level.CellSize / 2;
                 unit.PlayerNumber = originalShip.Value.PlayerNumber;
                 unit.UnitType = originalShip.Value.FigureType;
