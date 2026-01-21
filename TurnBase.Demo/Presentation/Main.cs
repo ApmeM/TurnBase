@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using TurnBase;
@@ -15,6 +16,7 @@ public partial class Main :
 {
     [Export]
     public PackedScene UnitScene;
+    private int playerId = -1;
 
 
     #region IPlayer region
@@ -22,13 +24,15 @@ public partial class Main :
     public Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
     {
         GD.Print("Init start");
+        this.playerId = model.PlayerId;
+        // _ = MoveCameraToPlayer();
         return new KaNoBuPlayerEasy().Init(model);
     }
 
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
     {
         GD.Print("MakeTurn start");
-        this.yourTurnLabel.Visible = true;
+        this.timerLabel.ShowMessage("Your turn", 1f);
         var allUnits = this.field.GetChildren();
 
         if (allUnits.Count == 0)
@@ -55,7 +59,6 @@ public partial class Main :
         var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
         GD.Print($"Move {from} to {to}");
 
-        this.yourTurnLabel.Visible = false;
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
             new KaNoBuMoveResponseModel(
                 KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
@@ -66,11 +69,53 @@ public partial class Main :
 
     #endregion
 
+    public async Task MoveCameraToPlayer()
+    {
+        var tween = new Tween();
+        this.AddChild(tween);
+        Vector2 armyCenter;
+        switch (playerId)
+        {
+            case 0:
+                armyCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 1 / 4);
+                break;
+            case 1:
+                armyCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 3 / 4);
+                break;
+            case 2:
+                armyCenter = new Vector2(this.GetViewport().Size.x * 1 / 4, this.GetViewport().Size.y * 2 / 4);
+                break;
+            case 3:
+                armyCenter = new Vector2(this.GetViewport().Size.x * 3 / 4, this.GetViewport().Size.y * 2 / 4);
+                break;
+            default:
+                armyCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 2 / 4);
+                break;
+        }
+
+        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, armyCenter, 1f);
+        tween.InterpolateProperty(this.draggableCamera, "zoom", this.draggableCamera.Scale, Vector2.One / 1.3f, 1f);
+        tween.Start();
+        await ToSignal(tween, "tween_all_completed");
+        tween.QueueFree();
+    }
+    public async Task MoveCameraToCenter()
+    {
+        var tween = new Tween();
+        this.AddChild(tween);
+        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, this.GetViewport().Size / 2, 1f);
+        tween.InterpolateProperty(this.draggableCamera, "scale", this.draggableCamera.Scale, Vector2.One, 1f);
+        tween.Start();
+        await ToSignal(tween, "tween_all_completed");
+        tween.QueueFree();
+    }
+
     #region IGameEventListener region
 
-    public void GameStarted()
+    public async void GameStarted()
     {
-        GD.Print("Game Started.");
+        this.playerId = -1;
+        this.timerLabel.ShowMessage("Game Started.", 1f);
     }
 
     public void GamePlayerInit(int playerNumber, string playerName)
@@ -198,7 +243,7 @@ public partial class Main :
         GD.Print($"Turn finished.");
     }
 
-    public void GameFinished(List<int> winners)
+    public async void GameFinished(List<int> winners)
     {
         this.uI.Visible = true;
 
@@ -214,6 +259,7 @@ public partial class Main :
         {
             throw new Exception("Unexpected number of winners.");
         }
+        // _ = MoveCameraToCenter();
     }
 
     public void GamePlayerDisconnected(int playerNumber)
@@ -306,13 +352,18 @@ public partial class Main :
 
     private void OnUnitClicked(Unit unit)
     {
+        if (unit.PlayerNumber != this.playerId)
+        {
+            return;
+        }
+
         var drag = this.drag;
         drag.StartDragging();
     }
 
     public override void _Ready()
     {
-        this.FillMembers();        
+        this.FillMembers();
 
         this.gameType.Connect("item_selected", this, nameof(GameTypeChanged));
         this.startButton.Connect("pressed", this, nameof(StartButonClicked));

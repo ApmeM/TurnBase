@@ -12,27 +12,38 @@ public class DragControl : Node2D
     {
         this.dragIndicator = GetNode<Line2D>("DragIndicator");
         this.dragIndicator.Visible = false;
-        this.dragIndicator.Points = new []{Vector2.Zero, Vector2.Zero};
+        this.dragIndicator.Points = new[] { Vector2.Zero, Vector2.Zero };
     }
 
-    public override void _Process(float delta)
+    public override void _UnhandledInput(InputEvent @event)
     {
-        if (this.dragIndicator.Visible)
-        {
-            this.dragIndicator.Points = new []{Vector2.Zero, dragIndicator.GetLocalMousePosition()};
+        base._UnhandledInput(@event);
 
-            if (Input.IsActionJustReleased("left_click"))
-            {
-                dragIndicator.Visible = false;
-                this.EmitSignal(nameof(DragFinished), this.dragIndicator.ToGlobal(this.dragIndicator.Points[0]), this.dragIndicator.ToGlobal(this.dragIndicator.Points[1]));
-            }
+        if (!this.dragIndicator.Visible)
+        {
+            return;
+        }
+
+        if (@event is InputEventMouseMotion motion)
+        {
+            this.dragIndicator.Points = new[] { Vector2.Zero, dragIndicator.GetLocalMousePosition() };
+            this.GetTree().SetInputAsHandled();
+            return;            
+        }
+
+        if (@event.IsActionReleased("left_click"))
+        {
+            dragIndicator.Visible = false;
+            this.EmitSignal(nameof(DragFinished), this.dragIndicator.ToGlobal(this.dragIndicator.Points[0]), this.dragIndicator.ToGlobal(this.dragIndicator.Points[1]));
+            this.GetTree().SetInputAsHandled();
+            return;
         }
     }
 
     public void StartDragging()
     {
         this.dragIndicator.GlobalPosition = this.GetGlobalMousePosition();
-        this.dragIndicator.Points = new []{Vector2.Zero, Vector2.Zero};
+        this.dragIndicator.Points = new[] { Vector2.Zero, Vector2.Zero };
         this.dragIndicator.Visible = true;
     }
 }

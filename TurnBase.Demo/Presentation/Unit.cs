@@ -112,15 +112,20 @@ public partial class Unit
         {
             CurrentTask = PendingTasks.Dequeue().Invoke();
         }
+    }
 
-        if (Input.IsActionJustPressed("left_click"))
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event.IsActionPressed("left_click"))
         {
             if (this.ship.GetRect().HasPoint(ship.GetLocalMousePosition()))
             {
+                this.GetTree().SetInputAsHandled();
                 EmitSignal(nameof(UnitClicked));
             }
         }
     }
+
 
     public void UnitHit()
     {

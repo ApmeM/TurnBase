@@ -12,6 +12,10 @@ public partial class DraggableCamera
 
     private bool drag = false;
     private Vector2 initPosMouse = Vector2.Zero;
+    private Vector2 initPosCamera = Vector2.Zero;
+
+    [Export]
+    public bool IsDebugMode = false;
 
     [Export]
     public float minimumZoom = 0.3f;
@@ -90,7 +94,7 @@ public partial class DraggableCamera
             this.maximumZoom = value;
         }
     }
-
+    private int dragsCount = 0;
     public override void _UnhandledInput(InputEvent @event)
     {
         base._UnhandledInput(@event);
@@ -106,30 +110,42 @@ public partial class DraggableCamera
             {
                 if (drag)
                 {
-                    this.GlobalPosition = (this.GetViewport().Size / 2 - this.GetViewport().CanvasTransform.origin) / this.GetViewport().CanvasTransform.Scale;
-                    var mousePos = this.GetViewport().GetMousePosition();
-                    this.GlobalPosition += (initPosMouse - mousePos) * this.Zoom;
-                    this.initPosMouse = mousePos;
+                    this.GlobalPosition = this.initPosCamera + (this.initPosMouse - this.GetViewport().GetMousePosition()) * this.Zoom;
+                    if (IsDebugMode)
+                    {
+                        this.debugLabel.Text = $"Dragging {dragsCount} at {this.GlobalPosition}";
+                    }
                 }
                 else
                 {
                     if (initPosMouse == Vector2.Zero)
                     {
                         this.initPosMouse = this.GetViewport().GetMousePosition();
+                        this.initPosCamera = this.GlobalPosition;
+                        if (IsDebugMode)
+                        {
+                            dragsCount++;
+                            this.debugLabel.Text = $"Drag {dragsCount} from {this.initPosCamera}";
+                        }
                     }
 
                     this.drag = this.initPosMouse != this.GetViewport().GetMousePosition();
                 }
             }
-            else
-            {
-                this.drag = false;
-                this.initPosMouse = Vector2.Zero;
-            }
         }
 
         if (@event is InputEventMouseButton buttonEvent)
         {
+            if (buttonEvent.ButtonIndex == (int)ButtonList.Left && buttonEvent.IsReleased())
+            {
+                if (IsDebugMode)
+                {
+                    this.debugLabel.Text = $"Drag {dragsCount} stopped";
+                }
+                this.drag = false;
+                this.initPosMouse = Vector2.Zero;
+                this.initPosCamera = Vector2.Zero;
+            }
             if (buttonEvent.ButtonIndex == (int)ButtonList.WheelUp)
             {
                 this.NormalizedZoom += 0.1f;
