@@ -155,6 +155,11 @@ public partial class DraggableCamera
                 this.NormalizedZoom -= 0.1f;
             }
         }
+
+        if (@event is InputEventMagnifyGesture gesture)
+        {
+            this.NormalizedZoom += gesture.Factor - 1;
+        }
     }
 
     private static float Map(float value, float leftMin, float leftMax, float rightMin, float rightMax)

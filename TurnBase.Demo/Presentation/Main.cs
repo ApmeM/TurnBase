@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using TurnBase;
@@ -25,7 +24,7 @@ public partial class Main :
     {
         GD.Print("Init start");
         this.playerId = model.PlayerId;
-        // _ = MoveCameraToPlayer();
+        _ = MoveCameraToPlayer();
         return new KaNoBuPlayerEasy().Init(model);
     }
 
@@ -73,27 +72,27 @@ public partial class Main :
     {
         var tween = new Tween();
         this.AddChild(tween);
-        Vector2 armyCenter;
+        Vector2 cameraCenter;
         switch (playerId)
         {
             case 0:
-                armyCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 1 / 4);
+                cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 1 / 4);
                 break;
             case 1:
-                armyCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 3 / 4);
+                cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 3 / 4);
                 break;
             case 2:
-                armyCenter = new Vector2(this.GetViewport().Size.x * 1 / 4, this.GetViewport().Size.y * 2 / 4);
+                cameraCenter = new Vector2(this.GetViewport().Size.x * 1 / 4, this.GetViewport().Size.y * 2 / 4);
                 break;
             case 3:
-                armyCenter = new Vector2(this.GetViewport().Size.x * 3 / 4, this.GetViewport().Size.y * 2 / 4);
+                cameraCenter = new Vector2(this.GetViewport().Size.x * 3 / 4, this.GetViewport().Size.y * 2 / 4);
                 break;
             default:
-                armyCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 2 / 4);
+                cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 2 / 4);
                 break;
         }
 
-        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, armyCenter, 1f);
+        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, cameraCenter, 1f);
         tween.InterpolateProperty(this.draggableCamera, "zoom", this.draggableCamera.Scale, Vector2.One / 1.3f, 1f);
         tween.Start();
         await ToSignal(tween, "tween_all_completed");
@@ -103,7 +102,10 @@ public partial class Main :
     {
         var tween = new Tween();
         this.AddChild(tween);
-        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, this.GetViewport().Size / 2, 1f);
+
+        var cameraCenter = new Vector2(this.GetViewport().Size.x / 2, this.GetViewport().Size.y / 2);
+
+        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, cameraCenter, 1f);
         tween.InterpolateProperty(this.draggableCamera, "scale", this.draggableCamera.Scale, Vector2.One, 1f);
         tween.Start();
         await ToSignal(tween, "tween_all_completed");
@@ -259,7 +261,7 @@ public partial class Main :
         {
             throw new Exception("Unexpected number of winners.");
         }
-        // _ = MoveCameraToCenter();
+        _ = MoveCameraToCenter();
     }
 
     public void GamePlayerDisconnected(int playerNumber)
