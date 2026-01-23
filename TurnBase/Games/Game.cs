@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IGame
     {
         private class PlayerData
         {
