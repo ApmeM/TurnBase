@@ -81,14 +81,6 @@ rect_min_size = Vector2( 0, 20 )
 rect_clip_content = true
 text = "127.0.0.1"
 
-[node name="ClientPlayer" type="OptionButton" parent="UIContainer/ClientGameType"]
-margin_top = 24.0
-margin_right = 125.0
-margin_bottom = 44.0
-text = "Human"
-items = [ "Human", null, false, 1, null, "Computer easy", null, false, 2, null ]
-selected = 0
-
 [node name="StartButton" type="Button" parent="UIContainer"]
 margin_top = 138.0
 margin_right = 125.0
