@@ -1,7 +1,32 @@
+using System;
 using TurnBase;
 
 namespace TurnBase.KaNoBu
 {
+    public static class FigureTypeInfo
+    {
+        public static string PrintableName(this KaNoBuFigure.FigureTypes figureType)
+        {
+            switch (figureType)
+            {
+                case KaNoBuFigure.FigureTypes.Unknown:
+                    return "?";
+                case KaNoBuFigure.FigureTypes.ShipFlag:
+                    return "F";
+                case KaNoBuFigure.FigureTypes.ShipStone:
+                    return "R";
+                case KaNoBuFigure.FigureTypes.ShipPaper:
+                    return "P";
+                case KaNoBuFigure.FigureTypes.ShipScissors:
+                    return "S";
+                case KaNoBuFigure.FigureTypes.ShipUniversal:
+                    return "U";
+                default:
+                    throw new Exception("Unknown figure type");
+            }
+        }
+    }
+
     public class KaNoBuFigure : IFigure
     {
         public enum FigureTypes

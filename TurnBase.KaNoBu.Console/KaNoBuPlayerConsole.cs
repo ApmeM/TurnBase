@@ -324,28 +324,7 @@ public class KaNoBuPlayerConsole :
         {
             return " ";
         }
-        if (figureType == KaNoBuFigure.FigureTypes.Unknown)
-        {
-            return "?";
-        }
-        if (figureType == KaNoBuFigure.FigureTypes.ShipPaper)
-        {
-            return "P";
-        }
-        else if (figureType == KaNoBuFigure.FigureTypes.ShipScissors)
-        {
-            return "S";
-        }
-        else if (figureType == KaNoBuFigure.FigureTypes.ShipStone)
-        {
-            return "R";
-        }
-        else if (figureType == KaNoBuFigure.FigureTypes.ShipFlag)
-        {
-            return "F";
-        }
 
-        throw new Exception("Unknown ship type: " + figureType);
+        return figureType.Value.PrintableName();
     }
-
 }

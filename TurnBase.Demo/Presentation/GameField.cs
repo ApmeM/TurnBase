@@ -161,11 +161,6 @@ public partial class GameField :
         }
         GD.Print($"Move {playerNumber} from {showPoint(notification.move.From)} to {showPoint(notification.move.To)}");
 
-        if (notification.battle != null)
-        {
-            GD.Print($"Battle result: {notification.battle.Value.battleResult} (IsFlag = {notification.battle.Value.isDefenderFlag})");
-        }
-
         var fromMapPos = new Vector2(notification.move.From.X, notification.move.From.Y);
         var toMapPos = new Vector2(notification.move.To.X, notification.move.To.Y);
         var level = this.water;
@@ -175,6 +170,7 @@ public partial class GameField :
 
         if (notification.battle.HasValue)
         {
+            GD.Print($"Battle result: {notification.battle.Value.battleResult} (IsFlag = {notification.battle.Value.isDefenderFlag})");
             var defenderUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == toMapPos);
 
             GD.Print($"moved unit {movedUnit.PlayerNumber} {movedUnit.UnitType}");
@@ -345,6 +341,7 @@ public partial class GameField :
 
     private void UpdateKnownShips(KaNoBuMoveModel.FigureModel?[,] field)
     {
+        // In case player defeated and all its ships become known.
         var allUnits = this.field.GetChildren();
         foreach (Unit unit in allUnits)
         {
@@ -428,24 +425,6 @@ public partial class GameField :
         }
 
         var ship = (KaNoBuFigure)figure;
-
-        if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipPaper)
-        {
-            return figure.PlayerId + "P";
-        }
-        else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipScissors)
-        {
-            return figure.PlayerId + "S";
-        }
-        else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipStone)
-        {
-            return figure.PlayerId + "R";
-        }
-        else if (ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
-        {
-            return figure.PlayerId + "F";
-        }
-
-        throw new Exception("Unknown ship type: " + ship.FigureType);
+        return figure.PlayerId + ship.FigureType.PrintableName();
     }
 }
