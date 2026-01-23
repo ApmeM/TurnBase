@@ -35,6 +35,11 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
             GD.Print($"Sending wait action.");
             var result = await SendAction("wait-action", playerIdQueryString);
 
+            if (result.code == 0)
+            {
+                break;
+            }
+
             if (result.code == 200)
             {
                 GD.Print($"It is {result.body?.GetType()?.Name ?? "UNKNOWN"}");
@@ -99,7 +104,7 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
         var response = Encoding.UTF8.GetString((byte[])result[3]);
         GD.Print($"Received response with code {(int)result[1]}: {response}");
 
-        if((int)result[1] == 0)
+        if ((int)result[1] == 0)
         {
             return new Response
             {
