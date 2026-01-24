@@ -19,7 +19,7 @@ margin_bottom = 5.0
 rect_scale = Vector2( 2, 2 )
 
 [node name="GameType" type="OptionButton" parent="UIContainer"]
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 20.0
 text = "Server"
 items = [ "Server", null, false, 0, null, "Client", null, false, 1, null ]
@@ -27,43 +27,43 @@ selected = 0
 
 [node name="ServerGameType" type="VBoxContainer" parent="UIContainer"]
 margin_top = 24.0
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 134.0
 
 [node name="ServerPlayer1" type="OptionButton" parent="UIContainer/ServerGameType"]
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 20.0
 text = "Human"
-items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
+items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
 selected = 1
 
 [node name="ServerPlayer2" type="OptionButton" parent="UIContainer/ServerGameType"]
 margin_top = 24.0
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 44.0
 text = "Computer easy"
-items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
+items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
 selected = 2
 
 [node name="ServerPlayer3" type="OptionButton" parent="UIContainer/ServerGameType"]
 margin_top = 48.0
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 68.0
-text = "Computer easy"
-items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
-selected = 2
+text = "Computer medium"
+items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
+selected = 4
 
 [node name="ServerPlayer4" type="OptionButton" parent="UIContainer/ServerGameType"]
 margin_top = 72.0
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 92.0
-text = "Computer easy"
-items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null ]
-selected = 2
+text = "Computer medium"
+items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
+selected = 4
 
 [node name="ServerIpInfo" type="Label" parent="UIContainer/ServerGameType"]
 margin_top = 96.0
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 110.0
 text = "127.0.0.1"
 autowrap = true
@@ -83,7 +83,7 @@ text = "127.0.0.1"
 
 [node name="StartButton" type="Button" parent="UIContainer"]
 margin_top = 138.0
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 158.0
 text = "Start"
 

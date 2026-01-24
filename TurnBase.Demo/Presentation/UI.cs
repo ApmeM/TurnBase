@@ -83,7 +83,8 @@ public partial class UI
                                 continue;
                             case 2:
                                 // Computer Easy
-                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(new KaNoBuPlayerEasy(), 1, 300, this));
+                                var playerEasy = new KaNoBuPlayerEasy();
+                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(playerEasy, 1, 300, this));
                                 continue;
                             case 3:
                                 // Remote
@@ -91,6 +92,12 @@ public partial class UI
                                 var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, kanobu.GameId);
                                 kanobu.AddPlayer(player);
                                 kanobu.AddGameListener(player);
+                                continue;
+                            case 4:
+                                // Computer Medium
+                                var playerMedium = new KaNoBuPlayerMedium();
+                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(playerMedium, 1, 300, this));
+                                kanobu.AddGameListener(playerMedium);
                                 continue;
                             default:
                                 throw new InvalidOperationException("Unknown Player Type");
