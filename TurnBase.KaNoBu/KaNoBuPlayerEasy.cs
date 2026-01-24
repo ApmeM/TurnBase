@@ -66,6 +66,10 @@ namespace TurnBase.KaNoBu
             return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(from[movementNum]);
         }
 
+        public void PlayersInitialized(IField mainField)
+        {
+        }
+
         private List<KaNoBuMoveResponseModel> findAllMovement(IField field)
         {
             var availableShips = new List<KaNoBuMoveResponseModel>();

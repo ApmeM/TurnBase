@@ -74,4 +74,12 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
             winners = winners
         });
     }
+
+    public void PlayersInitialized(IField mainField)
+    {
+        this.server.Actions.PushModel(PlayerId, new GamePlayersInitializedCommunicationModel
+        {
+            mainField = mainField
+        });
+    }
 }

@@ -5,9 +5,14 @@ namespace TurnBase
         public int X;
         public int Y;
 
-        override public string ToString()
+        public override string ToString()
         {
             return $"{X}x{Y}";
+        }
+
+        public string PrintableName()
+        {
+            return $"({(char)('A' + this.X)}{this.Y})";
         }
     }
 }

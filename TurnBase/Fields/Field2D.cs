@@ -71,5 +71,38 @@ namespace TurnBase
         {
             return point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
         }
+
+        public override string ToString()
+        {
+            string result = "";
+            result += string.Format("   ");
+            for (int j = 0; j < this.Width; j++)
+            {
+                result += $"  {(char)('A' + j)}";
+            }
+            result += string.Format("   ");
+            result += "\n";
+
+            for (int i = 0; i < this.Height; i++)
+            {
+                result += $"  {i}";
+                for (int j = 0; j < this.Width; j++)
+                {
+                    var ship = this.get(j, i);
+                    result += $" {ship?.PrintableName() ?? "  "}";
+                }
+
+                result += $"   {i}\n";
+            }
+
+            result += string.Format("   ");
+            for (int j = 0; j < this.Width; j++)
+            {
+                result += $"  {(char)('A' + j)}";
+            }
+            result += string.Format("   ");
+
+            return result;
+        }
     }
 }

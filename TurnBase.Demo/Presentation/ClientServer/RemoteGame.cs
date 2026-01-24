@@ -61,6 +61,10 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
                 {
                     player.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
                 }
+                else if (result.body is GamePlayersInitializedCommunicationModel gamePlayersInitialized)
+                {
+                    player.PlayersInitialized(gamePlayersInitialized.mainField);
+                }
                 else if (result.body is GamePlayerTurnCommunicationModel gamePlayerTurn)
                 {
                     player.GamePlayerTurn(gamePlayerTurn.playerNumber, (TMoveNotificationModel)gamePlayerTurn.notification);
@@ -104,7 +108,7 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
         var response = Encoding.UTF8.GetString((byte[])result[3]);
         GD.Print($"Received response with code {(int)result[1]}: {response}");
 
-        if ((int)result[1] == 0)
+        if ((int)result[1] != 200)
         {
             return new Response
             {

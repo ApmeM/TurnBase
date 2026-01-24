@@ -79,5 +79,10 @@ namespace TurnBase.KaNoBu
                 return new KaNoBuFigure(this.PlayerId, FigureTypes.Unknown);
             }
         }
+
+        public string PrintableName()
+        {
+            return this.PlayerId + this.FigureType.PrintableName();
+        }
     }
 }

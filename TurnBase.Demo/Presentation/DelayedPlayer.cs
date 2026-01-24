@@ -59,4 +59,9 @@ public class DelayedPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResp
     {
         this.player.GameFinished(winners);
     }
+
+    public void PlayersInitialized(IField mainField)
+    {
+        this.player.PlayersInitialized(mainField);
+    }
 }

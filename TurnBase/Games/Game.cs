@@ -68,7 +68,16 @@ namespace TurnBase
             this.gameLogListeners.ForEach(a => a.GameStarted());
 
             await this.InitPlayers();
+
+            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
+            this.players.Keys.ToList().ForEach(a => a.PlayersInitialized(this.mainField.copyForPlayer(players[a].PlayerNumber)));
+            this.gameLogListeners.ForEach(a => a.PlayersInitialized(this.mainField));
+
             await this.MovePlayers();
+
+            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
+            this.players.Keys.ToList().ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
+            this.gameLogListeners.ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
         }
 
         private Task GroupAction(List<IPlayer> nextPlayers, Func<IPlayer, Task<bool>> action)
@@ -103,11 +112,15 @@ namespace TurnBase
             var nextPlayers = rotator.MoveNext(null, allPlayers);
             Task<bool> action(IPlayer player) => this.InitPlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)player);
 
-            do
+            while (true)
             {
                 await GroupAction(nextPlayers.PlayersInTurn, action);
                 nextPlayers = rotator.MoveNext(nextPlayers.PlayersInTurn, allPlayers);
-            } while (nextPlayers.IsNewTurn == false);
+                if (nextPlayers.IsNewTurn)
+                {
+                    break;
+                }
+            }
         }
 
         private async Task<bool> InitPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
@@ -137,8 +150,6 @@ namespace TurnBase
 
         private async Task MovePlayers()
         {
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
-
             var rotator = this.rules.GetMoveRotator();
             var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
 
@@ -148,8 +159,8 @@ namespace TurnBase
             while (this.rules.findWinners(this.mainField) == null)
             {
                 await GroupAction(nextPlayers.PlayersInTurn, action);
-
                 nextPlayers = rotator.MoveNext(nextPlayers.PlayersInTurn, allPlayers);
+
                 if (nextPlayers.IsNewTurn)
                 {
                     this.rules.TurnCompleted(this.mainField);
@@ -158,10 +169,6 @@ namespace TurnBase
                     this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
                 }
             }
-
-            this.players.Keys.ToList().ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
-            this.gameLogListeners.ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
         }
 
         private async Task<bool> MovePlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)

@@ -2,7 +2,8 @@ using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
 {
-    public class DelayedPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+    public class DelayedPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : 
+        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
         private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
         private readonly int initDelay;
@@ -55,6 +56,11 @@ namespace TurnBase.KaNoBu
         public void GameFinished(List<int> winners)
         {
             this.player.GameFinished(winners);
+        }
+
+        public void PlayersInitialized(IField mainField)
+        {
+            this.player.PlayersInitialized(mainField);
         }
     }
 }

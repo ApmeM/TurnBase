@@ -130,6 +130,7 @@ public partial class Unit
     public void UnitHit()
     {
         this.TargetPositionMap = null;
+        this.ZIndex = -1;
         this.PendingTasks.Enqueue(() => UnitHitAction());
     }
 

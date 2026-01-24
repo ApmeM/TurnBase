@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TurnBase;
 
 public class CommunicationModel
 {
@@ -28,6 +29,12 @@ public class GameTurnFinishedCommunicationModel
 public class GamePlayerDisconnectedCommunicationModel
 {
     public int playerNumber;
+}
+
+
+public class GamePlayersInitializedCommunicationModel
+{
+    public IField mainField;
 }
 
 public class GameFinishedCommunicationModel

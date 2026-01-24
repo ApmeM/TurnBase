@@ -34,11 +34,6 @@ public partial class GameField :
 
         this.memorizedField.SynchronizeField(model.Request.Field);
 
-        if (this.field.GetChildCount() == 0)
-        {
-            this.InitializeField(this.memorizedField.Field);
-        }
-
         this.UpdateKnownShips();
 
         var level = this.water;
@@ -132,15 +127,41 @@ public partial class GameField :
         this.memorizedField.Clear();
     }
 
+    public void PlayersInitialized(IField mainField)
+    {
+        this.memorizedField.Clear();
+        this.memorizedField.SynchronizeField(mainField);
+
+        this.field.RemoveChildren();
+        var level = this.water;
+
+        for (var x = 0; x < mainField.Width; x++)
+        {
+            for (var y = 0; y < mainField.Height; y++)
+            {
+                var originalShip = mainField.get(x, y) as KaNoBuFigure;
+                if (originalShip == null)
+                {
+                    continue;
+                }
+
+                var mapPos = new Vector2(x, y);
+                var worldPos = level.MapToWorld(mapPos);
+                var unit = (Unit)UnitScene.Instance();
+
+                unit.TargetPositionMap = mapPos;
+                unit.Position = worldPos + level.CellSize / 2;
+                unit.PlayerNumber = originalShip.PlayerId;
+                unit.UnitType = originalShip.FigureType;
+                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
+
+                this.field.AddChild(unit);
+            }
+        }
+    }
+
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
     {
-        var allUnits = this.field.GetChildren();
-        if (allUnits.Count == 0)
-        {
-            // Field is not yet initialized.
-            return;
-        }
-
         this.memorizedField.UpdateKnownShips(notification);
 
         if (notification.move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
@@ -148,13 +169,14 @@ public partial class GameField :
             GD.Print($"Move {playerNumber} Skip turn.");
             return;
         }
-        GD.Print($"Move {playerNumber} from {showPoint(notification.move.From)} to {showPoint(notification.move.To)}");
+        GD.Print($"Move {playerNumber} from {notification.move.From.PrintableName()} to {notification.move.To.PrintableName()}");
 
         var fromMapPos = new Vector2(notification.move.From.X, notification.move.From.Y);
         var toMapPos = new Vector2(notification.move.To.X, notification.move.To.Y);
         var level = this.water;
         var toWorldPos = level.MapToWorld(toMapPos) + level.CellSize / 2;
 
+        var allUnits = this.field.GetChildren();
         var movedUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == fromMapPos && a.PlayerNumber == playerNumber);
 
         if (notification.battle.HasValue)
@@ -211,13 +233,8 @@ public partial class GameField :
         GD.Print($"Turn finished.");
     }
 
-    [Signal]
-    public delegate void GameFinishedEventHandler();
-
     public async void GameFinished(List<int> winners)
     {
-        this.EmitSignal(nameof(GameFinishedEventHandler));
-
         if (winners.Count == 1)
         {
             this.timerLabel.ShowMessage($"Player {winners[0]} won.", 5);
@@ -241,69 +258,10 @@ public partial class GameField :
     public void GameLogCurrentField(IField field)
     {
         this.memorizedField.SynchronizeField(field);
-
-        GD.Print(showField(field));
-        var allUnits = this.field.GetChildren();
-
-        if (allUnits.Count == 0)
-        {
-            var level = this.water;
-            for (var x = 0; x < field.Width; x++)
-            {
-                for (var y = 0; y < field.Height; y++)
-                {
-                    var originalShip = field.get(x, y) as KaNoBuFigure;
-                    if (originalShip == null)
-                    {
-                        continue;
-                    }
-
-                    var mapPos = new Vector2(x, y);
-                    var worldPos = level.MapToWorld(mapPos);
-                    var unit = (Unit)UnitScene.Instance();
-
-                    unit.TargetPositionMap = mapPos;
-                    unit.Rotation = Mathf.Pi;
-                    unit.Position = worldPos + level.CellSize / 2;
-                    unit.PlayerNumber = originalShip.PlayerId;
-                    unit.UnitType = (originalShip as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown;
-
-                    this.field.AddChild(unit);
-                }
-            }
-        }
+        GD.Print(field.ToString());
     }
 
     #endregion
-
-
-    private void InitializeField(IField field)
-    {
-        var level = this.water;
-        for (var x = 0; x < field.Width; x++)
-        {
-            for (var y = 0; y < field.Height; y++)
-            {
-                var originalShip = field.get(x, y) as KaNoBuFigure;
-                if (originalShip == null)
-                {
-                    continue;
-                }
-
-                var mapPos = new Vector2(x, y);
-                var worldPos = level.MapToWorld(mapPos);
-                var unit = (Unit)UnitScene.Instance();
-
-                unit.TargetPositionMap = mapPos;
-                unit.Position = worldPos + level.CellSize / 2;
-                unit.PlayerNumber = originalShip.PlayerId;
-                unit.UnitType = originalShip.FigureType;
-                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
-
-                this.field.AddChild(unit);
-            }
-        }
-    }
 
     private void UpdateKnownShips()
     {
@@ -335,53 +293,5 @@ public partial class GameField :
     public override void _Ready()
     {
         this.FillMembers();
-    }
-
-    private string showPoint(Point point)
-    {
-        return $"({(char)('A' + point.X)}{point.Y})";
-    }
-
-    private string showField(IField field)
-    {
-        string result = "";
-        result += string.Format("   ");
-        for (int j = 0; j < field.Width; j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-        result += "\n";
-
-        for (int i = 0; i < field.Height; i++)
-        {
-            result += $"  {i}";
-            for (int j = 0; j < field.Width; j++)
-            {
-                var ship = field.get(j, i) as KaNoBuFigure;
-                result += $" {getShipResource(ship)}";
-            }
-
-            result += $"   {i}\n";
-        }
-
-        result += string.Format("   ");
-        for (int j = 0; j < field.Width; j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-
-        return result;
-    }
-
-    private string getShipResource(KaNoBuFigure figure)
-    {
-        if (figure == null)
-        {
-            return "  ";
-        }
-
-        return figure.PlayerId + figure.FigureType.PrintableName();
     }
 }

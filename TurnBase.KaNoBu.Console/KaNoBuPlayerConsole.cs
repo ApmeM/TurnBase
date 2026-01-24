@@ -11,7 +11,7 @@ public class KaNoBuPlayerConsole :
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> makeTurnModel)
     {
         var field = makeTurnModel.Request.Field;
-        this.showMessage(showField(field));
+        this.showMessage(field.ToString());
         this.showMessage("Select your to move in format A0-A1.");
         Point? from = null;
         Point? to = null;
@@ -62,7 +62,7 @@ public class KaNoBuPlayerConsole :
             return;
         }
 
-        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move {showPoint(move.From)}-{showPoint(move.To)}.");
+        this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' move {move.From.PrintableName()}-{move.To.PrintableName()}.");
 
         if (battle.battle != null)
         {
@@ -74,7 +74,7 @@ public class KaNoBuPlayerConsole :
     {
         if (status != MoveValidationStatus.OK)
         {
-            this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {showPoint(moveResponseModel.From)}-{showPoint(moveResponseModel.To)} with status {status}.");
+            this.showMessage($"Player {playerNumber} '{this.players[playerNumber]}' made incorrect turn {moveResponseModel.From.PrintableName()}-{moveResponseModel.To.PrintableName()} with status {status}.");
         }
     }
 
@@ -96,7 +96,7 @@ public class KaNoBuPlayerConsole :
     public void GameLogCurrentField(IField field)
     {
         this.showMessage("Field:");
-        this.showMessage(this.showField(field));
+        this.showMessage(field.ToString());
     }
 
     #endregion
@@ -110,7 +110,7 @@ public class KaNoBuPlayerConsole :
 
         while (ships.Count != 0)
         {
-            this.showMessage(showField(preparedField));
+            this.showMessage(preparedField.ToString());
             var ship = ships[0];
             this.showMessage($"Select position for {ship}, empty value = random.");
             Point? p = await readPoint();
@@ -206,44 +206,6 @@ public class KaNoBuPlayerConsole :
         Console.WriteLine(text);
     }
 
-    private string showField(IField field)
-    {
-        string result = "";
-        result += string.Format("   ");
-        for (int j = 0; j < field.Width; j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-        result += "\n";
-
-        for (int i = 0; i < field.Height; i++)
-        {
-            result += $"  {i}";
-            for (int j = 0; j < field.Width; j++)
-            {
-                var ship = field.get(j, i);
-                result += $"  {getShipResource((ship == null) ? null : ((ship as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown))}";
-            }
-
-            result += $"   {i}\n";
-        }
-
-        result += string.Format("   ");
-        for (int j = 0; j < field.Width; j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-
-        return result;
-    }
-
-    private string showPoint(Point point)
-    {
-        return $"({(char)('A' + point.X)}{point.Y})";
-    }
-
     private string getShipResource(KaNoBuFigure.FigureTypes? figureType)
     {
         if (figureType == null)
@@ -252,5 +214,10 @@ public class KaNoBuPlayerConsole :
         }
 
         return figureType.Value.PrintableName();
+    }
+
+    public void PlayersInitialized(IField mainField)
+    {
+        this.showMessage(mainField.ToString());
     }
 }

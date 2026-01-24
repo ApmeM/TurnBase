@@ -160,6 +160,11 @@ namespace TurnBase.KaNoBu
         {
         }
 
+        public void PlayersInitialized(IField mainField)
+        {
+            this.memorizedField.SynchronizeField(mainField);
+        }
+
         public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
         {
             this.memorizedField.UpdateKnownShips(notification);

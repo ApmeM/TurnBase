@@ -94,6 +94,19 @@ public partial class Server
                 waitingPeers.Add((peer, 30, GetQueryValue(request, "playerId")));
                 continue;
             }
+            else if (request.StartsWith("OPTIONS /answer", System.StringComparison.InvariantCultureIgnoreCase))
+            {
+                var playerId = GetQueryValue(request, "playerId");
+                //TODO: validate playerId
+                if (string.IsNullOrWhiteSpace(playerId))
+                {
+                    SendStatus(peer, 400, null); // Bad Request
+                }
+                else
+                {
+                    SendStatus(peer, 204, null); // OK
+                }
+            }
             else if (request.StartsWith("POST /answer", System.StringComparison.InvariantCultureIgnoreCase))
             {
                 var playerId = GetQueryValue(request, "playerId");
@@ -146,6 +159,8 @@ public partial class Server
         var header =
             $"HTTP/1.1 {status} OK\r\n" +
             "Content-Type: application/json\r\n" +
+            "Access-Control-Allow-Headers: Content-Type\r\n" +
+            "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
             "Access-Control-Allow-Origin: *\r\n" +
             $"Content-Length: {Encoding.UTF8.GetByteCount(body)}\r\n\r\n";
 

@@ -38,5 +38,9 @@ namespace TurnBase
         {
             return new MakeTurnResponseModel<TMoveResponseModel>();
         }
+
+        public void PlayersInitialized(IField mainField)
+        {
+        }
     }
 }
