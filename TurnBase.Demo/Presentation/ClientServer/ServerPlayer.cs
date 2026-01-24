@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Godot;
 using TurnBase;
 
 public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
-        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>,
-        IGameEventListener<TMoveNotificationModel>
+        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
 {
     private readonly Server server;
 

@@ -9,9 +9,8 @@ using TurnBase.KaNoBu;
 
 [SceneReference("GameField.tscn")]
 public partial class GameField :
-    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel>,
-    IGameEventListener<KaNoBuMoveNotificationModel>,
-    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
+    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>,
+    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     [Export]
     public PackedScene UnitScene;
@@ -118,31 +117,23 @@ public partial class GameField :
     {
         this.playerId = -1;
 
-        var allUnits = this.field.GetChildren();
-        foreach (Unit unit in allUnits)
-        {
-            unit.QueueFree();
-        }
+        this.field.RemoveChildren();
 
         this.timerLabel.ShowMessage("Game Started.", 1f);
     }
 
     public void GamePlayerInit(int playerNumber, string playerName)
     {
-        GD.Print($"Player {playerNumber} initialized.");
+        GD.Print($"Log: Player {playerNumber} ({playerName}) joined the game.");
 
-        var field = this.field;
-        var allUnits = field.GetChildren();
-        foreach (Node2D unit in allUnits)
-        {
-            field.RemoveChild(unit);
-            unit.QueueFree();
-        }
+        this.field.RemoveChildren();
     }
 
     public void GameLogPlayerInit(int playerNumber, KaNoBuInitResponseModel initResponseModel)
     {
         GD.Print($"Log: Player {playerNumber} initialized.");
+    
+        this.field.RemoveChildren();
     }
 
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)

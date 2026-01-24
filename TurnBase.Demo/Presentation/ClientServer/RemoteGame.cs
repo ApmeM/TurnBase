@@ -8,7 +8,7 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
     private readonly Client client;
     private readonly string serverUrl;
     private readonly string gameId;
-    private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player;
+    private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
 
     public RemoteGame(Client client, string serverUrl, string gameId)
     {
@@ -17,7 +17,7 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
         this.gameId = gameId;
     }
 
-    public void SetPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
+    public void SetPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
     {
         this.player = player;
     }
@@ -55,27 +55,27 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
                 }
                 else if (result.body is GameStartedCommunicationModel gameStarted)
                 {
-                    (player as IGameEventListener<TMoveNotificationModel>)?.GameStarted();
+                    player.GameStarted();
                 }
                 else if (result.body is GamePlayerInitCommunicationModel gamePlayerInit)
                 {
-                    (player as IGameEventListener<TMoveNotificationModel>)?.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
+                    player.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
                 }
                 else if (result.body is GamePlayerTurnCommunicationModel gamePlayerTurn)
                 {
-                    (player as IGameEventListener<TMoveNotificationModel>)?.GamePlayerTurn(gamePlayerTurn.playerNumber, (TMoveNotificationModel)gamePlayerTurn.notification);
+                    player.GamePlayerTurn(gamePlayerTurn.playerNumber, (TMoveNotificationModel)gamePlayerTurn.notification);
                 }
                 else if (result.body is GameTurnFinishedCommunicationModel gameTurnFinished)
                 {
-                    (player as IGameEventListener<TMoveNotificationModel>)?.GameTurnFinished();
+                    player.GameTurnFinished();
                 }
                 else if (result.body is GamePlayerDisconnectedCommunicationModel gamePlayerDisconnected)
                 {
-                    (player as IGameEventListener<TMoveNotificationModel>)?.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber);
+                    player.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber);
                 }
                 else if (result.body is GameFinishedCommunicationModel gameFinished)
                 {
-                    (player as IGameEventListener<TMoveNotificationModel>)?.GameFinished(gameFinished.winners);
+                    player.GameFinished(gameFinished.winners);
                     break;
                 }
                 else

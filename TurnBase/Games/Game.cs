@@ -23,13 +23,12 @@ namespace TurnBase
         public string GameId { get; private set; }
 
         private IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules;
-        private Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>, PlayerData> players = new Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>, PlayerData>();
-        private List<IGameLogEventListener<TInitResponseModel, TMoveResponseModel>> gameLogListeners = new List<IGameLogEventListener<TInitResponseModel, TMoveResponseModel>>();
-        private List<IGameEventListener<TMoveNotificationModel>> gameListeners = new List<IGameEventListener<TMoveNotificationModel>>();
+        private Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>, PlayerData> players = new Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>, PlayerData>();
+        private List<IGameLogEventListener<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>> gameLogListeners = new List<IGameLogEventListener<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel>>();
         private bool GameIsRunning = false;
         private IField mainField;
 
-        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
         {
             if (this.players.Count >= this.rules.getMaxPlayersCount())
             {
@@ -50,12 +49,7 @@ namespace TurnBase
             return AddPlayerStatus.OK;
         }
 
-        public void AddGameListener(IGameEventListener<TMoveNotificationModel> gameListener)
-        {
-            this.gameListeners.Add(gameListener);
-        }
-
-        public void AddGameLogListener(IGameLogEventListener<TInitResponseModel, TMoveResponseModel> gameLogListener)
+        public void AddGameLogListener(IGameLogEventListener<TInitResponseModel, TMoveResponseModel, TMoveNotificationModel> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
         }
@@ -65,12 +59,13 @@ namespace TurnBase
             for (var i = this.players.Count; i < this.rules.getMinPlayersCount(); i++)
             {
                 // Add enough players, but all of them will loose.
-                this.AddPlayer(new PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>());
+                this.AddPlayer(new PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>());
             }
 
             this.GameIsRunning = true;
 
-            this.gameListeners.ForEach(a => a.GameStarted());
+            this.players.Keys.ToList().ForEach(a => a.GameStarted());
+            this.gameLogListeners.ForEach(a => a.GameStarted());
 
             await this.InitPlayers();
             await this.MovePlayers();
@@ -78,7 +73,7 @@ namespace TurnBase
 
         private Task GroupAction(List<IPlayer> nextPlayers, Func<IPlayer, Task<bool>> action)
         {
-            async Task SingleAction(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> p)
+            async Task SingleAction(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> p)
             {
                 if (await action(p))
                 {
@@ -88,12 +83,13 @@ namespace TurnBase
                 var playerData = this.players[p];
                 playerData.IsInGame = false;
                 this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
-                this.gameListeners.ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
+                this.players.Keys.ToList().ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
+                this.gameLogListeners.ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
             }
 
             return Task.WhenAll(
                 nextPlayers
-                    .Select(a => (IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)a)
+                    .Select(a => (IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)a)
                     .Where(a => this.players[a].IsInGame)
                     .Select(SingleAction)
                     .ToArray());
@@ -105,7 +101,7 @@ namespace TurnBase
             var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
 
             var nextPlayers = rotator.MoveNext(null, allPlayers);
-            Task<bool> action(IPlayer player) => this.InitPlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)player);
+            Task<bool> action(IPlayer player) => this.InitPlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)player);
 
             do
             {
@@ -114,7 +110,7 @@ namespace TurnBase
             } while (nextPlayers.IsNewTurn == false);
         }
 
-        private async Task<bool> InitPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
+        private async Task<bool> InitPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
         {
             var playerNumber = this.players[player].PlayerNumber;
 
@@ -132,9 +128,10 @@ namespace TurnBase
                 return false;
             }
 
-            this.gameListeners.ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
             this.gameLogListeners.ForEach(a => a.GameLogPlayerInit(playerNumber, initResponseModel.Response));
             this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
+            this.players.Keys.ToList().ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
+            this.gameLogListeners.ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
             return true;
         }
 
@@ -146,7 +143,7 @@ namespace TurnBase
             var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
 
             var nextPlayers = rotator.MoveNext(null, allPlayers);
-            Task<bool> action(IPlayer player) => this.MovePlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel>)player);
+            Task<bool> action(IPlayer player) => this.MovePlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)player);
 
             while (this.rules.findWinners(this.mainField) == null)
             {
@@ -156,16 +153,18 @@ namespace TurnBase
                 if (nextPlayers.IsNewTurn)
                 {
                     this.rules.TurnCompleted(this.mainField);
-                    this.gameListeners.ForEach(a => a.GameTurnFinished());
+                    this.players.Keys.ToList().ForEach(a => a.GameTurnFinished());
+                    this.gameLogListeners.ForEach(a => a.GameTurnFinished());
                     this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
                 }
             }
 
-            this.gameListeners.ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
+            this.players.Keys.ToList().ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
+            this.gameLogListeners.ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
             this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
         }
 
-        private async Task<bool> MovePlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel> player)
+        private async Task<bool> MovePlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
         {
             var playerNumber = this.players[player].PlayerNumber;
 
@@ -195,7 +194,8 @@ namespace TurnBase
             }
 
             var moveResult = this.rules.MakeMove(this.mainField, playerNumber, move);
-            this.gameListeners.ForEach(a => a.GamePlayerTurn(playerNumber, moveResult));
+            this.players.Keys.ToList().ForEach(a => a.GamePlayerTurn(playerNumber, moveResult));
+            this.gameLogListeners.ForEach(a => a.GamePlayerTurn(playerNumber, moveResult));
             this.gameLogListeners.ForEach(a => a.GameLogPlayerTurn(playerNumber, move, MoveValidationStatus.OK));
             this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
             return true;

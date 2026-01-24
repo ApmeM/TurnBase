@@ -4,11 +4,35 @@ using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
 {
-    public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>
+    public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
     {
         private Random r = new Random();
         private string name = "Computer easy";
         private int myNumber;
+
+        public void GameFinished(List<int> winners)
+        {
+        }
+
+        public void GamePlayerDisconnected(int playerNumber)
+        {
+        }
+
+        public void GamePlayerInit(int playerNumber, string playerName)
+        {
+        }
+
+        public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
+        {
+        }
+
+        public void GameStarted()
+        {
+        }
+
+        public void GameTurnFinished()
+        {
+        }
 
         public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
         {

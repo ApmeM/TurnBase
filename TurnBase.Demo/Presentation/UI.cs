@@ -69,7 +69,7 @@ public partial class UI
                         {
                             case 0:
                                 // None
-                                kanobu.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>());
+                                kanobu.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>());
                                 continue;
                             case 1:
                                 // Human
@@ -84,27 +84,24 @@ public partial class UI
                             case 2:
                                 // Computer Easy
                                 var playerEasy = new KaNoBuPlayerEasy();
-                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(playerEasy, 1, 300, this));
+                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerEasy, 1, 300, this));
                                 continue;
                             case 3:
                                 // Remote
                                 this.server.StartServer();
                                 var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, kanobu.GameId);
                                 kanobu.AddPlayer(player);
-                                kanobu.AddGameListener(player);
                                 continue;
                             case 4:
                                 // Computer Medium
                                 var playerMedium = new KaNoBuPlayerMedium();
-                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>(playerMedium, 1, 300, this));
-                                kanobu.AddGameListener(playerMedium);
+                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerMedium, 1, 300, this));
                                 continue;
                             default:
                                 throw new InvalidOperationException("Unknown Player Type");
                         }
                     }
 
-                    kanobu.AddGameListener(field);
                     if (!humanFound)
                     {
                         kanobu.AddGameLogListener(field);

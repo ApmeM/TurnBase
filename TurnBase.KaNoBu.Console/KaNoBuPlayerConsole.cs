@@ -1,12 +1,8 @@
-using System.Text;
-using TurnBase;
-
 namespace TurnBase.KaNoBu;
 
 public class KaNoBuPlayerConsole :
-    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>,
-    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel>,
-    IGameEventListener<KaNoBuMoveNotificationModel>
+    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>,
+    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     private Dictionary<int, string> players = new Dictionary<int, string>();
 

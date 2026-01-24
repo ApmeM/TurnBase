@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 namespace TurnBase.KaNoBu
 {
     public class KaNoBuPlayerMedium :
-        IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel>,
-        IGameEventListener<KaNoBuMoveNotificationModel>
+        IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
     {
         private Random r = new Random();
         private string name = "Computer easy";
