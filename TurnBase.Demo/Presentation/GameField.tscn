@@ -13,6 +13,7 @@
 font_data = ExtResource( 8 )
 
 [node name="GameField" type="CanvasLayer"]
+follow_viewport_enable = true
 script = ExtResource( 1 )
 UnitScene = ExtResource( 2 )
 
