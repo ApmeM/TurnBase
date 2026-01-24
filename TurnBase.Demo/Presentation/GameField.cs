@@ -15,7 +15,7 @@ public partial class GameField :
     [Export]
     public PackedScene UnitScene;
     private int playerId = -1;
-
+    private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
 
     #region IPlayer region
 
@@ -31,22 +31,15 @@ public partial class GameField :
     {
         GD.Print("MakeTurn start");
         this.timerLabel.ShowMessage("Your turn", 1f);
-        var allUnits = this.field.GetChildren();
 
-        if (allUnits.Count == 0)
-        {
-            this.InitializeField(model.Request.Field);
+        this.memorizedField.SynchronizeField(model);
 
-            allUnits = this.field.GetChildren();
-            foreach (Unit unit in allUnits)
-            {
-                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
-            }
-        }
-        else
+        if (this.field.GetChildCount() == 0)
         {
-            this.UpdateKnownShips(model.Request.Field);
+            this.InitializeField(this.memorizedField.Field);
         }
+
+        this.UpdateKnownShips();
 
         var level = this.water;
 
@@ -144,6 +137,8 @@ public partial class GameField :
             // Field is not yet initialized.
             return;
         }
+        
+        this.memorizedField.UpdateKnownShips(notification);
 
         if (notification.move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
         {
@@ -170,29 +165,9 @@ public partial class GameField :
             switch (notification.battle.Value.battleResult)
             {
                 case KaNoBuMoveNotificationModel.BattleResult.Draw:
-                    if (movedUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.UnitType = movedUnit.UnitType;
-                    if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = defenderUnit.UnitType;
                     break;
                 case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
                     // Attacker won
-
-                    if (movedUnit.UnitType == KaNoBuFigure.FigureTypes.ShipUniversal)
-                    {
-                        movedUnit.UnitType = KaNoBuFigure.FigureTypes.Unknown;
-                    }
-                    if (notification.battle.Value.isDefenderFlag)
-                    {
-                        defenderUnit.UnitType = KaNoBuFigure.FigureTypes.ShipFlag;
-                        // Attacker is unknown - any ship can beat the flag.
-                        // All the units under this player control changes the owner.
-                        allUnits.Cast<Unit>().Where(a => a.PlayerNumber == defenderUnit.PlayerNumber).ToList().ForEach(a => a.PlayerNumber = movedUnit.PlayerNumber);
-                    }
-                    else
-                    {
-                        if (movedUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.UnitType = KaNoBuRules.Looser[movedUnit.UnitType];
-                        if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = KaNoBuRules.Winner[defenderUnit.UnitType];
-                    }
-
                     movedUnit.RotateUnitTo(toWorldPos);
                     movedUnit.Attack();
                     defenderUnit.UnitHit();
@@ -200,14 +175,6 @@ public partial class GameField :
                     break;
                 case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                     // Defender won
-                    if (defenderUnit.UnitType == KaNoBuFigure.FigureTypes.ShipUniversal)
-                    {
-                        defenderUnit.UnitType = KaNoBuFigure.FigureTypes.Unknown;
-                    }
-
-                    if (movedUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.UnitType = KaNoBuRules.Winner[movedUnit.UnitType];
-                    if (defenderUnit.UnitType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.UnitType = KaNoBuRules.Looser[defenderUnit.UnitType];
-
                     defenderUnit.RotateUnitTo(movedUnit.Position);
                     defenderUnit.Attack();
                     movedUnit.UnitHit();
@@ -220,6 +187,8 @@ public partial class GameField :
             movedUnit.RotateUnitTo(toWorldPos);
             movedUnit.MoveUnitTo(toMapPos, toWorldPos);
         }
+
+        this.UpdateKnownShips();
     }
 
     public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveResponseModel moveResponseModel, MoveValidationStatus status)
@@ -324,15 +293,15 @@ public partial class GameField :
                 unit.Position = worldPos + level.CellSize / 2;
                 unit.PlayerNumber = originalShip.Value.PlayerNumber;
                 unit.UnitType = originalShip.Value.FigureType;
+                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
 
                 this.field.AddChild(unit);
             }
         }
     }
 
-    private void UpdateKnownShips(KaNoBuMoveModel.FigureModel?[,] field)
+    private void UpdateKnownShips()
     {
-        // In case player defeated and all its ships become known.
         var allUnits = this.field.GetChildren();
         foreach (Unit unit in allUnits)
         {
@@ -341,12 +310,9 @@ public partial class GameField :
                 continue;
             }
 
-            var figure = field[(int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y];
+            var figure = this.memorizedField.Field[(int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y];
             unit.PlayerNumber = figure.Value.PlayerNumber;
-            if (unit.UnitType == KaNoBuFigure.FigureTypes.Unknown)
-            {
-                unit.UnitType = figure.Value.FigureType;
-            }
+            unit.UnitType = figure.Value.FigureType;
         }
     }
 

@@ -12,7 +12,15 @@ namespace TurnBase.KaNoBu
         private string name = "Computer easy";
         private int myNumber;
 
-        private KaNoBuMoveModel.FigureModel?[,] field;
+        private List<Point> directions = new List<Point>
+        {
+            new Point { X = -1, Y = 0 },
+            new Point { X = 1, Y = 0 },
+            new Point { X = 0, Y = -1 },
+            new Point { X = 0, Y = 1 }
+        };
+
+        private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
 
         public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
         {
@@ -34,35 +42,8 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
         {
-            if (field == null)
-            {
-                field = model.Request.Field;
-            }
-            else
-            {
-                for (var x = 0; x < model.Request.Field.GetLength(0); x++)
-                {
-                    for (var y = 0; y < model.Request.Field.GetLength(1); y++)
-                    {
-                        var ship = model.Request.Field[x, y];
-                        if (ship != null)
-                        {
-                            if (field[x, y] == null)
-                            {
-                                throw new Exception("Inconsistent field state");
-                            }
-
-                            field[x, y] = new KaNoBuMoveModel.FigureModel
-                            {
-                                PlayerNumber = ship.Value.PlayerNumber,
-                                FigureType = field[x, y]?.FigureType == KaNoBuFigure.FigureTypes.Unknown ? ship.Value.FigureType : field[x, y].Value.FigureType
-                            };
-                        }
-                    }
-                }
-            }
-
-            var from = this.findAllMovement(model.Request.Field).OrderByDescending(a => EvaluateMove(this.field, a)).ToList();
+            this.memorizedField.SynchronizeField(model);
+            var from = this.findAllMovement(this.memorizedField.Field).OrderByDescending(a => EvaluateMove(this.memorizedField.Field, a)).ToList();
 
             if (from.Count == 0)
             {
@@ -130,14 +111,6 @@ namespace TurnBase.KaNoBu
             return 0;
         }
 
-        private List<Point> directions = new List<Point>
-        {
-            new Point { X = -1, Y = 0 },
-            new Point { X = 1, Y = 0 },
-            new Point { X = 0, Y = -1 },
-            new Point { X = 0, Y = 1 }
-        };
-
         private IEnumerable<KaNoBuMoveResponseModel> findAllMovement(KaNoBuMoveModel.FigureModel?[,] field)
         {
             for (int x = 0; x < field.GetLength(0); x++)
@@ -189,69 +162,7 @@ namespace TurnBase.KaNoBu
 
         public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
         {
-            if (this.field == null || notification.move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
-            {
-                return;
-            }
-
-            var fromMapPos = notification.move.From;
-            var toMapPos = notification.move.To;
-
-
-            var movedUnit = this.field[fromMapPos.X, fromMapPos.Y].Value;
-
-            if (notification.battle.HasValue)
-            {
-                var defenderUnit = this.field[toMapPos.X, toMapPos.Y].Value;
-
-                switch (notification.battle.Value.battleResult)
-                {
-                    case KaNoBuMoveNotificationModel.BattleResult.Draw:
-                        if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = movedUnit.FigureType;
-                        if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = defenderUnit.FigureType;
-                        this.field[fromMapPos.X, fromMapPos.Y] = movedUnit;
-                        this.field[toMapPos.X, toMapPos.Y] = defenderUnit;
-                        break;
-                    case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
-                        // Attacker won
-
-                        if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
-                        {
-                            movedUnit.FigureType = KaNoBuFigure.FigureTypes.Unknown;
-                        }
-                        if (notification.battle.Value.isDefenderFlag)
-                        {
-                            defenderUnit.FigureType = KaNoBuFigure.FigureTypes.ShipFlag;
-                        }
-                        else
-                        {
-                            if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Looser[movedUnit.FigureType];
-                            if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Winner[defenderUnit.FigureType];
-                        }
-                        this.field[fromMapPos.X, fromMapPos.Y] = null;
-                        this.field[toMapPos.X, toMapPos.Y] = movedUnit;
-                        break;
-                    case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
-                        // Defender won
-                        if (defenderUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
-                        {
-                            defenderUnit.FigureType = KaNoBuFigure.FigureTypes.Unknown;
-                        }
-
-                        if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Winner[movedUnit.FigureType];
-                        if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Looser[defenderUnit.FigureType];
-
-                        this.field[fromMapPos.X, fromMapPos.Y] = null;
-                        this.field[toMapPos.X, toMapPos.Y] = defenderUnit;
-                        break;
-                }
-            }
-            else
-            {
-                // No battle - swim here.
-                this.field[fromMapPos.X, fromMapPos.Y] = null;
-                this.field[toMapPos.X, toMapPos.Y] = movedUnit;
-            }
+            this.memorizedField.UpdateKnownShips(notification);
         }
 
         public void GameTurnFinished()
