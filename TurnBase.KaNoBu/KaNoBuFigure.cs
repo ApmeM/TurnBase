@@ -43,11 +43,11 @@ namespace TurnBase.KaNoBu
         public FigureTypes FigureType { get; set; }
         public int WinNumber { get; set; }
 
-        public KaNoBuFigure(int playerId, FigureTypes figure)
+        public KaNoBuFigure(int playerId, FigureTypes figureType, int winNumber = 0)
         {
             PlayerId = playerId;
-            FigureType = figure;
-            WinNumber = 0;
+            FigureType = figureType;
+            WinNumber = winNumber;
         }
 
         public bool IsMoveValid(KaNoBuMoveResponseModel playerMove)
@@ -66,6 +66,18 @@ namespace TurnBase.KaNoBu
             }
 
             return true;
+        }
+
+        public IFigure CopyForPlayer(int playerId)
+        {
+            if (this.PlayerId == playerId || playerId == -1)
+            {
+                return new KaNoBuFigure(this.PlayerId, this.FigureType);
+            }
+            else
+            {
+                return new KaNoBuFigure(this.PlayerId, FigureTypes.Unknown);
+            }
         }
     }
 }

@@ -4,34 +4,40 @@ namespace TurnBase.KaNoBu
 {
     public class KaNoBuFieldMemorization
     {
-        public KaNoBuMoveModel.FigureModel?[,] Field;
+        public IField Field;
 
-        public void SynchronizeField(MakeTurnModel<KaNoBuMoveModel> model)
+        public void Clear()
+        {
+            Field = null;
+        }
+
+        public void SynchronizeField(IField model)
         {
             if (Field == null)
             {
-                Field = model.Request.Field;
+                Field = model.copyForPlayer(-1);
             }
             else
             {
-                for (var x = 0; x < model.Request.Field.GetLength(0); x++)
+                for (var x = 0; x < model.Width; x++)
                 {
-                    for (var y = 0; y < model.Request.Field.GetLength(1); y++)
+                    for (var y = 0; y < model.Height; y++)
                     {
-                        var ship = model.Request.Field[x, y];
-                        if (ship != null)
-                        {
-                            if (Field[x, y] == null)
-                            {
-                                throw new Exception("Inconsistent field state");
-                            }
+                        var requestShip = model.get(x, y) as KaNoBuFigure;
+                        var memorizedShip = Field.get(x, y) as KaNoBuFigure;
 
-                            Field[x, y] = new KaNoBuMoveModel.FigureModel
-                            {
-                                PlayerNumber = ship.Value.PlayerNumber,
-                                FigureType = Field[x, y]?.FigureType == KaNoBuFigure.FigureTypes.Unknown ? ship.Value.FigureType : Field[x, y].Value.FigureType
-                            };
+                        if (requestShip != null && memorizedShip == null || memorizedShip != null && requestShip == null)
+                        {
+                            throw new Exception("Inconsistent field state");
                         }
+
+                        if (requestShip == null && memorizedShip == null)
+                        {
+                            continue;
+                        }
+
+                        memorizedShip.PlayerId = requestShip.PlayerId;
+                        memorizedShip.FigureType = memorizedShip.FigureType == KaNoBuFigure.FigureTypes.Unknown ? requestShip.FigureType : memorizedShip.FigureType;
                     }
                 }
             }
@@ -47,23 +53,24 @@ namespace TurnBase.KaNoBu
             var fromMapPos = notification.move.From;
             var toMapPos = notification.move.To;
 
-            var movedUnit = this.Field[fromMapPos.X, fromMapPos.Y].Value;
+            var movedUnit = this.Field.get(fromMapPos.X, fromMapPos.Y) as KaNoBuFigure;
+            var defenderUnit = this.Field.get(toMapPos.X, toMapPos.Y) as KaNoBuFigure;
+
+            this.Field.trySet(fromMapPos.X, fromMapPos.Y, null);
+            this.Field.trySet(toMapPos.X, toMapPos.Y, null);
 
             if (notification.battle.HasValue)
             {
-                var defenderUnit = this.Field[toMapPos.X, toMapPos.Y].Value;
-
                 switch (notification.battle.Value.battleResult)
                 {
                     case KaNoBuMoveNotificationModel.BattleResult.Draw:
                         if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = movedUnit.FigureType;
                         if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = defenderUnit.FigureType;
-                        this.Field[fromMapPos.X, fromMapPos.Y] = movedUnit;
-                        this.Field[toMapPos.X, toMapPos.Y] = defenderUnit;
+                        this.Field.trySet(fromMapPos.X, fromMapPos.Y, movedUnit);
+                        this.Field.trySet(toMapPos.X, toMapPos.Y, defenderUnit);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
                         // Attacker won
-
                         if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
                         {
                             movedUnit.FigureType = KaNoBuFigure.FigureTypes.Unknown;
@@ -77,8 +84,7 @@ namespace TurnBase.KaNoBu
                             if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Looser[movedUnit.FigureType];
                             if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Winner[defenderUnit.FigureType];
                         }
-                        this.Field[fromMapPos.X, fromMapPos.Y] = null;
-                        this.Field[toMapPos.X, toMapPos.Y] = movedUnit;
+                        this.Field.trySet(toMapPos.X, toMapPos.Y, movedUnit);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                         // Defender won
@@ -90,16 +96,14 @@ namespace TurnBase.KaNoBu
                         if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Winner[movedUnit.FigureType];
                         if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Looser[defenderUnit.FigureType];
 
-                        this.Field[fromMapPos.X, fromMapPos.Y] = null;
-                        this.Field[toMapPos.X, toMapPos.Y] = defenderUnit;
+                        this.Field.trySet(toMapPos.X, toMapPos.Y, defenderUnit);
                         break;
                 }
             }
             else
             {
                 // No battle - swim here.
-                this.Field[fromMapPos.X, fromMapPos.Y] = null;
-                this.Field[toMapPos.X, toMapPos.Y] = movedUnit;
+                this.Field.trySet(toMapPos.X, toMapPos.Y, movedUnit);
             }
         }
     }

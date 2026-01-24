@@ -32,7 +32,7 @@ public partial class GameField :
         GD.Print("MakeTurn start");
         this.timerLabel.ShowMessage("Your turn", 1f);
 
-        this.memorizedField.SynchronizeField(model);
+        this.memorizedField.SynchronizeField(model.Request.Field);
 
         if (this.field.GetChildCount() == 0)
         {
@@ -111,6 +111,7 @@ public partial class GameField :
         this.playerId = -1;
 
         this.field.RemoveChildren();
+        this.memorizedField.Clear();
 
         this.timerLabel.ShowMessage("Game Started.", 1f);
     }
@@ -120,13 +121,15 @@ public partial class GameField :
         GD.Print($"Log: Player {playerNumber} ({playerName}) joined the game.");
 
         this.field.RemoveChildren();
+        this.memorizedField.Clear();
     }
 
     public void GameLogPlayerInit(int playerNumber, KaNoBuInitResponseModel initResponseModel)
     {
         GD.Print($"Log: Player {playerNumber} initialized.");
-    
+
         this.field.RemoveChildren();
+        this.memorizedField.Clear();
     }
 
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
@@ -137,7 +140,7 @@ public partial class GameField :
             // Field is not yet initialized.
             return;
         }
-        
+
         this.memorizedField.UpdateKnownShips(notification);
 
         if (notification.move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
@@ -237,6 +240,8 @@ public partial class GameField :
 
     public void GameLogCurrentField(IField field)
     {
+        this.memorizedField.SynchronizeField(field);
+
         GD.Print(showField(field));
         var allUnits = this.field.GetChildren();
 
@@ -247,7 +252,7 @@ public partial class GameField :
             {
                 for (var y = 0; y < field.Height; y++)
                 {
-                    var originalShip = field.get(new Point { X = x, Y = y });
+                    var originalShip = field.get(x, y) as KaNoBuFigure;
                     if (originalShip == null)
                     {
                         continue;
@@ -272,14 +277,14 @@ public partial class GameField :
     #endregion
 
 
-    private void InitializeField(KaNoBuMoveModel.FigureModel?[,] field)
+    private void InitializeField(IField field)
     {
         var level = this.water;
-        for (var x = 0; x < field.GetLength(0); x++)
+        for (var x = 0; x < field.Width; x++)
         {
-            for (var y = 0; y < field.GetLength(1); y++)
+            for (var y = 0; y < field.Height; y++)
             {
-                var originalShip = field[x, y];
+                var originalShip = field.get(x, y) as KaNoBuFigure;
                 if (originalShip == null)
                 {
                     continue;
@@ -291,8 +296,8 @@ public partial class GameField :
 
                 unit.TargetPositionMap = mapPos;
                 unit.Position = worldPos + level.CellSize / 2;
-                unit.PlayerNumber = originalShip.Value.PlayerNumber;
-                unit.UnitType = originalShip.Value.FigureType;
+                unit.PlayerNumber = originalShip.PlayerId;
+                unit.UnitType = originalShip.FigureType;
                 unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
 
                 this.field.AddChild(unit);
@@ -310,9 +315,9 @@ public partial class GameField :
                 continue;
             }
 
-            var figure = this.memorizedField.Field[(int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y];
-            unit.PlayerNumber = figure.Value.PlayerNumber;
-            unit.UnitType = figure.Value.FigureType;
+            var figure = this.memorizedField.Field.get((int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y) as KaNoBuFigure;
+            unit.PlayerNumber = figure.PlayerId;
+            unit.UnitType = figure.FigureType;
         }
     }
 
@@ -353,7 +358,7 @@ public partial class GameField :
             result += $"  {i}";
             for (int j = 0; j < field.Width; j++)
             {
-                var ship = field.get(new Point { X = j, Y = i });
+                var ship = field.get(j, i) as KaNoBuFigure;
                 result += $" {getShipResource(ship)}";
             }
 
@@ -370,18 +375,13 @@ public partial class GameField :
         return result;
     }
 
-    private string getShipResource(IFigure figure)
+    private string getShipResource(KaNoBuFigure figure)
     {
         if (figure == null)
         {
             return "  ";
         }
-        else if (figure is UnknownFigure)
-        {
-            return figure.PlayerId + "?";
-        }
 
-        var ship = (KaNoBuFigure)figure;
-        return figure.PlayerId + ship.FigureType.PrintableName();
+        return figure.PlayerId + figure.FigureType.PrintableName();
     }
 }

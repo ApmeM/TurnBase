@@ -38,13 +38,13 @@ namespace TurnBase.KaNoBu
         {
             this.myNumber = model.PlayerId;
 
-            var preparedField = new KaNoBuFigure.FigureTypes[model.Request.Width,model.Request.Height];
+            var preparedField = Field2D.Create(model.Request.Width,model.Request.Height);
             for (var i = 0; i < model.Request.Width; i++)
             {
                 for (var j = 0; j < model.Request.Height; j++)
                 {
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField[i,j] = ship; 
+                    preparedField.trySet(i,j, new KaNoBuFigure(this.myNumber, ship));
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
@@ -66,26 +66,26 @@ namespace TurnBase.KaNoBu
             return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(from[movementNum]);
         }
 
-        private List<KaNoBuMoveResponseModel> findAllMovement(KaNoBuMoveModel.FigureModel?[,] field)
+        private List<KaNoBuMoveResponseModel> findAllMovement(IField field)
         {
             var availableShips = new List<KaNoBuMoveResponseModel>();
-            for (int x = 0; x < field.GetLength(0); x++)
+            for (int x = 0; x < field.Width; x++)
             {
-                for (int y = 0; y < field.GetLength(1); y++)
+                for (int y = 0; y < field.Height; y++)
                 {
                     var from = new Point { X = x, Y = y };
-                    var shipFrom = field[x,y];
+                    var shipFrom = field.get(x, y) as KaNoBuFigure;
                     if (shipFrom == null)
                     {
                         continue;
                     }
 
-                    if (shipFrom.Value.PlayerNumber != this.myNumber)
+                    if (shipFrom.PlayerId != this.myNumber)
                     {
                         continue;
                     }
 
-                    if (shipFrom.Value.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+                    if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
                     {
                         continue;
                     }
@@ -100,16 +100,16 @@ namespace TurnBase.KaNoBu
             return availableShips;
         }
 
-        private void tryAdd(List<KaNoBuMoveResponseModel> availableShips, KaNoBuMoveModel.FigureModel?[,] field, Point from, int x, int y)
+        private void tryAdd(List<KaNoBuMoveResponseModel> availableShips, IField field, Point from, int x, int y)
         {
-            if (x < 0 || y < 0 || x >= field.GetLength(0) || y >= field.GetLength(1))
+            if (x < 0 || y < 0 || x >= field.Width || y >= field.Height)
             {
                 return;
             }
 
             var to = new Point { X = x, Y = y };
-            var shipTo = field[x,y];
-            if (shipTo == null || shipTo.Value.PlayerNumber != this.myNumber)
+            var shipTo = field.get(x, y) as KaNoBuFigure;
+            if (shipTo == null || shipTo.PlayerId != this.myNumber)
             {
                 availableShips.Add(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN, from, to));
             }

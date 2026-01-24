@@ -18,28 +18,22 @@ namespace TurnBase.KaNoBu
 
     public class KaNoBuInitResponseModel
     {
-        public KaNoBuInitResponseModel(KaNoBuFigure.FigureTypes[,] preparedField)
-        {
-            PreparedField = preparedField;
-        }
-
-        public readonly KaNoBuFigure.FigureTypes[,] PreparedField;
-    }
-
-    public class KaNoBuMoveModel
-    {
-        public struct FigureModel
-        {
-            public KaNoBuFigure.FigureTypes FigureType;
-            public int PlayerNumber;
-        }
-
-        public KaNoBuMoveModel(FigureModel?[,] field)
+        public KaNoBuInitResponseModel(IField field)
         {
             Field = field;
         }
 
-        public readonly FigureModel?[,] Field;
+        public readonly IField Field;
+    }
+
+    public class KaNoBuMoveModel
+    {
+        public KaNoBuMoveModel(IField field)
+        {
+            Field = field;
+        }
+
+        public readonly IField Field;
     }
 
     public class KaNoBuMoveResponseModel

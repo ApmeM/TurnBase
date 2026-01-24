@@ -128,10 +128,10 @@ namespace TurnBase
                 return false;
             }
 
-            this.gameLogListeners.ForEach(a => a.GameLogPlayerInit(playerNumber, initResponseModel.Response));
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
             this.players.Keys.ToList().ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
             this.gameLogListeners.ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
+            this.gameLogListeners.ForEach(a => a.GameLogPlayerInit(playerNumber, initResponseModel.Response));
+            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField));
             return true;
         }
 

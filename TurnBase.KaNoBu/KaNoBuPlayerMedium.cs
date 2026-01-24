@@ -26,13 +26,13 @@ namespace TurnBase.KaNoBu
         {
             this.myNumber = model.PlayerId;
 
-            var preparedField = new KaNoBuFigure.FigureTypes[model.Request.Width, model.Request.Height];
+            var preparedField = Field2D.Create(model.Request.Width, model.Request.Height);
             for (var i = 0; i < model.Request.Width; i++)
             {
                 for (var j = 0; j < model.Request.Height; j++)
                 {
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField[i, j] = ship;
+                    preparedField.trySet(i, j, new KaNoBuFigure(this.myNumber, ship));
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
@@ -42,7 +42,7 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
         {
-            this.memorizedField.SynchronizeField(model);
+            this.memorizedField.SynchronizeField(model.Request.Field);
             var from = this.findAllMovement(this.memorizedField.Field).OrderByDescending(a => EvaluateMove(this.memorizedField.Field, a)).ToList();
 
             if (from.Count == 0)
@@ -53,17 +53,17 @@ namespace TurnBase.KaNoBu
             return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(from[0]);
         }
 
-        private int EvaluateMove(KaNoBuMoveModel.FigureModel?[,] field, KaNoBuMoveResponseModel a)
+        private int EvaluateMove(IField field, KaNoBuMoveResponseModel a)
         {
-            var shipFrom = field[a.From.X, a.From.Y];
-            var shipTo = field[a.To.X, a.To.Y];
-            if (shipTo != null && shipTo.Value.PlayerNumber != this.myNumber)
+            var shipFrom = field.get(a.From.X, a.From.Y) as KaNoBuFigure;
+            var shipTo = field.get(a.To.X, a.To.Y) as KaNoBuFigure;
+            if (shipTo != null && shipTo.PlayerId != this.myNumber)
             {
-                if (shipTo.Value.FigureType == KaNoBuFigure.FigureTypes.Unknown)
+                if (shipTo.FigureType == KaNoBuFigure.FigureTypes.Unknown)
                 {
                     return 8; // Attack unknown enemy
                 }
-                if (shipTo.Value.FigureType == KaNoBuRules.Looser[shipFrom.Value.FigureType])
+                if (shipTo.FigureType == KaNoBuRules.Looser[shipFrom.FigureType])
                 {
                     return 10; // Attack loosing enemy
                 }
@@ -73,12 +73,12 @@ namespace TurnBase.KaNoBu
             foreach (var dir in directions)
             {
                 var to = new Point { X = a.To.X + dir.X, Y = a.To.Y + dir.Y };
-                if (to.X < 0 || to.Y < 0 || to.X >= field.GetLength(0) || to.Y >= field.GetLength(1))
+                if (to.X < 0 || to.Y < 0 || to.X >= field.Width || to.Y >= field.Height)
                 {
                     continue;
                 }
-                var shipNearby = field[to.X, to.Y];
-                if (shipNearby != null && shipNearby.Value.PlayerNumber != this.myNumber)
+                var shipNearby = field.get(to.X, to.Y) as KaNoBuFigure;
+                if (shipNearby != null && shipNearby.PlayerId != this.myNumber)
                 {
                     enemyNearby = true;
                 }
@@ -89,12 +89,12 @@ namespace TurnBase.KaNoBu
             }
 
             Point? myFlag = null;
-            for (int x = 0; x < field.GetLength(0); x++)
+            for (int x = 0; x < field.Width; x++)
             {
-                for (int y = 0; y < field.GetLength(1); y++)
+                for (int y = 0; y < field.Height; y++)
                 {
-                    var ship = field[x, y];
-                    if (ship != null && ship.Value.PlayerNumber == this.myNumber && ship.Value.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+                    var ship = field.get(x, y) as KaNoBuFigure;
+                    if (ship != null && ship.PlayerId == this.myNumber && ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
                     {
                         myFlag = new Point { X = x, Y = y };
                     }
@@ -111,25 +111,25 @@ namespace TurnBase.KaNoBu
             return 0;
         }
 
-        private IEnumerable<KaNoBuMoveResponseModel> findAllMovement(KaNoBuMoveModel.FigureModel?[,] field)
+        private IEnumerable<KaNoBuMoveResponseModel> findAllMovement(IField field)
         {
-            for (int x = 0; x < field.GetLength(0); x++)
+            for (int x = 0; x < field.Width; x++)
             {
-                for (int y = 0; y < field.GetLength(1); y++)
+                for (int y = 0; y < field.Height; y++)
                 {
                     var from = new Point { X = x, Y = y };
-                    var shipFrom = field[x, y];
+                    var shipFrom = field.get(x, y) as KaNoBuFigure;
                     if (shipFrom == null)
                     {
                         continue;
                     }
 
-                    if (shipFrom.Value.PlayerNumber != this.myNumber)
+                    if (shipFrom.PlayerId != this.myNumber)
                     {
                         continue;
                     }
 
-                    if (shipFrom.Value.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+                    if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
                     {
                         continue;
                     }
@@ -137,13 +137,13 @@ namespace TurnBase.KaNoBu
                     foreach (var dir in directions)
                     {
                         var to = new Point { X = x + dir.X, Y = y + dir.Y };
-                        if (to.X < 0 || to.Y < 0 || to.X >= field.GetLength(0) || to.Y >= field.GetLength(1))
+                        if (to.X < 0 || to.Y < 0 || to.X >= field.Width || to.Y >= field.Height)
                         {
                             continue;
                         }
 
-                        var shipTo = field[to.X, to.Y];
-                        if (shipTo == null || shipTo.Value.PlayerNumber != this.myNumber)
+                        var shipTo = field.get(to.X, to.Y) as KaNoBuFigure;
+                        if (shipTo == null || shipTo.PlayerId != this.myNumber)
                         {
                             yield return new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN, from, to);
                         }

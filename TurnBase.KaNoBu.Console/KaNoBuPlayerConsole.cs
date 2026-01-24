@@ -29,7 +29,7 @@ public class KaNoBuPlayerConsole :
         this.showMessage($"Your turn number: {model.PlayerId}");
         var name = await this.getName();
 
-        var preparedField = await this.fillField(model.Request);
+        var preparedField = await this.fillField(model.PlayerId, model.Request);
 
         return new InitResponseModel<KaNoBuInitResponseModel>(name, new KaNoBuInitResponseModel(preparedField));
     }
@@ -101,11 +101,10 @@ public class KaNoBuPlayerConsole :
 
     #endregion
 
-    private async Task<KaNoBuFigure.FigureTypes[,]> fillField(KaNoBuInitModel model)
+    private async Task<IField> fillField(int playerId, KaNoBuInitModel model)
     {
         var ships = model.AvailableFigures;
-        var preparedField = new KaNoBuFigure.FigureTypes[model.Width, model.Height];
-        var preparedFieldSet = new bool[model.Width, model.Height];
+        var preparedField = Field2D.Create(model.Width, model.Height);
         this.showMessage($"Initializing field with {ships.Count} ships.");
         var r = new Random();
 
@@ -121,26 +120,23 @@ public class KaNoBuPlayerConsole :
                 {
                     var x = r.Next(model.Width);
                     var y = r.Next(model.Height);
-                    if (preparedFieldSet[x, y])
+                    if (preparedField.get(x, y) != null)
                     {
                         continue;
                     }
-                    preparedField[x, y] = ship;
-                    preparedFieldSet[x, y] = true;
+                    preparedField.trySet(x, y, new KaNoBuFigure(playerId, ship));
                     break;
                 }
                 ships.RemoveAt(0);
             }
             else
             {
-                if (preparedFieldSet[p.Value.X, p.Value.Y])
+                if (preparedField.get(p.Value.X, p.Value.Y) != null)
                 {
                     this.showMessage("Cant place on this field. It is already occupied.");
                     continue;
                 }
-                preparedField[p.Value.X, p.Value.Y] = ship;
-                preparedFieldSet[p.Value.X, p.Value.Y] = true;
-                // ToDo: check if field already occupied.
+                preparedField.trySet(p.Value.X, p.Value.Y, new KaNoBuFigure(playerId, ship));
                 ships.RemoveAt(0);
             }
         }
@@ -210,72 +206,6 @@ public class KaNoBuPlayerConsole :
         Console.WriteLine(text);
     }
 
-    private string showField(KaNoBuFigure.FigureTypes[,] field)
-    {
-        string result = "";
-        result += string.Format("   ");
-        for (int j = 0; j < field.GetLength(0); j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-        result += "\n";
-
-        for (int i = 0; i < field.GetLength(1); i++)
-        {
-            result += $"  {i}";
-            for (int j = 0; j < field.GetLength(0); j++)
-            {
-                var ship = field[j, i];
-                result += $"  {getShipResource(ship)}";
-            }
-
-            result += $"  {i}\n";
-        }
-
-        result += string.Format("   ");
-        for (int j = 0; j < field.GetLength(0); j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-
-        return result;
-    }
-
-    private string showField(KaNoBuMoveModel.FigureModel?[,] field)
-    {
-        string result = "";
-        result += string.Format("   ");
-        for (int j = 0; j < field.GetLength(0); j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-        result += "\n";
-
-        for (int i = 0; i < field.GetLength(1); i++)
-        {
-            result += $"  {i}";
-            for (int j = 0; j < field.GetLength(0); j++)
-            {
-                var ship = field[j, i];
-                result += $"  {getShipResource(ship?.FigureType)}";
-            }
-
-            result += $"  {i}\n";
-        }
-
-        result += string.Format("   ");
-        for (int j = 0; j < field.GetLength(0); j++)
-        {
-            result += $"  {(char)('A' + j)}";
-        }
-        result += string.Format("   ");
-
-        return result;
-    }
-
     private string showField(IField field)
     {
         string result = "";
@@ -292,7 +222,7 @@ public class KaNoBuPlayerConsole :
             result += $"  {i}";
             for (int j = 0; j < field.Width; j++)
             {
-                var ship = field.get(new Point { X = j, Y = i });
+                var ship = field.get(j, i);
                 result += $"  {getShipResource((ship == null) ? null : ((ship as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown))}";
             }
 
