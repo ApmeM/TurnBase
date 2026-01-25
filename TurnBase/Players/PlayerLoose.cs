@@ -5,7 +5,8 @@ namespace TurnBase
 {
     public class PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
-        public void GameFinished(List<int> winners)
+
+        public void GameStarted()
         {
         }
 
@@ -17,15 +18,23 @@ namespace TurnBase
         {
         }
 
+        public void PlayersInitialized()
+        {
+        }
+
+        public void GameLogCurrentField(IField field)
+        {
+        }
+
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
         {
         }
-
-        public void GameStarted()
+        
+        public void GameTurnFinished()
         {
         }
 
-        public void GameTurnFinished()
+        public void GameFinished(List<int> winners)
         {
         }
 
@@ -37,10 +46,6 @@ namespace TurnBase
         public async Task<MakeTurnResponseModel<TMoveResponseModel>> MakeTurn(MakeTurnModel<TMoveModel> model)
         {
             return new MakeTurnResponseModel<TMoveResponseModel>();
-        }
-
-        public void PlayersInitialized(IField mainField)
-        {
         }
     }
 }

@@ -158,9 +158,15 @@ namespace TurnBase.KaNoBu
 
         public void GamePlayerInit(int playerNumber, string playerName)
         {
+            this.memorizedField.Clear();
         }
 
-        public void PlayersInitialized(IField mainField)
+        public void PlayersInitialized()
+        {
+            this.memorizedField.Clear();
+        }
+
+        public void GameLogCurrentField(IField mainField)
         {
             this.memorizedField.SynchronizeField(mainField);
         }

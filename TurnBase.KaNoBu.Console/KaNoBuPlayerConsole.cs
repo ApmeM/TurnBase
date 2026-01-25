@@ -53,6 +53,16 @@ public class KaNoBuPlayerConsole :
     {
     }
 
+    public void PlayersInitialized()
+    {
+    }
+
+    public void GameLogCurrentField(IField field)
+    {
+        this.showMessage("Field:");
+        this.showMessage(field.ToString());
+    }
+
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel battle)
     {
         var move = battle.move;
@@ -91,12 +101,6 @@ public class KaNoBuPlayerConsole :
     public void GamePlayerDisconnected(int playerNumber)
     {
         this.showMessage($"Player {playerNumber} disconnected.");
-    }
-
-    public void GameLogCurrentField(IField field)
-    {
-        this.showMessage("Field:");
-        this.showMessage(field.ToString());
     }
 
     #endregion
@@ -214,10 +218,5 @@ public class KaNoBuPlayerConsole :
         }
 
         return figureType.Value.PrintableName();
-    }
-
-    public void PlayersInitialized(IField mainField)
-    {
-        this.showMessage(mainField.ToString());
     }
 }

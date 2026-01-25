@@ -4,7 +4,7 @@ using Godot;
 
 public class PendingActionHub
 {
-    // ToDo: cleanup dictionaries for players when game is finished.
+    // ToDo: cleanup dictionaries for players when game is finished or player is disconnected.
     private readonly Dictionary<string, Queue<object>> PendingModels = new Dictionary<string, Queue<object>>();
     private readonly Dictionary<string, TaskCompletionSource<object>> PendingResponses = new Dictionary<string, TaskCompletionSource<object>>();
 

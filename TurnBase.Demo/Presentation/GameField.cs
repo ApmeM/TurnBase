@@ -55,6 +55,13 @@ public partial class GameField :
 
     #endregion
 
+    #region IGameLogEventListener region
+
+    public void GameLogPlayerInit(int playerNumber, KaNoBuInitResponseModel initResponseModel) { }
+    public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveResponseModel moveResponseModel, MoveValidationStatus status) { }
+
+    #endregion
+
     public async Task MoveCameraToPlayer()
     {
         var tween = new Tween();
@@ -119,43 +126,42 @@ public partial class GameField :
         this.memorizedField.Clear();
     }
 
-    public void GameLogPlayerInit(int playerNumber, KaNoBuInitResponseModel initResponseModel)
+    public void PlayersInitialized()
     {
-        GD.Print($"Log: Player {playerNumber} initialized.");
-
-        this.field.RemoveChildren();
         this.memorizedField.Clear();
+        this.field.RemoveChildren();
     }
 
-    public void PlayersInitialized(IField mainField)
+    public void GameLogCurrentField(IField mainField)
     {
-        this.memorizedField.Clear();
         this.memorizedField.SynchronizeField(mainField);
+        GD.Print(mainField.ToString());
 
-        this.field.RemoveChildren();
-        var level = this.water;
-
-        for (var x = 0; x < mainField.Width; x++)
+        if (this.field.GetChildCount() == 0)
         {
-            for (var y = 0; y < mainField.Height; y++)
+            var level = this.water;
+            for (var x = 0; x < mainField.Width; x++)
             {
-                var originalShip = mainField.get(x, y) as KaNoBuFigure;
-                if (originalShip == null)
+                for (var y = 0; y < mainField.Height; y++)
                 {
-                    continue;
+                    var originalShip = mainField.get(x, y) as KaNoBuFigure;
+                    if (originalShip == null)
+                    {
+                        continue;
+                    }
+
+                    var mapPos = new Vector2(x, y);
+                    var worldPos = level.MapToWorld(mapPos);
+                    var unit = (Unit)UnitScene.Instance();
+
+                    unit.TargetPositionMap = mapPos;
+                    unit.Position = worldPos + level.CellSize / 2;
+                    unit.PlayerNumber = originalShip.PlayerId;
+                    unit.UnitType = originalShip.FigureType;
+                    unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
+
+                    this.field.AddChild(unit);
                 }
-
-                var mapPos = new Vector2(x, y);
-                var worldPos = level.MapToWorld(mapPos);
-                var unit = (Unit)UnitScene.Instance();
-
-                unit.TargetPositionMap = mapPos;
-                unit.Position = worldPos + level.CellSize / 2;
-                unit.PlayerNumber = originalShip.PlayerId;
-                unit.UnitType = originalShip.FigureType;
-                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
-
-                this.field.AddChild(unit);
             }
         }
     }
@@ -216,18 +222,6 @@ public partial class GameField :
         this.UpdateKnownShips();
     }
 
-    public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveResponseModel moveResponseModel, MoveValidationStatus status)
-    {
-        if (status != MoveValidationStatus.OK)
-        {
-            GD.Print($"Wrong turn made: {status}");
-        }
-        else
-        {
-            GD.Print("Correct turn made.");
-        }
-    }
-
     public void GameTurnFinished()
     {
         GD.Print($"Turn finished.");
@@ -253,12 +247,6 @@ public partial class GameField :
     public void GamePlayerDisconnected(int playerNumber)
     {
         this.timerLabel.ShowMessage($"Player {playerNumber} disconnected.", 5);
-    }
-
-    public void GameLogCurrentField(IField field)
-    {
-        this.memorizedField.SynchronizeField(field);
-        GD.Print(field.ToString());
     }
 
     #endregion

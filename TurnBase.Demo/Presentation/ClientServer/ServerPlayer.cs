@@ -45,6 +45,19 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
         });
     }
 
+    public void PlayersInitialized()
+    {
+        this.server.Actions.PushModel(PlayerId, new GamePlayersInitializedCommunicationModel());
+    }
+
+    public void GameLogCurrentField(IField field)
+    {
+        this.server.Actions.PushModel(PlayerId, new GameLogCurrentFieldCommunicationModel
+        {
+            field = field
+        });
+    }
+
     public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
     {
         this.server.Actions.PushModel(PlayerId, new GamePlayerTurnCommunicationModel
@@ -72,14 +85,6 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
         this.server.Actions.PushModel(PlayerId, new GameFinishedCommunicationModel
         {
             winners = winners
-        });
-    }
-
-    public void PlayersInitialized(IField mainField)
-    {
-        this.server.Actions.PushModel(PlayerId, new GamePlayersInitializedCommunicationModel
-        {
-            mainField = mainField
         });
     }
 }

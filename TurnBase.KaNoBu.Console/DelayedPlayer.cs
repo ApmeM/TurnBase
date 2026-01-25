@@ -38,6 +38,16 @@ namespace TurnBase.KaNoBu
             this.player.GamePlayerInit(playerNumber, playerName);
         }
 
+        public void PlayersInitialized()
+        {
+            this.player.PlayersInitialized();
+        }
+        
+        public void GameLogCurrentField(IField field)
+        {
+            this.player.GameLogCurrentField(field);
+        }
+        
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
         {
             this.player.GamePlayerTurn(playerNumber, notification);
@@ -56,11 +66,6 @@ namespace TurnBase.KaNoBu
         public void GameFinished(List<int> winners)
         {
             this.player.GameFinished(winners);
-        }
-
-        public void PlayersInitialized(IField mainField)
-        {
-            this.player.PlayersInitialized(mainField);
         }
     }
 }

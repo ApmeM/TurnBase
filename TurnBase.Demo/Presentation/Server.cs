@@ -97,7 +97,7 @@ public partial class Server
             else if (request.StartsWith("OPTIONS /answer", System.StringComparison.InvariantCultureIgnoreCase))
             {
                 var playerId = GetQueryValue(request, "playerId");
-                //TODO: validate playerId
+                // ToDo: validate playerId
                 if (string.IsNullOrWhiteSpace(playerId))
                 {
                     SendStatus(peer, 400, null); // Bad Request

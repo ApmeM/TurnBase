@@ -21,6 +21,14 @@ namespace TurnBase.KaNoBu
         public void GamePlayerInit(int playerNumber, string playerName)
         {
         }
+        
+        public void PlayersInitialized()
+        {
+        }
+
+        public void GameLogCurrentField(IField field)
+        {
+        }
 
         public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
         {
@@ -64,10 +72,6 @@ namespace TurnBase.KaNoBu
             int movementNum = r.Next(from.Count);
 
             return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(from[movementNum]);
-        }
-
-        public void PlayersInitialized(IField mainField)
-        {
         }
 
         private List<KaNoBuMoveResponseModel> findAllMovement(IField field)

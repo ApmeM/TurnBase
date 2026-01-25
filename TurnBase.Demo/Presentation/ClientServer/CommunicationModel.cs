@@ -10,10 +10,24 @@ public class GameStartedCommunicationModel
 {
 }
 
+public class GamePlayerDisconnectedCommunicationModel
+{
+    public int playerNumber;
+}
+
 public class GamePlayerInitCommunicationModel
 {
     public int playerNumber;
     public string playerName;
+}
+
+public class GamePlayersInitializedCommunicationModel
+{
+}
+
+public class GameLogCurrentFieldCommunicationModel
+{
+    public IField field;
 }
 
 public class GamePlayerTurnCommunicationModel
@@ -24,17 +38,6 @@ public class GamePlayerTurnCommunicationModel
 
 public class GameTurnFinishedCommunicationModel
 {
-}
-
-public class GamePlayerDisconnectedCommunicationModel
-{
-    public int playerNumber;
-}
-
-
-public class GamePlayersInitializedCommunicationModel
-{
-    public IField mainField;
 }
 
 public class GameFinishedCommunicationModel

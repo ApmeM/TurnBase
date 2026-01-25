@@ -63,7 +63,11 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
                 }
                 else if (result.body is GamePlayersInitializedCommunicationModel gamePlayersInitialized)
                 {
-                    player.PlayersInitialized(gamePlayersInitialized.mainField);
+                    player.PlayersInitialized();
+                }
+                else if (result.body is GameLogCurrentFieldCommunicationModel gameLogCurrentField)
+                {
+                    player.GameLogCurrentField(gameLogCurrentField.field);
                 }
                 else if (result.body is GamePlayerTurnCommunicationModel gamePlayerTurn)
                 {
