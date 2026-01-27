@@ -25,7 +25,7 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
     public async Task Play()
     {
         var gameIdQueryString = new Godot.Collections.Dictionary { { "gameId", gameId } };
-        var playerId = (await SendAction("join", gameIdQueryString)).body;
+        var playerId = ((await SendAction("join", gameIdQueryString)).body as JoinGameResponseModel).PlayerId;
         GD.Print($"Joined as {playerId}");
 
         var playerIdQueryString = new Godot.Collections.Dictionary { { "playerId", playerId } };
@@ -69,9 +69,9 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
                 {
                     player.GameLogCurrentField(gameLogCurrentField.field);
                 }
-                else if (result.body is GamePlayerTurnCommunicationModel gamePlayerTurn)
+                else if (result.body is GamePlayerTurnCommunicationModel<TMoveNotificationModel> gamePlayerTurn)
                 {
-                    player.GamePlayerTurn(gamePlayerTurn.playerNumber, (TMoveNotificationModel)gamePlayerTurn.notification);
+                    player.GamePlayerTurn(gamePlayerTurn.playerNumber, gamePlayerTurn.notification);
                 }
                 else if (result.body is GameTurnFinishedCommunicationModel gameTurnFinished)
                 {
@@ -99,11 +99,11 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
         public int result;
         public int code;
         public string[] headers;
-        public object body;
+        public ICommunicationModel body;
     }
 
 
-    private async Task<Response> SendAction(string action, Godot.Collections.Dictionary playerId, object body = null)
+    private async Task<Response> SendAction(string action, Godot.Collections.Dictionary playerId, ICommunicationModel body = null)
     {
         var queryString = new HTTPClient().QueryStringFromDict(playerId);
         var url = $"{this.serverUrl}/{action}?{queryString}";
@@ -128,7 +128,7 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
             result = (int)result[0],
             code = (int)result[1],
             headers = (string[])result[2],
-            body = CommunicationSerializer.DeserializeObject<object>(response)
+            body = CommunicationSerializer.DeserializeObject<ICommunicationModel>(response)
         };
     }
 }

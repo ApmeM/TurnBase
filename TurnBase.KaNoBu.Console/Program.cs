@@ -13,9 +13,9 @@ public class Program
         game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), 1, 500));
         
         game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), 1, 500));
-        var console = new KaNoBuPlayerConsole();
-        // game.AddPlayer(console);
-        game.AddGameLogListener(console);
+
+        // game.AddPlayer(new KaNoBuPlayerConsole());
+        game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new ConsoleLogger()));
         
         await game.Play();
     }

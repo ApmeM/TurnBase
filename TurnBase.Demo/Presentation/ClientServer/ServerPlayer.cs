@@ -60,7 +60,7 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
 
     public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
     {
-        this.server.Actions.PushModel(PlayerId, new GamePlayerTurnCommunicationModel
+        this.server.Actions.PushModel(PlayerId, new GamePlayerTurnCommunicationModel<TMoveNotificationModel>
         {
             playerNumber = playerNumber,
             notification = notification

@@ -1,5 +1,6 @@
 using System;
 using System.CodeDom;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using TurnBase;
@@ -21,17 +22,22 @@ public partial class UI
 
     private void GameTypeChanged(int selectedId)
     {
+        this.serverGameType.Visible = false;
+        this.clientGameType.Visible = false;
+        this.replayGameType.Visible = false;
         switch (this.gameType.GetSelectedId())
         {
             case 0:
                 // server
                 this.serverGameType.Visible = true;
-                this.clientGameType.Visible = false;
                 break;
             case 1:
                 // client
-                this.serverGameType.Visible = false;
                 this.clientGameType.Visible = true;
+                break;
+            case 2:
+                // Replay
+                this.replayGameType.Visible = true;
                 break;
             default:
                 throw new Exception("Unknown game type");
@@ -41,10 +47,13 @@ public partial class UI
     [Signal]
     public delegate void StartGameEventhandler();
 
-    private async void StartButonClicked()
+    private void StartButonClicked()
     {
         this.EmitSignal(nameof(StartGameEventhandler));
     }
+
+    private List<ICommunicationModel> lastReplay;
+
     public IGame BuildGame(GameField field)
     {
         switch (this.gameType.GetSelectedId())
@@ -106,7 +115,10 @@ public partial class UI
                     {
                         kanobu.AddGameLogListener(field);
                     }
-
+                    var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
+                    this.lastReplay = memoryReplay.Events;
+                    kanobu.AddGameLogListener(memoryReplay);
+                    this.gameType.SetItemDisabled(2, false);
                     return kanobu;
                 }
             case 1:
@@ -114,6 +126,19 @@ public partial class UI
                     var kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
                     kanobu.SetPlayer(field);
                     return kanobu;
+                }
+            case 2:
+                {
+                    if (lastReplay != null)
+                    {
+                        var kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
+                        kanobu.AddGameLogListener(field);
+                        return kanobu;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("No replay found!");
+                    }
                 }
             default:
                 throw new InvalidOperationException("Unknown game type");

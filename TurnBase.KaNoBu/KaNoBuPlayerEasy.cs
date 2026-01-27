@@ -21,7 +21,7 @@ namespace TurnBase.KaNoBu
         public void GamePlayerInit(int playerNumber, string playerName)
         {
         }
-        
+
         public void PlayersInitialized()
         {
         }
@@ -46,18 +46,22 @@ namespace TurnBase.KaNoBu
         {
             this.myNumber = model.PlayerId;
 
-            var preparedField = Field2D.Create(model.Request.Width,model.Request.Height);
+            var preparedField = Field2D.Create(model.Request.Width, model.Request.Height);
             for (var i = 0; i < model.Request.Width; i++)
             {
                 for (var j = 0; j < model.Request.Height; j++)
                 {
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField.trySet(i,j, new KaNoBuFigure(this.myNumber, ship));
+                    preparedField.trySet(i, j, new KaNoBuFigure(this.myNumber, ship));
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
 
-            return new InitResponseModel<KaNoBuInitResponseModel>(name, new KaNoBuInitResponseModel(preparedField));
+            return new InitResponseModel<KaNoBuInitResponseModel>
+            {
+                Name = name,
+                Response = new KaNoBuInitResponseModel(preparedField)
+            };
         }
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
@@ -66,12 +70,18 @@ namespace TurnBase.KaNoBu
 
             if (from == null || from.Count == 0)
             {
-                return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN, default, default));
+                return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
+                {
+                    Response = new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN, default, default)
+                };
             }
 
             int movementNum = r.Next(from.Count);
 
-            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(from[movementNum]);
+            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
+            {
+                Response = from[movementNum]
+            };
         }
 
         private List<KaNoBuMoveResponseModel> findAllMovement(IField field)

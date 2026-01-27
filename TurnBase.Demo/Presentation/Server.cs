@@ -111,7 +111,7 @@ public partial class Server
             {
                 var playerId = GetQueryValue(request, "playerId");
                 var body = request.Split("\r\n\r\n")[1];
-                var responseObj = CommunicationSerializer.DeserializeObject<object>(body);
+                var responseObj = CommunicationSerializer.DeserializeObject<ICommunicationModel>(body);
                 this.Actions.ResolveResponse(playerId, responseObj);
                 SendStatus(peer, 200, null); // OK
             }
@@ -123,7 +123,7 @@ public partial class Server
                 {
                     var playerId = playerIds.Pop();
                     GD.Print($"Player {playerId} joined.");
-                    SendStatus(peer, 200, playerId); // OK
+                    SendStatus(peer, 200, new JoinGameResponseModel { PlayerId = playerId }); // OK
                 }
                 else
                 {
@@ -152,7 +152,7 @@ public partial class Server
         incomingPeers.Add(peer);
     }
 
-    private void SendStatus(StreamPeerTCP peer, int status, object model)
+    private void SendStatus(StreamPeerTCP peer, int status, ICommunicationModel model)
     {
         var body = CommunicationSerializer.SerializeObject(model);
 

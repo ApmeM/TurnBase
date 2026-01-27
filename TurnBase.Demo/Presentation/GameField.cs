@@ -9,7 +9,6 @@ using TurnBase.KaNoBu;
 
 [SceneReference("GameField.tscn")]
 public partial class GameField :
-    IGameLogEventListener<KaNoBuInitResponseModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>,
     IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     [Export]
@@ -21,7 +20,6 @@ public partial class GameField :
 
     public Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
     {
-        GD.Print("Init start");
         this.playerId = model.PlayerId;
         _ = MoveCameraToPlayer();
         return new KaNoBuPlayerEasy().Init(model);
@@ -29,7 +27,6 @@ public partial class GameField :
 
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
     {
-        GD.Print("MakeTurn start");
         this.timerLabel.ShowMessage("Your turn", 1f);
 
         this.memorizedField.SynchronizeField(model.Request.Field);
@@ -45,20 +42,15 @@ public partial class GameField :
         var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
         GD.Print($"Move {from} to {to}");
 
-        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(
-            new KaNoBuMoveResponseModel(
+        return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
+        {
+            Response = new KaNoBuMoveResponseModel(
                 KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN,
                 new Point { X = (int)from.x, Y = (int)from.y },
                 new Point { X = (int)to.x, Y = (int)to.y }
-            ));
+            )
+        };
     }
-
-    #endregion
-
-    #region IGameLogEventListener region
-
-    public void GameLogPlayerInit(int playerNumber, KaNoBuInitResponseModel initResponseModel) { }
-    public void GameLogPlayerTurn(int playerNumber, KaNoBuMoveResponseModel moveResponseModel, MoveValidationStatus status) { }
 
     #endregion
 
@@ -92,6 +84,7 @@ public partial class GameField :
         await ToSignal(tween, "tween_all_completed");
         tween.QueueFree();
     }
+
     public async Task MoveCameraToCenter()
     {
         var tween = new Tween();
@@ -108,7 +101,7 @@ public partial class GameField :
 
     #region IGameEventListener region
 
-    public async void GameStarted()
+    public void GameStarted()
     {
         this.playerId = -1;
 
@@ -120,8 +113,6 @@ public partial class GameField :
 
     public void GamePlayerInit(int playerNumber, string playerName)
     {
-        GD.Print($"Log: Player {playerNumber} ({playerName}) joined the game.");
-
         this.field.RemoveChildren();
         this.memorizedField.Clear();
     }
@@ -172,10 +163,8 @@ public partial class GameField :
 
         if (notification.move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
         {
-            GD.Print($"Move {playerNumber} Skip turn.");
             return;
         }
-        GD.Print($"Move {playerNumber} from {notification.move.From.PrintableName()} to {notification.move.To.PrintableName()}");
 
         var fromMapPos = new Vector2(notification.move.From.X, notification.move.From.Y);
         var toMapPos = new Vector2(notification.move.To.X, notification.move.To.Y);
@@ -187,7 +176,6 @@ public partial class GameField :
 
         if (notification.battle.HasValue)
         {
-            GD.Print($"Battle result: {notification.battle.Value.battleResult} (IsFlag = {notification.battle.Value.isDefenderFlag})");
             var defenderUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == toMapPos);
 
             GD.Print($"moved unit {movedUnit.PlayerNumber} {movedUnit.UnitType}");
@@ -224,7 +212,6 @@ public partial class GameField :
 
     public void GameTurnFinished()
     {
-        GD.Print($"Turn finished.");
     }
 
     public async void GameFinished(List<int> winners)

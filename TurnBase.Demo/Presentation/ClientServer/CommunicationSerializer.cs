@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 public class CommunicationSerializer
 {
-    public static T DeserializeObject<T>(string value)
+    public static T DeserializeObject<T>(string value) where T : ICommunicationModel
     {
         GD.Print($"ORIGINAL: {value}");
 
@@ -16,7 +16,7 @@ public class CommunicationSerializer
 
         return result;
     }
-    public static string SerializeObject(object value)
+    public static string SerializeObject(ICommunicationModel value)
     {
         return JsonConvert.SerializeObject(new CommunicationModel { Data = value }, new JsonSerializerSettings()
         {

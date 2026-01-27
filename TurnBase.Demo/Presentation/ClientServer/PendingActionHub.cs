@@ -5,20 +5,20 @@ using Godot;
 public class PendingActionHub
 {
     // ToDo: cleanup dictionaries for players when game is finished or player is disconnected.
-    private readonly Dictionary<string, Queue<object>> PendingModels = new Dictionary<string, Queue<object>>();
-    private readonly Dictionary<string, TaskCompletionSource<object>> PendingResponses = new Dictionary<string, TaskCompletionSource<object>>();
+    private readonly Dictionary<string, Queue<ICommunicationModel>> PendingModels = new Dictionary<string, Queue<ICommunicationModel>>();
+    private readonly Dictionary<string, TaskCompletionSource<ICommunicationModel>> PendingResponses = new Dictionary<string, TaskCompletionSource<ICommunicationModel>>();
 
-    public void PushModel(string playerId, object model)
+    public void PushModel(string playerId, ICommunicationModel model)
     {
         if (!PendingModels.TryGetValue(playerId, out var queue))
         {
-            PendingModels[playerId] = new Queue<object>();
+            PendingModels[playerId] = new Queue<ICommunicationModel>();
         }
 
         this.PendingModels[playerId].Enqueue(model);
     }
 
-    public object PopModel(string playerId)
+    public ICommunicationModel PopModel(string playerId)
     {
         if (!PendingModels.TryGetValue(playerId, out var queue))
         {
@@ -34,13 +34,13 @@ public class PendingActionHub
 
     public Task<T> WaitResponse<T>(string playerId)
     {
-        this.PendingResponses[playerId] = new TaskCompletionSource<object>();
+        this.PendingResponses[playerId] = new TaskCompletionSource<ICommunicationModel>();
         return PendingResponses[playerId]
             .Task
             .ContinueWith(t => (T)t.Result);
     }
 
-    public void ResolveResponse(string playerId, object response)
+    public void ResolveResponse(string playerId, ICommunicationModel response)
     {
         if (PendingResponses.TryGetValue(playerId, out var tcs))
         {

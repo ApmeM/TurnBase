@@ -22,7 +22,7 @@ rect_scale = Vector2( 2, 2 )
 margin_right = 150.0
 margin_bottom = 20.0
 text = "Server"
-items = [ "Server", null, false, 0, null, "Client", null, false, 1, null ]
+items = [ "Server", null, false, 0, null, "Client", null, false, 1, null, "Replay", null, true, 2, null ]
 selected = 0
 
 [node name="ServerGameType" type="VBoxContainer" parent="UIContainer"]
@@ -80,6 +80,12 @@ margin_bottom = 20.0
 rect_min_size = Vector2( 0, 20 )
 rect_clip_content = true
 text = "127.0.0.1"
+
+[node name="ReplayGameType" type="VBoxContainer" parent="UIContainer"]
+visible = false
+margin_top = 162.0
+margin_right = 150.0
+margin_bottom = 162.0
 
 [node name="StartButton" type="Button" parent="UIContainer"]
 margin_top = 138.0

@@ -37,7 +37,11 @@ namespace TurnBase.KaNoBu
                 }
             }
 
-            return new InitResponseModel<KaNoBuInitResponseModel>(name, new KaNoBuInitResponseModel(preparedField));
+            return new InitResponseModel<KaNoBuInitResponseModel>
+            {
+                Name = name,
+                Response = new KaNoBuInitResponseModel(preparedField)
+            };
         }
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
@@ -47,12 +51,17 @@ namespace TurnBase.KaNoBu
 
             if (from.Count == 0)
             {
-                return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN, default, default));
+                return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
+                {
+                    Response = new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN, default, default)
+                };
             }
 
-            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>(from[0]);
+            return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
+            {
+                Response = from[0]
+            };
         }
-
         private int EvaluateMove(IField field, KaNoBuMoveResponseModel a)
         {
             var shipFrom = field.get(a.From.X, a.From.Y) as KaNoBuFigure;

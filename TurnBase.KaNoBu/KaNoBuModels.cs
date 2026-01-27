@@ -79,5 +79,22 @@ namespace TurnBase.KaNoBu
 
         public readonly KaNoBuMoveResponseModel move;
         public readonly Battle? battle;
+
+        public override string ToString()
+        {
+            if (move.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
+            {
+                return $"Player skip turn.";
+            }
+
+            var result = $"Player move {move.From.PrintableName()}-{move.To.PrintableName()}.";
+
+            if (battle != null)
+            {
+                result += $"\nBattle result: {battle.Value.battleResult} (IsFlag = {battle.Value.isDefenderFlag})";
+            }
+
+            return result;
+        }
     }
 }
