@@ -123,12 +123,18 @@ public partial class UI
                 }
             case 1:
                 {
+                    // Client
                     var kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
-                    kanobu.SetPlayer(field);
+                    kanobu.AddPlayer(field);
+                    var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
+                    this.lastReplay = memoryReplay.Events;
+                    kanobu.AddGameLogListener(memoryReplay);
+                    this.gameType.SetItemDisabled(2, false);
                     return kanobu;
                 }
             case 2:
                 {
+                    // Replay
                     if (lastReplay != null)
                     {
                         var kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);

@@ -3,12 +3,15 @@ using System.Text;
 using System.Threading.Tasks;
 using TurnBase;
 
-public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IGame
+
+public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
+    IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
 {
     private readonly Client client;
     private readonly string serverUrl;
     private readonly string gameId;
     private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
+    private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
 
     public RemoteGame(Client client, string serverUrl, string gameId)
     {
@@ -17,9 +20,21 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
         this.gameId = gameId;
     }
 
-    public void SetPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
+    public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
     {
-        this.player = player;
+        // Remote game supports only one player.
+        if (this.player == null)
+        {
+            this.player = player;
+            return AddPlayerStatus.OK;
+        }
+
+        return AddPlayerStatus.MAX_PLAYERS_REACHED;
+    }
+
+    public void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener)
+    {
+        this.gameLogListeners.Add(gameLogListener);
     }
 
     public async Task Play()
@@ -55,35 +70,43 @@ public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveRespons
                 }
                 else if (result.body is GameStartedCommunicationModel gameStarted)
                 {
-                    player.GameStarted();
+                    this.player.GameStarted();
+                    this.gameLogListeners.GameStarted();
                 }
                 else if (result.body is GamePlayerInitCommunicationModel gamePlayerInit)
                 {
-                    player.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
+                    this.player.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
+                    this.gameLogListeners.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
                 }
                 else if (result.body is GamePlayersInitializedCommunicationModel gamePlayersInitialized)
                 {
-                    player.PlayersInitialized();
+                    this.player.PlayersInitialized();
+                    this.gameLogListeners.PlayersInitialized();
                 }
                 else if (result.body is GameLogCurrentFieldCommunicationModel gameLogCurrentField)
                 {
-                    player.GameLogCurrentField(gameLogCurrentField.field);
+                    this.player.GameLogCurrentField(gameLogCurrentField.field);
+                    this.gameLogListeners.GameLogCurrentField(gameLogCurrentField.field);
                 }
                 else if (result.body is GamePlayerTurnCommunicationModel<TMoveNotificationModel> gamePlayerTurn)
                 {
-                    player.GamePlayerTurn(gamePlayerTurn.playerNumber, gamePlayerTurn.notification);
+                    this.player.GamePlayerTurn(gamePlayerTurn.playerNumber, gamePlayerTurn.notification);
+                    this.gameLogListeners.GamePlayerTurn(gamePlayerTurn.playerNumber, gamePlayerTurn.notification);
                 }
                 else if (result.body is GameTurnFinishedCommunicationModel gameTurnFinished)
                 {
-                    player.GameTurnFinished();
+                    this.player.GameTurnFinished();
+                    this.gameLogListeners.GameTurnFinished();
                 }
                 else if (result.body is GamePlayerDisconnectedCommunicationModel gamePlayerDisconnected)
                 {
-                    player.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber);
+                    this.player.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber);
+                    this.gameLogListeners.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber);
                 }
                 else if (result.body is GameFinishedCommunicationModel gameFinished)
                 {
-                    player.GameFinished(gameFinished.winners);
+                    this.player.GameFinished(gameFinished.winners);
+                    this.gameLogListeners.GameFinished(gameFinished.winners);
                     break;
                 }
                 else

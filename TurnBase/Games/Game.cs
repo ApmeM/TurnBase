@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IGame
+    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : 
+        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
         private class PlayerData
         {
@@ -24,7 +25,7 @@ namespace TurnBase
 
         private IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules;
         private Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>, PlayerData> players = new Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>, PlayerData>();
-        private List<IGameEventListener<TMoveNotificationModel>> gameLogListeners = new List<IGameEventListener<TMoveNotificationModel>>();
+        private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
         private bool GameIsRunning = false;
         private IField mainField;
 
@@ -65,21 +66,21 @@ namespace TurnBase
             this.GameIsRunning = true;
 
             this.players.Keys.ToList().ForEach(a => a.GameStarted());
-            this.gameLogListeners.ForEach(a => a.GameStarted());
+            this.gameLogListeners.GameStarted();
 
             await this.InitPlayers();
 
             this.players.Keys.ToList().ForEach(a => a.PlayersInitialized());
-            this.gameLogListeners.ForEach(a => a.PlayersInitialized());
+            this.gameLogListeners.PlayersInitialized();
             this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(-1)));
+            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
 
             await this.MovePlayers();
 
             this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(-1)));
+            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
             this.players.Keys.ToList().ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
-            this.gameLogListeners.ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
+            this.gameLogListeners.GameFinished(this.rules.findWinners(this.mainField));
         }
 
         private Task GroupAction(List<IPlayer> nextPlayers, Func<IPlayer, Task<bool>> action)
@@ -96,7 +97,7 @@ namespace TurnBase
                 playerData.IsInGame = false;
                 this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
                 this.players.Keys.ToList().ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
-                this.gameLogListeners.ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
+                this.gameLogListeners.GamePlayerDisconnected(playerData.PlayerNumber);
             }
 
             return Task.WhenAll(
@@ -145,10 +146,10 @@ namespace TurnBase
             }
 
             this.players.Keys.ToList().ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
-            this.gameLogListeners.ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
+            this.gameLogListeners.GamePlayerInit(playerNumber, initResponseModel.Name);
 
             this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(-1)));
+            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
             return true;
         }
 
@@ -170,10 +171,10 @@ namespace TurnBase
                     this.rules.TurnCompleted(this.mainField);
 
                     this.players.Keys.ToList().ForEach(a => a.GameTurnFinished());
-                    this.gameLogListeners.ForEach(a => a.GameTurnFinished());
+                    this.gameLogListeners.GameTurnFinished();
 
                     this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-                    this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(-1)));
+                    this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
                 }
             }
         }
@@ -209,10 +210,10 @@ namespace TurnBase
             var moveResult = this.rules.MakeMove(this.mainField, playerNumber, move);
 
             this.players.Keys.ToList().ForEach(a => a.GamePlayerTurn(playerNumber, moveResult));
-            this.gameLogListeners.ForEach(a => a.GamePlayerTurn(playerNumber, moveResult));
+            this.gameLogListeners.GamePlayerTurn(playerNumber, moveResult);
 
             this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(-1)));
+            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
             return true;
         }
     }

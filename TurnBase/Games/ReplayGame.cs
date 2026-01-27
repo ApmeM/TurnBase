@@ -3,10 +3,11 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class ReplayGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IGame
+    public class ReplayGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : 
+        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
         private readonly List<ICommunicationModel> events;
-        private List<IGameEventListener<TMoveNotificationModel>> gameLogListeners = new List<IGameEventListener<TMoveNotificationModel>>();
+        private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
 
         public ReplayGame(List<ICommunicationModel> events)
         {
@@ -18,41 +19,47 @@ namespace TurnBase
             this.gameLogListeners.Add(gameLogListener);
         }
 
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
+        {
+            // Replay cant not have real players.
+            return AddPlayerStatus.MAX_PLAYERS_REACHED;
+        }
+
         public async Task Play()
         {
             foreach (var gameEvent in events)
             {
                 if (gameEvent is GameStartedCommunicationModel gameStarted)
                 {
-                    this.gameLogListeners.ForEach(a => a.GameStarted());
+                    this.gameLogListeners.GameStarted();
                 }
                 else if (gameEvent is GamePlayerInitCommunicationModel gamePlayerInit)
                 {
-                    this.gameLogListeners.ForEach(a => a.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName));
+                    this.gameLogListeners.GamePlayerInit(gamePlayerInit.playerNumber, gamePlayerInit.playerName);
                 }
                 else if (gameEvent is GamePlayersInitializedCommunicationModel gamePlayersInitialized)
                 {
-                    this.gameLogListeners.ForEach(a => a.PlayersInitialized());
+                    this.gameLogListeners.PlayersInitialized();
                 }
                 else if (gameEvent is GameLogCurrentFieldCommunicationModel gameLogCurrentField)
                 {
-                    this.gameLogListeners.ForEach(a => a.GameLogCurrentField(gameLogCurrentField.field));
+                    this.gameLogListeners.GameLogCurrentField(gameLogCurrentField.field);
                 }
                 else if (gameEvent is GamePlayerTurnCommunicationModel<TMoveNotificationModel> gamePlayerTurn)
                 {
-                    this.gameLogListeners.ForEach(a => a.GamePlayerTurn(gamePlayerTurn.playerNumber, gamePlayerTurn.notification));
+                    this.gameLogListeners.GamePlayerTurn(gamePlayerTurn.playerNumber, gamePlayerTurn.notification);
                 }
                 else if (gameEvent is GameTurnFinishedCommunicationModel gameTurnFinished)
                 {
-                    this.gameLogListeners.ForEach(a => a.GameTurnFinished());
+                    this.gameLogListeners.GameTurnFinished();
                 }
                 else if (gameEvent is GamePlayerDisconnectedCommunicationModel gamePlayerDisconnected)
                 {
-                    this.gameLogListeners.ForEach(a => a.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber));
+                    this.gameLogListeners.GamePlayerDisconnected(gamePlayerDisconnected.playerNumber);
                 }
                 else if (gameEvent is GameFinishedCommunicationModel gameFinished)
                 {
-                    this.gameLogListeners.ForEach(a => a.GameFinished(gameFinished.winners));
+                    this.gameLogListeners.GameFinished(gameFinished.winners);
                     break;
                 }
                 else
