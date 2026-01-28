@@ -18,15 +18,22 @@ margin_right = 5.5
 margin_bottom = 5.0
 rect_scale = Vector2( 2, 2 )
 
-[node name="GameType" type="OptionButton" parent="UIContainer"]
+[node name="ServerIpInfo" type="Label" parent="UIContainer"]
 margin_right = 150.0
-margin_bottom = 20.0
+margin_bottom = 14.0
+text = "127.0.0.1"
+autowrap = true
+
+[node name="GameType" type="OptionButton" parent="UIContainer"]
+margin_top = 18.0
+margin_right = 150.0
+margin_bottom = 38.0
 text = "Server"
 items = [ "Server", null, false, 0, null, "Client", null, false, 1, null, "Replay", null, true, 2, null ]
 selected = 0
 
 [node name="ServerGameType" type="VBoxContainer" parent="UIContainer"]
-margin_top = 24.0
+margin_top = 42.0
 margin_right = 150.0
 margin_bottom = 134.0
 
@@ -60,13 +67,6 @@ margin_bottom = 92.0
 text = "Computer medium"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
 selected = 4
-
-[node name="ServerIpInfo" type="Label" parent="UIContainer/ServerGameType"]
-margin_top = 96.0
-margin_right = 150.0
-margin_bottom = 110.0
-text = "127.0.0.1"
-autowrap = true
 
 [node name="ClientGameType" type="VBoxContainer" parent="UIContainer"]
 visible = false
