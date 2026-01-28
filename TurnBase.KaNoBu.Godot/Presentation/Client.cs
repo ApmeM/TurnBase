@@ -10,26 +10,6 @@ public partial class Client : IClient
 {
     private HTTPClient httpClient= new HTTPClient();
 
-    public async Task<object[]> SendRequest(string url, string body)
-    {
-        if (body != null)
-        {
-            this.http.Request(
-                url,
-                new[] { "Content-Type: application/json" },
-                false,
-                HTTPClient.Method.Post,
-                body);
-        }
-        else
-        {
-            this.http.Request(url);
-        }
-
-        var result = await ToSignal(this.http, "request_completed");
-        return result;
-    }
-
     public async Task<ClientResponse> SendAction(string serverUrl, string action, Dictionary<string, object> queryData, ICommunicationModel body = null)
     {
         var queryString = httpClient.QueryStringFromDict(ToGodotDictionaryRecursive(queryData));
@@ -59,7 +39,27 @@ public partial class Client : IClient
         };
     }
 
-    public static Godot.Collections.Dictionary ToGodotDictionaryRecursive(IDictionary source)
+    private async Task<object[]> SendRequest(string url, string body)
+    {
+        if (body != null)
+        {
+            this.http.Request(
+                url,
+                new[] { "Content-Type: application/json" },
+                false,
+                HTTPClient.Method.Post,
+                body);
+        }
+        else
+        {
+            this.http.Request(url);
+        }
+
+        var result = await ToSignal(this.http, "request_completed");
+        return result;
+    }
+
+    private static Godot.Collections.Dictionary ToGodotDictionaryRecursive(IDictionary source)
     {
         var gdDict = new Godot.Collections.Dictionary();
 

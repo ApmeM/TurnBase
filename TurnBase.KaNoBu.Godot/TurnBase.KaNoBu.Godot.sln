@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBase.Demo", "TurnBase.Demo.csproj", "{4DB1C265-0E7D-449E-93F0-4CF20FB718E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBase.KaNoBu.Godot", "TurnBase.KaNoBu.Godot.csproj", "{4DB1C265-0E7D-449E-93F0-4CF20FB718E3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnBase", "..\TurnBase\TurnBase.csproj", "{E434FF70-077D-4188-B1A5-B05510A141F9}"
 EndProject

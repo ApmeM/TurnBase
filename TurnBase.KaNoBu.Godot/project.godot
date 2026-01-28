@@ -20,8 +20,8 @@ ResourceScriptDirectories=[ "res://" ]
 
 [application]
 
-config/name="TurnBase.Demo"
-config/description="This is the demo for TurnBase library."
+config/name="TurnBase.KaNoBu.Godot"
+config/description="This is the Stone-Scissors-Rock game based on TurnBase library."
 run/main_scene="res://Presentation/Main.tscn"
 config/icon="res://assets/Icon.png"
 
@@ -66,7 +66,7 @@ pointing/android/enable_pan_and_scale_gestures=true
 
 [mono]
 
-project/assembly_name="TurnBase.Demo"
+project/assembly_name="TurnBase.KaNoBu.Godot"
 
 [network]
 
