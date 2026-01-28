@@ -3,42 +3,45 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TurnBase;
 
+public interface IServer
+{
+    void RegisterPlayer(string playerId, string gameId);
+    void SendRequest(string playerId, ICommunicationModel model);
+    Task<T> SendRequest<T>(string playerId, ICommunicationModel model);
+}
+
 public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
         IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
 {
-    private readonly Server server;
+    private readonly IServer server;
 
     public string PlayerId { get; private set; }
 
-    public ServerPlayer(Server server, string gameId)
+    public ServerPlayer(IServer server, string gameId)
     {
         this.server = server;
         this.PlayerId = Guid.NewGuid().ToString();
         this.server.RegisterPlayer(this.PlayerId, gameId);
     }
 
-    public async Task<InitResponseModel<TInitResponseModel>> Init(
-        InitModel<TInitModel> model)
+    public async Task<InitResponseModel<TInitResponseModel>> Init(InitModel<TInitModel> model)
     {
-        this.server.Actions.PushModel(PlayerId, model);
-        return await this.server.Actions.WaitResponse<InitResponseModel<TInitResponseModel>>(PlayerId);
+        return await this.server.SendRequest<InitResponseModel<TInitResponseModel>>(PlayerId, model);
     }
 
-    public async Task<MakeTurnResponseModel<TMoveResponseModel>> MakeTurn(
-        MakeTurnModel<TMoveModel> model)
+    public async Task<MakeTurnResponseModel<TMoveResponseModel>> MakeTurn(MakeTurnModel<TMoveModel> model)
     {
-        this.server.Actions.PushModel(PlayerId, model);
-        return await this.server.Actions.WaitResponse<MakeTurnResponseModel<TMoveResponseModel>>(PlayerId);
+        return await this.server.SendRequest<MakeTurnResponseModel<TMoveResponseModel>>(PlayerId, model);
     }
 
     public void GameStarted()
     {
-        this.server.Actions.PushModel(PlayerId, new GameStartedCommunicationModel());
+        this.server.SendRequest(PlayerId, new GameStartedCommunicationModel());
     }
 
     public void GamePlayerInit(int playerNumber, string playerName)
     {
-        this.server.Actions.PushModel(PlayerId, new GamePlayerInitCommunicationModel
+        this.server.SendRequest(PlayerId, new GamePlayerInitCommunicationModel
         {
             playerNumber = playerNumber,
             playerName = playerName
@@ -47,12 +50,12 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
 
     public void PlayersInitialized()
     {
-        this.server.Actions.PushModel(PlayerId, new GamePlayersInitializedCommunicationModel());
+        this.server.SendRequest(PlayerId, new GamePlayersInitializedCommunicationModel());
     }
 
     public void GameLogCurrentField(IField field)
     {
-        this.server.Actions.PushModel(PlayerId, new GameLogCurrentFieldCommunicationModel
+        this.server.SendRequest(PlayerId, new GameLogCurrentFieldCommunicationModel
         {
             field = field
         });
@@ -60,7 +63,7 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
 
     public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
     {
-        this.server.Actions.PushModel(PlayerId, new GamePlayerTurnCommunicationModel<TMoveNotificationModel>
+        this.server.SendRequest(PlayerId, new GamePlayerTurnCommunicationModel<TMoveNotificationModel>
         {
             playerNumber = playerNumber,
             notification = notification
@@ -69,12 +72,12 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
 
     public void GameTurnFinished()
     {
-        this.server.Actions.PushModel(PlayerId, new GameTurnFinishedCommunicationModel());
+        this.server.SendRequest(PlayerId, new GameTurnFinishedCommunicationModel());
     }
 
     public void GamePlayerDisconnected(int playerNumber)
     {
-        this.server.Actions.PushModel(PlayerId, new GamePlayerDisconnectedCommunicationModel
+        this.server.SendRequest(PlayerId, new GamePlayerDisconnectedCommunicationModel
         {
             playerNumber = playerNumber,
         });
@@ -82,7 +85,7 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
 
     public void GameFinished(List<int> winners)
     {
-        this.server.Actions.PushModel(PlayerId, new GameFinishedCommunicationModel
+        this.server.SendRequest(PlayerId, new GameFinishedCommunicationModel
         {
             winners = winners
         });
