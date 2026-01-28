@@ -1,0 +1,84 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[  ]
+_global_script_class_icons={
+}
+
+[MonoCustomResourceRegistry]
+
+ClassPrefix=""
+SearchType=0
+ResourceScriptDirectories=[ "res://" ]
+
+[application]
+
+config/name="TurnBase.KaNoBu.Godot"
+config/description="This is the Stone-Scissors-Rock game based on TurnBase library."
+run/main_scene="res://Presentation/Main.tscn"
+config/icon="res://assets/Icon.png"
+
+[display]
+
+window/size/width=640
+window/size/height=832
+window/dpi/allow_hidpi=true
+window/handheld/orientation="portrait"
+window/stretch/mode="2d"
+window/stretch/aspect="keep"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/MonoCustomResourceRegistry/plugin.cfg" )
+
+[gdnative]
+
+singletons=[  ]
+
+[global]
+
+android=false
+
+[image_loader]
+
+filter=false
+gen_mipmaps=false
+
+[input]
+
+left_click={
+"deadzone": 0.5,
+"events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"doubleclick":false,"script":null)
+ ]
+}
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+pointing/android/enable_pan_and_scale_gestures=true
+
+[mono]
+
+project/assembly_name="TurnBase.KaNoBu.Godot"
+
+[network]
+
+limits/debugger_stdout/max_chars_per_second=20480
+
+[rasterizer]
+
+use_pixel_snap=true
+
+[rendering]
+
+quality/driver/driver_name="GLES2"
+vram_compression/import_etc=true
+vram_compression/import_etc2=false
+environment/default_clear_color=Color( 0.0784314, 0.105882, 0.145098, 1 )

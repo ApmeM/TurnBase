@@ -1,0 +1,19 @@
+<Project Sdk="Godot.NET.Sdk/3.3.0">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>TurnBase.KaNoBu.Godot</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GodotProjectDir Condition=" '$(SolutionDir)' != '' ">$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</GodotProjectDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="GodotAnalysers" Version="2.0.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="GodotAnalysersAttribute" Version="2.0.1" />
+    <ProjectReference Include="..\TurnBase\TurnBase.csproj" />
+    <ProjectReference Include="..\TurnBase.KaNoBu\TurnBase.KaNoBu.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+</Project>
