@@ -9,6 +9,8 @@ namespace TurnBase
         private readonly List<ICommunicationModel> events;
         private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
 
+        public string GameId => "replay_game";
+
         public ReplayGame(List<ICommunicationModel> events)
         {
             this.events = events;

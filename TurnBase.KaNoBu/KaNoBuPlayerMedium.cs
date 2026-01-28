@@ -9,7 +9,7 @@ namespace TurnBase.KaNoBu
         IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
     {
         private Random r = new Random();
-        private string name = "Computer easy";
+        private string name = "Computer medium";
         private int myNumber;
 
         private List<Point> directions = new List<Point>

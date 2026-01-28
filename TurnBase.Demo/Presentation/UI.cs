@@ -56,13 +56,15 @@ public partial class UI
 
     public IGame BuildGame(GameField field)
     {
+        var humanFound = false;
+        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> kanobu;
         switch (this.gameType.GetSelectedId())
         {
             case 0:
                 {
                     // server
                     var rules = new KaNoBuRules(8);
-                    var kanobu = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
+                    kanobu = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
                     var playerTypes = new[]{
                     this.serverPlayer1,
@@ -71,83 +73,97 @@ public partial class UI
                     this.serverPlayer4,
                 };
 
-                    var humanFound = false;
                     foreach (var playertype in playerTypes)
                     {
-                        switch (playertype.GetSelectedId())
+                        if (playertype.GetSelectedId() == 1)
                         {
-                            case 0:
-                                // None
+                            if (humanFound)
+                            {
+                                GD.Print("Only one human player is allowed.");
                                 kanobu.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>());
                                 continue;
-                            case 1:
-                                // Human
-                                if (humanFound)
-                                {
-                                    GD.Print("2 Human players are not implemented yet.");
-                                    return null;
-                                }
-                                humanFound = true;
-                                kanobu.AddPlayer(field);
-                                continue;
-                            case 2:
-                                // Computer Easy
-                                var playerEasy = new KaNoBuPlayerEasy();
-                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerEasy, 1, 300, this));
-                                continue;
-                            case 3:
-                                // Remote
-                                this.server.StartServer();
-                                var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, kanobu.GameId);
-                                kanobu.AddPlayer(player);
-                                continue;
-                            case 4:
-                                // Computer Medium
-                                var playerMedium = new KaNoBuPlayerMedium();
-                                kanobu.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerMedium, 1, 300, this));
-                                continue;
-                            default:
-                                throw new InvalidOperationException("Unknown Player Type");
+                            }
+
+                            humanFound = true;
                         }
+
+                        kanobu.AddPlayer(BuildPlayer(playertype.GetSelectedId(), field, kanobu.GameId));
                     }
 
-                    if (!humanFound)
-                    {
-                        kanobu.AddGameLogListener(field);
-                    }
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
                     this.lastReplay = memoryReplay.Events;
                     kanobu.AddGameLogListener(memoryReplay);
                     this.gameType.SetItemDisabled(2, false);
-                    return kanobu;
+                    break;
                 }
             case 1:
                 {
                     // Client
-                    var kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
-                    kanobu.AddPlayer(field);
+                    kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
+                    kanobu.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), field, kanobu.GameId));
+
+                    if (clientPlayer.GetSelectedId() == 1)
+                    {
+                        humanFound = true;
+                    }
+
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
                     this.lastReplay = memoryReplay.Events;
                     kanobu.AddGameLogListener(memoryReplay);
                     this.gameType.SetItemDisabled(2, false);
-                    return kanobu;
+                    break;
                 }
             case 2:
                 {
                     // Replay
                     if (lastReplay != null)
                     {
-                        var kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
-                        kanobu.AddGameLogListener(field);
-                        return kanobu;
+                        kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
                     }
                     else
                     {
                         throw new InvalidOperationException("No replay found!");
                     }
+                    break;
                 }
             default:
                 throw new InvalidOperationException("Unknown game type");
+        }
+        
+        kanobu.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
+
+        if(!humanFound)
+        {
+            kanobu.AddGameLogListener(field);
+        }
+
+        return kanobu;
+    }
+
+    public IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> BuildPlayer(int playerType, GameField field, string gameId)
+    {
+        switch (playerType)
+        {
+            case 0:
+                // None
+                return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>();
+            case 1:
+                // Human
+                return field;
+            case 2:
+                // Computer Easy
+                var playerEasy = new KaNoBuPlayerEasy();
+                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerEasy, 1, 300, this);
+            case 3:
+                // Remote
+                this.server.StartServer();
+                return new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, gameId);
+            case 4:
+                // Computer Medium
+                var playerMedium = new KaNoBuPlayerMedium();
+                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerMedium, 1, 300, this);
+            default:
+                throw new InvalidOperationException("Unknown Player Type");
         }
     }
 }

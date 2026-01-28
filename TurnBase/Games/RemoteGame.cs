@@ -21,7 +21,7 @@ namespace TurnBase
     {
         private readonly IClient client;
         private readonly string serverUrl;
-        private readonly string gameId;
+        public string GameId { get; private set; }
         private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
         private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
 
@@ -29,7 +29,7 @@ namespace TurnBase
         {
             this.client = client;
             this.serverUrl = serverUrl;
-            this.gameId = gameId;
+            this.GameId = gameId;
         }
 
         public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
@@ -51,7 +51,7 @@ namespace TurnBase
 
         public async Task Play()
         {
-            var gameIdQueryString = new Dictionary<string, object> { { "gameId", gameId } };
+            var gameIdQueryString = new Dictionary<string, object> { { "gameId", this.GameId } };
             var playerId = ((await this.client.SendAction(serverUrl, "join", gameIdQueryString)).body as JoinGameResponseModel).PlayerId;
 
             var playerIdQueryString = new Dictionary<string, object> { { "playerId", playerId } };

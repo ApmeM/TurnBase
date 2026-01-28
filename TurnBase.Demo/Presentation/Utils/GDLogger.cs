@@ -1,12 +1,10 @@
 using Godot;
+using TurnBase;
 
-namespace TurnBase.Demo
+public class GDLogger : ILogger
 {
-    public class GDLogger: ILogger
+    public void Log(string message)
     {
-        public void Log(string message)
-        {
-            GD.Print(message);
-        }
+        GD.Print(message);
     }
 }

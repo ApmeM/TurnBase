@@ -35,12 +35,9 @@ public partial class GameField :
 
         var level = this.water;
 
-        GD.Print("Waiting for drag finished");
         var dragRes = await this.drag.ToSignal(this.drag, nameof(DragControl.DragFinished));
-        GD.Print($"Drag finished from {(Vector2)dragRes[0]} to {(Vector2)dragRes[1]}");
         var from = level.WorldToMap(level.ToLocal((Vector2)dragRes[0]));
         var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
-        GD.Print($"Move {from} to {to}");
 
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
         {
@@ -126,7 +123,6 @@ public partial class GameField :
     public void GameLogCurrentField(IField mainField)
     {
         this.memorizedField.SynchronizeField(mainField);
-        GD.Print(mainField.ToString());
 
         if (this.field.GetChildCount() == 0)
         {
@@ -177,9 +173,6 @@ public partial class GameField :
         if (notification.battle.HasValue)
         {
             var defenderUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == toMapPos);
-
-            GD.Print($"moved unit {movedUnit.PlayerNumber} {movedUnit.UnitType}");
-            GD.Print($"defender unit {defenderUnit.PlayerNumber} {defenderUnit.UnitType}");
 
             switch (notification.battle.Value.battleResult)
             {

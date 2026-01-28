@@ -9,7 +9,7 @@ namespace TurnBase
 
     public interface IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IGame
     {
-        Task Play();
+        string GameId { get; }
 
         AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player);
 

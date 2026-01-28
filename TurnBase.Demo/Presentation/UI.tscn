@@ -81,6 +81,13 @@ rect_min_size = Vector2( 0, 20 )
 rect_clip_content = true
 text = "127.0.0.1"
 
+[node name="ClientPlayer" type="OptionButton" parent="UIContainer/ClientGameType"]
+margin_right = 150.0
+margin_bottom = 20.0
+text = "Human"
+items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
+selected = 1
+
 [node name="ReplayGameType" type="VBoxContainer" parent="UIContainer"]
 visible = false
 margin_top = 162.0
