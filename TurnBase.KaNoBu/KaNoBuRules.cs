@@ -388,24 +388,6 @@ namespace TurnBase.KaNoBu
 
         public void PlayerDisconnected(IField field, int playerNumber)
         {
-            var mainField = (Field2D)field;
-            for (int i = 0; i < mainField.Width; i++)
-            {
-                for (int j = 0; j < mainField.Height; j++)
-                {
-                    var playerShip = (KaNoBuFigure)mainField.get(i, j);
-                    if (playerShip == null)
-                    {
-                        continue;
-                    }
-
-                    // If the player is disconnected, remove their flag from the field => they lose.
-                    if (playerShip.FigureType == KaNoBuFigure.FigureTypes.ShipFlag && playerShip.PlayerId == playerNumber)
-                    {
-                        mainField.trySet(i, j, null);
-                    }
-                }
-            }
         }
     }
 }
