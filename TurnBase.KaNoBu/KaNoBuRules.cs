@@ -99,7 +99,8 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < preparedField.Height; j++)
                 {
-                    var shipType = (preparedField.get(i, j) as KaNoBuFigure).FigureType;
+                    var p = new Point(i, j);
+                    var shipType = (preparedField.get(p) as KaNoBuFigure).FigureType;
                     if (!availableShips.ContainsKey(shipType))
                     {
                         return false;
@@ -138,7 +139,8 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < playerHeight; j++)
                 {
-                    var playerShip = (preparedField.get(i, j) as KaNoBuFigure).FigureType;
+                    var p = new Point(i, j);
+                    var playerShip = (preparedField.get(p) as KaNoBuFigure).FigureType;
                     Point position;
                     if (playerNumber == 0)
                     {
@@ -161,8 +163,8 @@ namespace TurnBase.KaNoBu
                         throw new Exception("Unsupported number of players.");
                     }
 
-                    mainField.trySet(position.X, position.Y, null);
-                    mainField.trySet(position.X, position.Y, new KaNoBuFigure(playerNumber, playerShip));
+                    mainField.trySet(position, null);
+                    mainField.trySet(position, new KaNoBuFigure(playerNumber, playerShip));
                 }
             }
 
@@ -186,7 +188,8 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < mainHeight; j++)
                 {
-                    var playerShip = (KaNoBuFigure)mainField.get(i, j);
+                    var p = new Point(i, j);
+                    var playerShip = (KaNoBuFigure)mainField.get(p);
                     if (playerShip == null)
                     {
                         continue;
@@ -231,8 +234,8 @@ namespace TurnBase.KaNoBu
                 return MoveValidationStatus.ERROR_OUTSIDE_FIELD;
             }
 
-            var from = (KaNoBuFigure)mainField.get(playerMove.From.X, playerMove.From.Y);
-            var to = (KaNoBuFigure)mainField.get(playerMove.To.X, playerMove.To.Y);
+            var from = (KaNoBuFigure)mainField.get(playerMove.From);
+            var to = (KaNoBuFigure)mainField.get(playerMove.To);
 
             if (from == null)
             {
@@ -265,13 +268,13 @@ namespace TurnBase.KaNoBu
                 return new KaNoBuMoveNotificationModel(playerMove);
             }
 
-            var from = (KaNoBuFigure)mainField.get(playerMove.From.X, playerMove.From.Y);
-            var to = (KaNoBuFigure)mainField.get(playerMove.To.X, playerMove.To.Y);
+            var from = (KaNoBuFigure)mainField.get(playerMove.From);
+            var to = (KaNoBuFigure)mainField.get(playerMove.To);
 
             if (to == null)
             {
-                mainField.trySet(playerMove.To.X, playerMove.To.Y, from);
-                mainField.trySet(playerMove.From.X, playerMove.From.Y, null);
+                mainField.trySet(playerMove.To, from);
+                mainField.trySet(playerMove.From, null);
                 return new KaNoBuMoveNotificationModel(playerMove);
             }
 
@@ -279,9 +282,9 @@ namespace TurnBase.KaNoBu
 
             if (winner != null)
             {
-                mainField.trySet(playerMove.From.X, playerMove.From.Y, null);
-                mainField.trySet(playerMove.To.X, playerMove.To.Y, null);
-                mainField.trySet(playerMove.To.X, playerMove.To.Y, winner);
+                mainField.trySet(playerMove.From, null);
+                mainField.trySet(playerMove.To, null);
+                mainField.trySet(playerMove.To, winner);
                 winner.WinNumber++;
                 if(winner.WinNumber % 3 == 0)
                 {
@@ -296,7 +299,8 @@ namespace TurnBase.KaNoBu
                 {
                     for (int j = 0; j < mainField.Height; j++)
                     {
-                        var playerShip = (KaNoBuFigure)mainField.get(i, j);
+                        var p = new Point(i, j);
+                        var playerShip = (KaNoBuFigure)mainField.get(p);
                         if (playerShip == null)
                         {
                             continue;

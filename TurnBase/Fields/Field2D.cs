@@ -24,11 +24,6 @@ namespace TurnBase
             this.realField = realField;
         }
 
-        public IFigure get(int fromX, int fromY)
-        {
-            return get(new Point { X = fromX, Y = fromY });
-        }
-
         public IFigure get(Point from)
         {
             if (!IsInBounds(from))
@@ -39,10 +34,6 @@ namespace TurnBase
             return realField[from.X, from.Y];
         }
 
-        public SetStatus trySet(int toX, int toY, IFigure ship)
-        {
-            return trySet(new Point { X = toX, Y = toY }, ship);
-        }
         public SetStatus trySet(Point to, IFigure ship)
         {
             if (!IsInBounds(to))
@@ -82,11 +73,6 @@ namespace TurnBase
                 }
             }
             return result;
-        }
-
-        public bool IsInBounds(int x, int y)
-        {
-            return IsInBounds(new Point { X = x, Y = y });
         }
 
         public bool IsInBounds(Point point)

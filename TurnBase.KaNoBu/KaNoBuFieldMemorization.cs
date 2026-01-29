@@ -23,8 +23,9 @@ namespace TurnBase.KaNoBu
                 {
                     for (var y = 0; y < model.Height; y++)
                     {
-                        var requestShip = model.get(x, y) as KaNoBuFigure;
-                        var memorizedShip = Field.get(x, y) as KaNoBuFigure;
+                        var p = new Point(x, y);
+                        var requestShip = model.get(p) as KaNoBuFigure;
+                        var memorizedShip = Field.get(p) as KaNoBuFigure;
 
                         if (requestShip != null && memorizedShip == null || memorizedShip != null && requestShip == null)
                         {
@@ -53,11 +54,11 @@ namespace TurnBase.KaNoBu
             var fromMapPos = notification.move.From;
             var toMapPos = notification.move.To;
 
-            var movedUnit = this.Field.get(fromMapPos.X, fromMapPos.Y) as KaNoBuFigure;
-            var defenderUnit = this.Field.get(toMapPos.X, toMapPos.Y) as KaNoBuFigure;
+            var movedUnit = this.Field.get(fromMapPos) as KaNoBuFigure;
+            var defenderUnit = this.Field.get(toMapPos) as KaNoBuFigure;
 
-            this.Field.trySet(fromMapPos.X, fromMapPos.Y, null);
-            this.Field.trySet(toMapPos.X, toMapPos.Y, null);
+            this.Field.trySet(fromMapPos, null);
+            this.Field.trySet(toMapPos, null);
 
             if (notification.battle.HasValue)
             {
@@ -66,8 +67,8 @@ namespace TurnBase.KaNoBu
                     case KaNoBuMoveNotificationModel.BattleResult.Draw:
                         if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = movedUnit.FigureType;
                         if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = defenderUnit.FigureType;
-                        this.Field.trySet(fromMapPos.X, fromMapPos.Y, movedUnit);
-                        this.Field.trySet(toMapPos.X, toMapPos.Y, defenderUnit);
+                        this.Field.trySet(fromMapPos, movedUnit);
+                        this.Field.trySet(toMapPos, defenderUnit);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
                         // Attacker won
@@ -84,7 +85,7 @@ namespace TurnBase.KaNoBu
                             if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Looser[movedUnit.FigureType];
                             if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Winner[defenderUnit.FigureType];
                         }
-                        this.Field.trySet(toMapPos.X, toMapPos.Y, movedUnit);
+                        this.Field.trySet(toMapPos, movedUnit);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                         // Defender won
@@ -96,14 +97,14 @@ namespace TurnBase.KaNoBu
                         if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Winner[movedUnit.FigureType];
                         if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Looser[defenderUnit.FigureType];
 
-                        this.Field.trySet(toMapPos.X, toMapPos.Y, defenderUnit);
+                        this.Field.trySet(toMapPos, defenderUnit);
                         break;
                 }
             }
             else
             {
                 // No battle - swim here.
-                this.Field.trySet(toMapPos.X, toMapPos.Y, movedUnit);
+                this.Field.trySet(toMapPos, movedUnit);
             }
         }
     }

@@ -132,7 +132,8 @@ public partial class GameField :
             {
                 for (var y = 0; y < mainField.Height; y++)
                 {
-                    var originalShip = mainField.get(x, y) as KaNoBuFigure;
+                    var p = new Point(x, y);
+                    var originalShip = mainField.get(p) as KaNoBuFigure;
                     if (originalShip == null)
                     {
                         continue;
@@ -241,8 +242,8 @@ public partial class GameField :
             {
                 continue;
             }
-
-            var figure = this.memorizedField.Field.get((int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y) as KaNoBuFigure;
+            var p = new Point((int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y);
+            var figure = this.memorizedField.Field.get(p) as KaNoBuFigure;
             unit.PlayerNumber = figure.PlayerId;
             unit.UnitType = figure.FigureType;
         }
