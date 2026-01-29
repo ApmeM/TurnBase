@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
@@ -6,25 +8,31 @@ namespace TurnBase.KaNoBu
         IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
         private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
+        private readonly Func<int, Task> delayAction;
         private readonly int initDelay;
         private readonly int turnDelay;
 
-        public DelayedPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> originalPlayer, int initDelay, int turnDelay)
+        public DelayedPlayer(
+            IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> originalPlayer, 
+            Func<int, Task> delayAction,
+            int initDelay, 
+            int turnDelay)
         {
             this.player = originalPlayer;
+            this.delayAction = delayAction;
             this.initDelay = initDelay;
             this.turnDelay = turnDelay;
         }
 
         public async Task<InitResponseModel<TInitResponseModel>> Init(InitModel<TInitModel> model)
         {
-            await Task.Delay(this.initDelay);
+            await delayAction(this.initDelay);
             return await this.player.Init(model);
         }
 
         public async Task<MakeTurnResponseModel<TMoveResponseModel>> MakeTurn(MakeTurnModel<TMoveModel> model)
         {
-            await Task.Delay(this.turnDelay);
+            await delayAction(this.turnDelay);
             return await this.player.MakeTurn(model);
         }
 

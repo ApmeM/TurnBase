@@ -2,6 +2,7 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Godot;
 using TurnBase;
 using TurnBase.KaNoBu;
@@ -129,10 +130,10 @@ public partial class UI
             default:
                 throw new InvalidOperationException("Unknown game type");
         }
-        
+
         kanobu.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
 
-        if(!humanFound)
+        if (!humanFound)
         {
             kanobu.AddGameLogListener(field);
         }
@@ -153,7 +154,11 @@ public partial class UI
             case 2:
                 // Computer Easy
                 var playerEasy = new KaNoBuPlayerEasy();
-                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerEasy, 1, 300, this);
+                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
+                    playerEasy, 
+                    async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
+                    1,
+                    300);
             case 3:
                 // Remote
                 this.server.StartServer();
@@ -161,7 +166,11 @@ public partial class UI
             case 4:
                 // Computer Medium
                 var playerMedium = new KaNoBuPlayerMedium();
-                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(playerMedium, 1, 300, this);
+                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
+                    playerMedium,
+                    async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
+                    1,
+                    300);
             default:
                 throw new InvalidOperationException("Unknown Player Type");
         }

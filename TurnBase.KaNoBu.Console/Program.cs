@@ -8,15 +8,15 @@ public class Program
     {
         var rules = new KaNoBuRules(8);
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), 1, 500));
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), 1, 500));
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), 1, 500));
-        
-        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), 1, 500));
+        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), async (delay) => await Task.Delay(delay), 1, 500));
+        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), async (delay) => await Task.Delay(delay), 1, 500));
+        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), async (delay) => await Task.Delay(delay), 1, 500));
+
+        game.AddPlayer(new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new KaNoBuPlayerEasy(), async (delay) => await Task.Delay(delay), 1, 500));
 
         // game.AddPlayer(new KaNoBuPlayerConsole());
         game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new ConsoleLogger()));
-        
+
         await game.Play();
     }
 }

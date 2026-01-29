@@ -67,6 +67,11 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
         {
+            // if (r.Next(100) < 20)
+            // {
+            //     return null;
+            // }
+
             var from = this.findAllMovement(model.Request.Field);
 
             if (from == null || from.Count == 0)
