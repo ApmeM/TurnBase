@@ -70,13 +70,15 @@ margin_left = -32.0
 margin_top = -69.0
 margin_right = 32.0
 margin_bottom = -56.0
-columns = 6
+mouse_filter = 2
+columns = 3
 
 [node name="StarExample" type="TextureRect" parent="Stars"]
 visible = false
 margin_right = 20.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 20, 20 )
+mouse_filter = 2
 texture = SubResource( 58 )
 expand = true
 
