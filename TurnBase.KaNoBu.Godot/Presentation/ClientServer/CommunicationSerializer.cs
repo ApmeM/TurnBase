@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using Newtonsoft.Json;
 
@@ -5,16 +6,19 @@ public class CommunicationSerializer
 {
     public static T DeserializeObject<T>(string value) where T : ICommunicationModel
     {
-        GD.Print($"ORIGINAL: {value}");
-
-        var result = (T)JsonConvert.DeserializeObject<CommunicationModel>(value, new JsonSerializerSettings()
+        try
         {
-            TypeNameHandling = TypeNameHandling.Auto
-        }).Data;
+            return (T)JsonConvert.DeserializeObject<CommunicationModel>(value, new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            }).Data;
+        }
+        catch (Exception ex)
+        {
+            GD.Print($"Incorrect request: {ex}");
+            return default;
+        }
 
-        GD.Print($"RESULT: {SerializeObject(result)}");
-
-        return result;
     }
     public static string SerializeObject(ICommunicationModel value)
     {

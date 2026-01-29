@@ -46,13 +46,15 @@ namespace TurnBase
                 return AddPlayerStatus.PLAYER_ALREADY_ADDED;
             }
 
-            this.players.Add(player, new PlayerData { IsInGame = true, PlayerNumber = this.players.Count });
+            this.players.Add(
+                new PlayerFailProtection<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>(player), 
+                new PlayerData { IsInGame = true, PlayerNumber = this.players.Count });
             return AddPlayerStatus.OK;
         }
 
         public void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener)
         {
-            this.gameLogListeners.Add(gameLogListener);
+            this.gameLogListeners.Add(new FailProtectedListener<TMoveNotificationModel>(gameLogListener));
         }
 
         public async Task Play()
@@ -135,7 +137,7 @@ namespace TurnBase
 
             var initResponseModel = await player.Init(new InitModel<TInitModel> { PlayerId = playerNumber, Request = initModel });
 
-            if (initResponseModel.Response == null)
+            if (initResponseModel == null || initResponseModel.Response == null)
             {
                 return false;
             }
@@ -192,7 +194,7 @@ namespace TurnBase
                 var makeTurnResponseModel = await player.MakeTurn(new MakeTurnModel<TMoveModel> { TryNumber = tryNumber, Request = field });
                 tryNumber++;
 
-                if (makeTurnResponseModel.Response == null)
+                if (makeTurnResponseModel == null || makeTurnResponseModel.Response == null)
                 {
                     return false;
                 }
