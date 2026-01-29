@@ -29,7 +29,7 @@ public partial class GameField :
     {
         this.timerLabel.ShowMessage("Your turn", 1f);
 
-        this.memorizedField.SynchronizeField(model.Request.Field);
+        this.memorizedField.SynchronizeField((Field2D)model.Request.Field);
 
         this.UpdateKnownShips();
 
@@ -120,8 +120,9 @@ public partial class GameField :
         this.field.RemoveChildren();
     }
 
-    public void GameLogCurrentField(IField mainField)
+    public void GameLogCurrentField(IField field)
     {
+        var mainField = (Field2D)field;
         this.memorizedField.SynchronizeField(mainField);
 
         if (this.field.GetChildCount() == 0)

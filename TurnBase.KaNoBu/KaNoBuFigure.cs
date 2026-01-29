@@ -80,7 +80,7 @@ namespace TurnBase.KaNoBu
             }
         }
 
-        public string PrintableName()
+        public override string ToString()
         {
             return this.PlayerId + this.FigureType.PrintableName();
         }

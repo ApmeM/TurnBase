@@ -1,5 +1,13 @@
 namespace TurnBase
 {
+    public enum SetStatus
+    {
+        OK,
+        OUT_OF_BOUNDS,
+        OCCUPIED,
+        READ_ONLY,
+    }
+
     public class Field2D : IField
     {
         public IFigure[,] realField;
@@ -18,34 +26,43 @@ namespace TurnBase
 
         public IFigure get(int fromX, int fromY)
         {
-            if (fromX < 0 || fromX >= Width || fromY < 0 || fromY >= Height)
+            return get(new Point { X = fromX, Y = fromY });
+        }
+
+        public IFigure get(Point from)
+        {
+            if (!IsInBounds(from))
             {
                 return null;
             }
 
-            return realField[fromX, fromY];
+            return realField[from.X, from.Y];
         }
 
         public SetStatus trySet(int toX, int toY, IFigure ship)
         {
-            if (toX < 0 || toX >= Width || toY < 0 || toY >= Height)
+            return trySet(new Point { X = toX, Y = toY }, ship);
+        }
+        public SetStatus trySet(Point to, IFigure ship)
+        {
+            if (!IsInBounds(to))
             {
                 return SetStatus.OUT_OF_BOUNDS;
             }
 
-            if (ship != null && this.realField[toX, toY] != null)
+            if (ship != null && this.realField[to.X, to.Y] != null)
             {
                 return SetStatus.OCCUPIED;
             }
 
             if (ship == null)
             {
-                this.realField[toX, toY] = null;
+                this.realField[to.X, to.Y] = null;
                 return SetStatus.OK;
             }
             else
             {
-                this.realField[toX, toY] = ship;
+                this.realField[to.X, to.Y] = ship;
                 return SetStatus.OK;
             }
         }
@@ -60,16 +77,39 @@ namespace TurnBase
                     var figure = this.realField[x, y];
                     if (figure != null)
                     {
-                        result.trySet(x, y, figure.CopyForPlayer(PlayerId));
+                        result.realField[x, y] = figure.CopyForPlayer(PlayerId);
                     }
                 }
             }
             return result;
         }
 
+        public bool IsInBounds(int x, int y)
+        {
+            return IsInBounds(new Point { X = x, Y = y });
+        }
+
         public bool IsInBounds(Point point)
         {
             return point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
+        }
+
+        public Point RotatePointFor2Players(Point point, int playerNumber)
+        {
+            if (playerNumber > 1)
+            {
+                return default;
+            }
+
+            playerNumber = playerNumber % 2;
+
+            int mainWidth = this.Width - 1;
+            int mainHeight = this.Height - 1;
+
+            int x = playerNumber * mainWidth - (playerNumber * 2 - 1) * point.X;
+            int y = playerNumber * mainHeight - (playerNumber * 2 - 1) * point.Y;
+
+            return new Point { X = x, Y = y };
         }
 
         public override string ToString()
@@ -88,8 +128,8 @@ namespace TurnBase
                 result += $"  {i}";
                 for (int j = 0; j < this.Width; j++)
                 {
-                    var ship = this.get(j, i);
-                    result += $" {ship?.PrintableName() ?? "  "}";
+                    var ship = this.realField[j, i];
+                    result += $" {ship?.ToString() ?? "  "}";
                 }
 
                 result += $"   {i}\n";

@@ -76,9 +76,10 @@ namespace TurnBase.KaNoBu
             return new KaNoBuInitModel(initFieldWidth, initFieldHeight, availableShips);
         }
 
-        public bool TryApplyInitResponse(IField mainField, int playerNumber, KaNoBuInitResponseModel initResponse)
+        public bool TryApplyInitResponse(IField field, int playerNumber, KaNoBuInitResponseModel initResponse)
         {
-            var preparedField = initResponse.Field;
+            var preparedField = (Field2D)initResponse.Field;
+            var mainField = (Field2D)field;
 
             var ships = this.GetInitModel(playerNumber).AvailableFigures;
             var availableShips = new Dictionary<KaNoBuFigure.FigureTypes, int>();
@@ -125,8 +126,8 @@ namespace TurnBase.KaNoBu
             var mainHeight = mainField.Height;
             var mainWidth = mainField.Width;
 
-            var playerWidth = initResponse.Field.Width;
-            var playerHeight = initResponse.Field.Height;
+            var playerWidth = preparedField.Width;
+            var playerHeight = preparedField.Height;
 
             if (initFieldWidth != playerWidth || initFieldHeight != playerHeight)
             {
@@ -137,7 +138,7 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < playerHeight; j++)
                 {
-                    var playerShip = (initResponse.Field.get(i, j) as KaNoBuFigure).FigureType;
+                    var playerShip = (preparedField.get(i, j) as KaNoBuFigure).FigureType;
                     Point position;
                     if (playerNumber == 0)
                     {
@@ -173,8 +174,10 @@ namespace TurnBase.KaNoBu
             return new KaNoBuMoveModel(mainField.copyForPlayer(playerNumber));
         }
 
-        public KaNoBuMoveResponseModel AutoMove(IField mainField, int playerNumber)
+        public KaNoBuMoveResponseModel AutoMove(IField field, int playerNumber)
         {
+            var mainField = (Field2D)field;
+
             var mainWidth = mainField.Width;
             var mainHeight = mainField.Height;
             var canMove = false;
@@ -214,8 +217,10 @@ namespace TurnBase.KaNoBu
             }
         }
 
-        public MoveValidationStatus CheckMove(IField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
+        public MoveValidationStatus CheckMove(IField field, int playerNumber, KaNoBuMoveResponseModel playerMove)
         {
+            var mainField = (Field2D)field;
+
             if (playerMove.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
             {
                 return MoveValidationStatus.OK;
@@ -252,8 +257,9 @@ namespace TurnBase.KaNoBu
             return MoveValidationStatus.OK;
         }
 
-        public KaNoBuMoveNotificationModel MakeMove(IField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
+        public KaNoBuMoveNotificationModel MakeMove(IField field, int playerNumber, KaNoBuMoveResponseModel playerMove)
         {
+            var mainField = (Field2D)field;
             if (playerMove.Status == KaNoBuMoveResponseModel.MoveStatus.SKIP_TURN)
             {
                 return new KaNoBuMoveNotificationModel(playerMove);
@@ -380,8 +386,9 @@ namespace TurnBase.KaNoBu
             // Nothing to do here.
         }
 
-        public void PlayerDisconnected(IField mainField, int playerNumber)
+        public void PlayerDisconnected(IField field, int playerNumber)
         {
+            var mainField = (Field2D)field;
             for (int i = 0; i < mainField.Width; i++)
             {
                 for (int j = 0; j < mainField.Height; j++)

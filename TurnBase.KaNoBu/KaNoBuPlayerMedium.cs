@@ -46,7 +46,7 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
         {
-            this.memorizedField.SynchronizeField(model.Request.Field);
+            this.memorizedField.SynchronizeField((Field2D)model.Request.Field);
             var from = this.findAllMovement(this.memorizedField.Field).OrderByDescending(a => EvaluateMove(this.memorizedField.Field, a)).ToList();
 
             if (from.Count == 0)
@@ -62,8 +62,9 @@ namespace TurnBase.KaNoBu
                 Response = from[0]
             };
         }
-        private int EvaluateMove(IField field, KaNoBuMoveResponseModel a)
+        private int EvaluateMove(IField mainField, KaNoBuMoveResponseModel a)
         {
+            var field = (Field2D)mainField;
             var shipFrom = field.get(a.From.X, a.From.Y) as KaNoBuFigure;
             var shipTo = field.get(a.To.X, a.To.Y) as KaNoBuFigure;
             if (shipTo != null && shipTo.PlayerId != this.myNumber)
@@ -82,7 +83,7 @@ namespace TurnBase.KaNoBu
             foreach (var dir in directions)
             {
                 var to = new Point { X = a.To.X + dir.X, Y = a.To.Y + dir.Y };
-                if (to.X < 0 || to.Y < 0 || to.X >= field.Width || to.Y >= field.Height)
+                if (!field.IsInBounds(to))
                 {
                     continue;
                 }
@@ -120,8 +121,9 @@ namespace TurnBase.KaNoBu
             return 0;
         }
 
-        private IEnumerable<KaNoBuMoveResponseModel> findAllMovement(IField field)
+        private IEnumerable<KaNoBuMoveResponseModel> findAllMovement(IField mainField)
         {
+            var field = (Field2D)mainField;
             for (int x = 0; x < field.Width; x++)
             {
                 for (int y = 0; y < field.Height; y++)
@@ -146,7 +148,7 @@ namespace TurnBase.KaNoBu
                     foreach (var dir in directions)
                     {
                         var to = new Point { X = x + dir.X, Y = y + dir.Y };
-                        if (to.X < 0 || to.Y < 0 || to.X >= field.Width || to.Y >= field.Height)
+                        if (!field.IsInBounds(to))
                         {
                             continue;
                         }
@@ -177,7 +179,7 @@ namespace TurnBase.KaNoBu
 
         public void GameLogCurrentField(IField mainField)
         {
-            this.memorizedField.SynchronizeField(mainField);
+            this.memorizedField.SynchronizeField((Field2D)mainField);
         }
 
         public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)

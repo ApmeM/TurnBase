@@ -4,18 +4,18 @@ namespace TurnBase.KaNoBu
 {
     public class KaNoBuFieldMemorization
     {
-        public IField Field;
+        public Field2D Field;
 
         public void Clear()
         {
             Field = null;
         }
 
-        public void SynchronizeField(IField model)
+        public void SynchronizeField(Field2D model)
         {
             if (Field == null)
             {
-                Field = model.copyForPlayer(-1);
+                Field = (Field2D)model.copyForPlayer(-1);
             }
             else
             {

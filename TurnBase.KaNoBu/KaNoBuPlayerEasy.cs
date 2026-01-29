@@ -84,8 +84,9 @@ namespace TurnBase.KaNoBu
             };
         }
 
-        private List<KaNoBuMoveResponseModel> findAllMovement(IField field)
+        private List<KaNoBuMoveResponseModel> findAllMovement(IField mainField)
         {
+            var field = (Field2D)mainField;
             var availableShips = new List<KaNoBuMoveResponseModel>();
             for (int x = 0; x < field.Width; x++)
             {
@@ -118,9 +119,10 @@ namespace TurnBase.KaNoBu
             return availableShips;
         }
 
-        private void tryAdd(List<KaNoBuMoveResponseModel> availableShips, IField field, Point from, int x, int y)
+        private void tryAdd(List<KaNoBuMoveResponseModel> availableShips, IField mainField, Point from, int x, int y)
         {
-            if (x < 0 || y < 0 || x >= field.Width || y >= field.Height)
+            var field = (Field2D)mainField;
+            if (!field.IsInBounds(x, y))
             {
                 return;
             }

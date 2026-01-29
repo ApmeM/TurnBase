@@ -87,7 +87,7 @@ namespace TurnBase.KaNoBu
                 return $"Player skip turn.";
             }
 
-            var result = $"Player move {move.From.PrintableName()}-{move.To.PrintableName()}.";
+            var result = $"Player move {move.From}-{move.To}.";
 
             if (battle != null)
             {
