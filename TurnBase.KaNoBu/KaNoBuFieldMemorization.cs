@@ -38,7 +38,7 @@ namespace TurnBase.KaNoBu
                         }
 
                         memorizedShip.PlayerId = requestShip.PlayerId;
-                        memorizedShip.FigureType = memorizedShip.FigureType == KaNoBuFigure.FigureTypes.Unknown ? requestShip.FigureType : memorizedShip.FigureType;
+                        memorizedShip.FigureType = requestShip.FigureType != KaNoBuFigure.FigureTypes.Unknown ? requestShip.FigureType : memorizedShip.FigureType;
                     }
                 }
             }
