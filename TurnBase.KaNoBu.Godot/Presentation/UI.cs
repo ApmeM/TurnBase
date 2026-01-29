@@ -150,7 +150,11 @@ public partial class UI
                 return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>();
             case 1:
                 // Human
-                return field;
+                return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
+                    field, 
+                    async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
+                    1000,
+                    60000);
             case 2:
                 // Computer Easy
                 var playerEasy = new KaNoBuPlayerEasy();
@@ -162,7 +166,12 @@ public partial class UI
             case 3:
                 // Remote
                 this.server.StartServer();
-                return new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, gameId);
+                var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, gameId);
+                return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
+                    player, 
+                    async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
+                    600000,
+                    60000);
             case 4:
                 // Computer Medium
                 var playerMedium = new KaNoBuPlayerMedium();

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
 {
-    public class DelayedPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
+    public class TimeoutPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
         PassThroughListener<TMoveNotificationModel>,
         IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
@@ -13,7 +13,7 @@ namespace TurnBase.KaNoBu
         private readonly int initDelay;
         private readonly int turnDelay;
 
-        public DelayedPlayer(
+        public TimeoutPlayer(
             IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> originalPlayer,
             Func<int, Task> delayAction,
             int initDelay,
@@ -27,14 +27,28 @@ namespace TurnBase.KaNoBu
 
         public async Task<InitResponseModel<TInitResponseModel>> Init(InitModel<TInitModel> model)
         {
-            await delayAction(this.initDelay);
-            return await this.player.Init(model);
+            var task1 = delayAction(this.initDelay);
+            var task2 = this.player.Init(model);
+            var task = await Task.WhenAny(task1, task2);
+            if (task == task2)
+            {
+                return await task2;
+            }
+
+            return new InitResponseModel<TInitResponseModel>();
         }
 
         public async Task<MakeTurnResponseModel<TMoveResponseModel>> MakeTurn(MakeTurnModel<TMoveModel> model)
         {
-            await delayAction(this.turnDelay);
-            return await this.player.MakeTurn(model);
+            var task1 = delayAction(this.turnDelay);
+            var task2 = this.player.MakeTurn(model);
+            var task = await Task.WhenAny(task1, task2);
+            if (task == task2)
+            {
+                return await task2;
+            }
+            
+            return new MakeTurnResponseModel<TMoveResponseModel>();
         }
     }
 }
