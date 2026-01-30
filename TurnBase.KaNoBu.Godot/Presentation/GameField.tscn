@@ -18,7 +18,7 @@ script = ExtResource( 1 )
 UnitScene = ExtResource( 2 )
 
 [node name="DraggableCamera" parent="." instance=ExtResource( 10 )]
-position = Vector2( 320, 448 )
+anchor_mode = 0
 limit_left = -64
 limit_top = -64
 limit_right = 704

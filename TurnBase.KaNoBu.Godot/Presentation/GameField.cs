@@ -74,9 +74,13 @@ public partial class GameField :
                 cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 2 / 4);
                 break;
         }
+        
+        var newZoom = Vector2.One / 1.3f;
 
-        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, cameraCenter, 1f);
-        tween.InterpolateProperty(this.draggableCamera, "zoom", this.draggableCamera.Scale, Vector2.One / 1.3f, 1f);
+        var newSize = this.GetViewport().Size * newZoom;
+        var newPos = cameraCenter - newSize / 2;
+        tween.InterpolateProperty(this.draggableCamera, "global_position", this.draggableCamera.GlobalPosition, newPos, 1f);
+        tween.InterpolateProperty(this.draggableCamera, "zoom", this.draggableCamera.Zoom, newZoom, 1f);
         tween.Start();
         await ToSignal(tween, "tween_all_completed");
         tween.QueueFree();
@@ -88,9 +92,12 @@ public partial class GameField :
         this.AddChild(tween);
 
         var cameraCenter = new Vector2(this.GetViewport().Size.x / 2, this.GetViewport().Size.y / 2);
+        var newZoom = Vector2.One;
 
-        tween.InterpolateProperty(this.draggableCamera, "position", this.draggableCamera.Position, cameraCenter, 1f);
-        tween.InterpolateProperty(this.draggableCamera, "scale", this.draggableCamera.Scale, Vector2.One, 1f);
+        var newSize = this.GetViewport().Size * newZoom;
+        var newPos = cameraCenter - newSize / 2;
+        tween.InterpolateProperty(this.draggableCamera, "global_position", this.draggableCamera.GlobalPosition, newPos, 1f);
+        tween.InterpolateProperty(this.draggableCamera, "zoom", this.draggableCamera.Zoom, newZoom, 1f);
         tween.Start();
         await ToSignal(tween, "tween_all_completed");
         tween.QueueFree();
