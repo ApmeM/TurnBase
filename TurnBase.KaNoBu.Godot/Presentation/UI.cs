@@ -64,7 +64,7 @@ public partial class UI
             case 0:
                 {
                     // server
-                    var rules = new KaNoBuRules(8);
+                    var rules = new KaNoBuRules(8, true);
                     kanobu = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
                     var playerTypes = new[]{

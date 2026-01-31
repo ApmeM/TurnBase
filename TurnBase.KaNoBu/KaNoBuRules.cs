@@ -20,8 +20,9 @@ namespace TurnBase.KaNoBu
         };
 
         private readonly int size;
+        private readonly bool visibleShips;
 
-        public KaNoBuRules(int size)
+        public KaNoBuRules(int size, bool visibleShips)
         {
             if (size < 6)
             {
@@ -29,6 +30,7 @@ namespace TurnBase.KaNoBu
             }
 
             this.size = size;
+            this.visibleShips = visibleShips;
         }
 
         public IField generateGameField()
@@ -164,7 +166,7 @@ namespace TurnBase.KaNoBu
                     }
 
                     mainField.trySet(position, null);
-                    mainField.trySet(position, new KaNoBuFigure(playerNumber, playerShip));
+                    mainField.trySet(position, new KaNoBuFigure(playerNumber, playerShip, this.visibleShips, 0));
                 }
             }
 

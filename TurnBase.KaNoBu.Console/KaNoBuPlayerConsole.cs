@@ -103,7 +103,7 @@ public class KaNoBuPlayerConsole :
                     {
                         continue;
                     }
-                    preparedField.trySet(point, new KaNoBuFigure(playerId, ship));
+                    preparedField.trySet(point, new KaNoBuFigure(playerId, ship, true, 0));
                     break;
                 }
                 ships.RemoveAt(0);
@@ -115,7 +115,7 @@ public class KaNoBuPlayerConsole :
                     this.showMessage("Cant place on this field. It is already occupied.");
                     continue;
                 }
-                preparedField.trySet(p.Value, new KaNoBuFigure(playerId, ship));
+                preparedField.trySet(p.Value, new KaNoBuFigure(playerId, ship, true, 0));
                 ships.RemoveAt(0);
             }
         }

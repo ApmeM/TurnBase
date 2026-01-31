@@ -29,6 +29,8 @@ namespace TurnBase.KaNoBu
 
     public class KaNoBuFigure : IFigure
     {
+        private readonly bool visibleForAllPlayers;
+
         public enum FigureTypes
         {
             Unknown = 0,
@@ -43,10 +45,11 @@ namespace TurnBase.KaNoBu
         public FigureTypes FigureType { get; set; }
         public int WinNumber { get; set; }
 
-        public KaNoBuFigure(int playerId, FigureTypes figureType, int winNumber = 0)
+        public KaNoBuFigure(int playerId, FigureTypes figureType, bool visibleForAllPlayers, int winNumber)
         {
             PlayerId = playerId;
             FigureType = figureType;
+            this.visibleForAllPlayers = visibleForAllPlayers;
             WinNumber = winNumber;
         }
 
@@ -70,13 +73,13 @@ namespace TurnBase.KaNoBu
 
         public IFigure CopyForPlayer(int playerId)
         {
-            if (this.PlayerId == playerId || playerId == -1)
+            if (this.PlayerId == playerId || playerId == -1 || visibleForAllPlayers)
             {
-                return new KaNoBuFigure(this.PlayerId, this.FigureType);
+                return new KaNoBuFigure(this.PlayerId, this.FigureType, visibleForAllPlayers, this.WinNumber);
             }
             else
             {
-                return new KaNoBuFigure(this.PlayerId, FigureTypes.Unknown);
+                return new KaNoBuFigure(this.PlayerId, FigureTypes.Unknown, visibleForAllPlayers, this.WinNumber);
             }
         }
 

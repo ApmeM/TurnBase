@@ -33,7 +33,7 @@ namespace TurnBase.KaNoBu
                 {
                     var p = new Point(i, j);
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField.trySet(p, new KaNoBuFigure(this.myNumber, ship));
+                    preparedField.trySet(p, new KaNoBuFigure(this.myNumber, ship, true, 0));
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
