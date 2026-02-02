@@ -148,17 +148,17 @@ public partial class DraggableCamera
             }
             if (buttonEvent.ButtonIndex == (int)ButtonList.WheelUp)
             {
-                this.NormalizedZoom += 0.1f;
+                this.NormalizedZoom -= 0.1f;
             }
             if (buttonEvent.ButtonIndex == (int)ButtonList.WheelDown)
             {
-                this.NormalizedZoom -= 0.1f;
-            }
+                this.NormalizedZoom += 0.1f;
+            } 
         }
 
         if (@event is InputEventMagnifyGesture gesture)
         {
-            this.NormalizedZoom += gesture.Factor - 1;
+            this.NormalizedZoom -= gesture.Factor - 1;
         }
     }
 

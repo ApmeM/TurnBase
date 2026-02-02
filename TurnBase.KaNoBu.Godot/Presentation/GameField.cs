@@ -269,6 +269,13 @@ public partial class GameField :
 
     public override void _Ready()
     {
+        base._Ready();
         this.FillMembers();
+        this.AddToGroup(Groups.Field);
+    }
+
+    public Vector2 WorldToMap(Vector2 position)
+    {
+        return this.water.WorldToMap(position);
     }
 }

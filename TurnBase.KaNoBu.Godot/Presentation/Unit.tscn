@@ -9,7 +9,7 @@
 resource_local_to_scene = true
 flags = 4
 atlas = ExtResource( 2 )
-region = Rect2( 70, 600, 66, 113 )
+region = Rect2( 0, 0, 66, 113 )
 
 [sub_resource type="AtlasTexture" id=21]
 flags = 4
@@ -20,7 +20,7 @@ region = Rect2( 280, 110, 14, 22 )
 resource_local_to_scene = true
 flags = 4
 atlas = ExtResource( 2 )
-region = Rect2( 300, 170, 20, 20 )
+region = Rect2( 320, 170, 20, 20 )
 
 [sub_resource type="AtlasTexture" id=56]
 flags = 4
@@ -40,6 +40,7 @@ region = Rect2( 5, 84, 6, 6 )
 [node name="Unit" type="Node2D"]
 scale = Vector2( 0.6, 0.55 )
 script = ExtResource( 1 )
+UnitType = 1
 
 [node name="Ship" type="Sprite" parent="."]
 texture = SubResource( 54 )

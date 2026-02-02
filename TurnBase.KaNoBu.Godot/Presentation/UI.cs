@@ -1,16 +1,22 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Godot;
 using TurnBase;
 using TurnBase.KaNoBu;
 
-
 [SceneReference("UI.tscn")]
 public partial class UI
 {
+    [Export]
+    public List<PackedScene> Levels;
+
+    [Export]
+    public PackedScene GameField;
+
+    [Export]
+    public PackedScene Replay;
+
     public override void _Ready()
     {
         this.FillMembers();
@@ -19,6 +25,14 @@ public partial class UI
         this.startButton.Connect("pressed", this, nameof(StartButonClicked));
 
         this.serverIpInfo.Text = string.Join("\n", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
+
+        if (Levels != null)
+        {
+            for (int i = 0; i < Levels.Count; i++)
+            {
+                this.levelType.AddItem($"{i}");
+            }
+        }
     }
 
     private void GameTypeChanged(int selectedId)
@@ -26,6 +40,7 @@ public partial class UI
         this.serverGameType.Visible = false;
         this.clientGameType.Visible = false;
         this.replayGameType.Visible = false;
+        this.levelsGameType.Visible = false;
         switch (this.gameType.GetSelectedId())
         {
             case 0:
@@ -39,6 +54,10 @@ public partial class UI
             case 2:
                 // Replay
                 this.replayGameType.Visible = true;
+                break;
+            case 3:
+                // Levels
+                this.levelsGameType.Visible = true;
                 break;
             default:
                 throw new Exception("Unknown game type");
@@ -55,24 +74,29 @@ public partial class UI
 
     private List<ICommunicationModel> lastReplay;
 
-    public IGame BuildGame(GameField field)
+    public IGame BuildGame()
     {
         var humanFound = false;
+        GameField field;
         IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> kanobu;
         switch (this.gameType.GetSelectedId())
         {
             case 0:
                 {
                     // server
-                    var rules = new KaNoBuRules(8, true);
+                    field = this.GameField.Instance<GameField>();
+                    this.GetParent().AddChild(field);
+
+                    var rules = new KaNoBuRules(8);
+                    rules.AllFiguresVisible = true;
                     kanobu = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
                     var playerTypes = new[]{
-                    this.serverPlayer1,
-                    this.serverPlayer2,
-                    this.serverPlayer3,
-                    this.serverPlayer4,
-                };
+                        this.serverPlayer1,
+                        this.serverPlayer2,
+                        this.serverPlayer3,
+                        this.serverPlayer4,
+                    };
 
                     foreach (var playertype in playerTypes)
                     {
@@ -88,7 +112,7 @@ public partial class UI
                             humanFound = true;
                         }
 
-                        kanobu.AddPlayer(BuildPlayer(playertype.GetSelectedId(), field, kanobu.GameId));
+                        kanobu.AddPlayer(BuildPlayer(playertype.GetSelectedId(), kanobu.GameId));
                     }
 
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
@@ -100,8 +124,11 @@ public partial class UI
             case 1:
                 {
                     // Client
+                    field = this.GameField.Instance<GameField>();
+                    this.GetParent().AddChild(field);
+
                     kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
-                    kanobu.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), field, kanobu.GameId));
+                    kanobu.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), kanobu.GameId));
 
                     if (clientPlayer.GetSelectedId() == 1)
                     {
@@ -117,6 +144,9 @@ public partial class UI
             case 2:
                 {
                     // Replay
+                    field = this.Replay.Instance<GameField>();
+                    this.GetParent().AddChild(field);
+
                     if (lastReplay != null)
                     {
                         kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
@@ -127,6 +157,13 @@ public partial class UI
                     }
                     break;
                 }
+            case 3:
+                humanFound = true;
+                var levelName = this.levelType.GetItemText(this.levelType.GetSelectedId());
+                field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
+                this.GetParent().AddChild(field);
+                kanobu = ((LevelBase)field).Start();
+                break;
             default:
                 throw new InvalidOperationException("Unknown game type");
         }
@@ -141,7 +178,7 @@ public partial class UI
         return kanobu;
     }
 
-    public IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> BuildPlayer(int playerType, GameField field, string gameId)
+    public IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> BuildPlayer(int playerType, string gameId)
     {
         switch (playerType)
         {
@@ -150,8 +187,9 @@ public partial class UI
                 return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>();
             case 1:
                 // Human
+                var field = this.GetParent().GetNode<GameField>("GameField");
                 return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
-                    field, 
+                    field,
                     async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
                     1000,
                     60000);
@@ -159,7 +197,7 @@ public partial class UI
                 // Computer Easy
                 var playerEasy = new KaNoBuPlayerEasy();
                 return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
-                    playerEasy, 
+                    playerEasy,
                     async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
                     1,
                     300);
@@ -168,7 +206,7 @@ public partial class UI
                 this.server.StartServer();
                 var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, gameId);
                 return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
-                    player, 
+                    player,
                     async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
                     600000,
                     60000);

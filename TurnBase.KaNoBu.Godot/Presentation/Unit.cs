@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TurnBase.KaNoBu;
 
+[Tool]
 [SceneReference("Unit.tscn")]
 public partial class Unit
 {
@@ -13,11 +14,16 @@ public partial class Unit
     private KaNoBuFigure.FigureTypes unitType = KaNoBuFigure.FigureTypes.ShipPaper;
     private int playerNumber = 0;
     private bool isSelected = false;
+    
     public Vector2? TargetPositionMap;
+
+    [Export]
+    public bool IsDead;
 
     [Signal]
     public delegate void UnitClicked();
 
+    [Export]
     public KaNoBuFigure.FigureTypes UnitType
     {
         get => this.unitType;
@@ -26,7 +32,7 @@ public partial class Unit
             this.unitType = value;
             if (IsInsideTree())
             {
-                if (TargetPositionMap == null)
+                if (IsDead)
                 {
                     return;
                 }
@@ -66,7 +72,7 @@ public partial class Unit
             this.playerNumber = value;
             if (IsInsideTree())
             {
-                if (this.TargetPositionMap == null)
+                if (IsDead)
                 {
                     return;
                 }
@@ -130,6 +136,7 @@ public partial class Unit
     public void UnitHit()
     {
         this.TargetPositionMap = null;
+        this.IsDead = true;
         this.ZIndex = -1;
         this.PendingTasks.Enqueue(() => UnitHitAction());
     }
