@@ -10,6 +10,8 @@ public partial class Main
         this.FillMembers();
 
         this.uI.Connect(nameof(UI.StartGameEventhandler), this, nameof(OnStartGameAsync));
+        this.infinityGameField.RemoveFromGroup(Groups.Field);
+
         StartInfinityGame();
     }
 
@@ -31,7 +33,6 @@ public partial class Main
                 kanobu.AddPlayer(delayedPlayer);
             }
             kanobu.AddGameLogListener(this.infinityGameField);
-            this.infinityGameField.RemoveFromGroup(Groups.Field);
             await kanobu.Play();
         }
     }

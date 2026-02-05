@@ -62,6 +62,7 @@ namespace TurnBase.KaNoBu
         {
             public BattleResult battleResult;
             public bool isDefenderFlag;
+            public bool isMine;
         }
 
         public enum BattleResult

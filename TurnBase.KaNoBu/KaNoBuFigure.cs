@@ -21,6 +21,8 @@ namespace TurnBase.KaNoBu
                     return "S";
                 case KaNoBuFigure.FigureTypes.ShipUniversal:
                     return "U";
+                case KaNoBuFigure.FigureTypes.ShipMine:
+                    return "M";
                 default:
                     throw new Exception("Unknown figure type");
             }
@@ -33,12 +35,13 @@ namespace TurnBase.KaNoBu
 
         public enum FigureTypes
         {
-            Unknown = 0,
-            ShipFlag = 1,
-            ShipStone = 2,
-            ShipPaper = 3,
-            ShipScissors = 4,
-            ShipUniversal = 5
+            Unknown,
+            ShipFlag,
+            ShipStone,
+            ShipPaper,
+            ShipScissors,
+            ShipUniversal,
+            ShipMine,
         }
 
         public int PlayerId { get; set; }
@@ -55,7 +58,7 @@ namespace TurnBase.KaNoBu
 
         public bool IsMoveValid(KaNoBuMoveResponseModel playerMove)
         {
-            if (this.FigureType == FigureTypes.ShipFlag || this.FigureType == FigureTypes.Unknown)
+            if (this.FigureType == FigureTypes.ShipFlag || this.FigureType == FigureTypes.Unknown || this.FigureType == FigureTypes.ShipMine)
             {
                 return false;
             }

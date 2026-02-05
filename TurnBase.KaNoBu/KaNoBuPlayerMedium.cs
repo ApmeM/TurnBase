@@ -141,7 +141,7 @@ namespace TurnBase.KaNoBu
                         continue;
                     }
 
-                    if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+                    if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipFlag || shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipMine)
                     {
                         continue;
                     }

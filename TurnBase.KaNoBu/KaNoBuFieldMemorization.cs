@@ -88,15 +88,22 @@ namespace TurnBase.KaNoBu
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                         // Defender won
-                        if (defenderUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
+                        if (notification.battle.Value.isMine)
                         {
-                            defenderUnit.FigureType = KaNoBuFigure.FigureTypes.Unknown;
+                            defenderUnit.FigureType = KaNoBuFigure.FigureTypes.ShipMine;
                         }
+                        else
+                        {
+                            if (defenderUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
+                            {
+                                defenderUnit.FigureType = KaNoBuFigure.FigureTypes.Unknown;
+                            }
 
-                        if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Winner[movedUnit.FigureType];
-                        if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Looser[defenderUnit.FigureType];
+                            if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) defenderUnit.FigureType = KaNoBuRules.Winner[movedUnit.FigureType];
+                            if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown) movedUnit.FigureType = KaNoBuRules.Looser[defenderUnit.FigureType];
 
-                        this.Field[toMapPos] = defenderUnit;
+                            this.Field[toMapPos] = defenderUnit;
+                        }
                         break;
                 }
             }

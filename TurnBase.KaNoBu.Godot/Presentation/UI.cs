@@ -86,7 +86,7 @@ public partial class UI
                     this.GetParent().AddChild(field);
 
                     var rules = new KaNoBuRules(8);
-                    rules.AllFiguresVisible = true;
+                    rules.AllFiguresVisible = false;
                     kanobu = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
                     var playerTypes = new[]{
@@ -164,7 +164,7 @@ public partial class UI
                     var levelName = this.levelType.GetItemText(this.levelType.GetSelectedId());
                     var field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
                     this.GetParent().AddChild(field);
-                    kanobu = ((LevelBase)field).Start();
+                    kanobu = field.Start();
                     break;
                 }
             default:

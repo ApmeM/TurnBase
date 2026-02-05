@@ -67,7 +67,8 @@ namespace TurnBase.KaNoBu
             var availableShips = new List<KaNoBuFigure.FigureTypes>();
             var fieldSize = initFieldWidth * initFieldHeight;
             availableShips.Add(KaNoBuFigure.FigureTypes.ShipFlag);
-            for (int i = 1; i < fieldSize; i++)
+            availableShips.Add(KaNoBuFigure.FigureTypes.ShipMine);
+            for (int i = 2; i < fieldSize; i++)
             {
                 var shipN = i % 3;
                 if (shipN == 0) availableShips.Add(KaNoBuFigure.FigureTypes.ShipStone);
@@ -200,6 +201,11 @@ namespace TurnBase.KaNoBu
                         continue;
                     }
 
+                    if (playerShip.FigureType == KaNoBuFigure.FigureTypes.ShipMine)
+                    {
+                        continue;
+                    }
+
                     if (playerShip.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
                     {
                         flagFound = true;
@@ -289,7 +295,7 @@ namespace TurnBase.KaNoBu
             {
                 mainField[playerMove.From]= null;
                 mainField[playerMove.To] = null;
-                mainField[playerMove.To] = winner;
+                mainField[playerMove.To] = winner.FigureType == KaNoBuFigure.FigureTypes.ShipMine ? null : winner;
                 winner.WinNumber++;
                 if (winner.WinNumber % 3 == 0)
                 {
@@ -325,7 +331,8 @@ namespace TurnBase.KaNoBu
                     winner == from ? KaNoBuMoveNotificationModel.BattleResult.AttackerWon :
                     winner == to ? KaNoBuMoveNotificationModel.BattleResult.DefenderWon :
                     throw new Exception("Invalid battle calculation."),
-                isDefenderFlag = to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag
+                isDefenderFlag = to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag,
+                isMine = to.FigureType == KaNoBuFigure.FigureTypes.ShipMine
             }
             );
         }
@@ -365,6 +372,10 @@ namespace TurnBase.KaNoBu
             {
                 return attacker;
             }
+            else if (defender.FigureType == KaNoBuFigure.FigureTypes.ShipMine)
+            {
+                return defender;
+            }
             else if (defender.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
             {
                 defender.FigureType = Winner[attacker.FigureType];
@@ -385,7 +396,7 @@ namespace TurnBase.KaNoBu
             }
             else
             {
-                return null;
+                throw new InvalidOperationException($"Battle between attacker {attacker.FigureType} and defender {defender.FigureType} should not happen.");
             }
         }
 

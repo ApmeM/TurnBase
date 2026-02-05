@@ -195,9 +195,19 @@ public partial class GameField :
                     break;
                 case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                     // Defender won
-                    defenderUnit.RotateUnitTo(movedUnit.Position);
-                    defenderUnit.Attack();
-                    movedUnit.UnitHit();
+                    if (notification.battle.Value.isMine)
+                    {
+                        movedUnit.RotateUnitTo(toWorldPos);
+                        movedUnit.Attack();
+                        movedUnit.UnitHit();
+                        defenderUnit.UnitHit();
+                    }
+                    else
+                    {
+                        defenderUnit.RotateUnitTo(movedUnit.Position);
+                        defenderUnit.Attack();
+                        movedUnit.UnitHit();
+                    }
                     break;
             }
         }
