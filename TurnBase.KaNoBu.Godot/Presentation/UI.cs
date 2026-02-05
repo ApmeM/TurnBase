@@ -76,15 +76,13 @@ public partial class UI
 
     public IGame BuildGame()
     {
-        var humanFound = false;
-        GameField field;
         IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> kanobu;
         switch (this.gameType.GetSelectedId())
         {
             case 0:
                 {
                     // server
-                    field = this.GameField.Instance<GameField>();
+                    var field = this.GameField.Instance<GameField>();
                     this.GetParent().AddChild(field);
 
                     var rules = new KaNoBuRules(8);
@@ -98,6 +96,7 @@ public partial class UI
                         this.serverPlayer4,
                     };
 
+                    var humanFound = false;
                     foreach (var playertype in playerTypes)
                     {
                         if (playertype.GetSelectedId() == 1)
@@ -115,6 +114,11 @@ public partial class UI
                         kanobu.AddPlayer(BuildPlayer(playertype.GetSelectedId(), kanobu.GameId));
                     }
 
+                    if (!humanFound)
+                    {
+                        kanobu.AddGameLogListener(field);
+                    }
+
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
                     this.lastReplay = memoryReplay.Events;
                     kanobu.AddGameLogListener(memoryReplay);
@@ -124,15 +128,15 @@ public partial class UI
             case 1:
                 {
                     // Client
-                    field = this.GameField.Instance<GameField>();
+                    var field = this.GameField.Instance<GameField>();
                     this.GetParent().AddChild(field);
 
                     kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
                     kanobu.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), kanobu.GameId));
 
-                    if (clientPlayer.GetSelectedId() == 1)
+                    if (clientPlayer.GetSelectedId() != 1)
                     {
-                        humanFound = true;
+                        kanobu.AddGameLogListener(field);
                     }
 
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
@@ -144,36 +148,30 @@ public partial class UI
             case 2:
                 {
                     // Replay
-                    field = this.Replay.Instance<GameField>();
+                    var field = this.Replay.Instance<GameField>();
                     this.GetParent().AddChild(field);
 
-                    if (lastReplay != null)
-                    {
-                        kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
-                    }
-                    else
+                    if (lastReplay == null)
                     {
                         throw new InvalidOperationException("No replay found!");
                     }
+                    kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
+                    kanobu.AddGameLogListener(field);
                     break;
                 }
             case 3:
-                humanFound = true;
-                var levelName = this.levelType.GetItemText(this.levelType.GetSelectedId());
-                field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
-                this.GetParent().AddChild(field);
-                kanobu = ((LevelBase)field).Start();
-                break;
+                {
+                    var levelName = this.levelType.GetItemText(this.levelType.GetSelectedId());
+                    var field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
+                    this.GetParent().AddChild(field);
+                    kanobu = ((LevelBase)field).Start();
+                    break;
+                }
             default:
                 throw new InvalidOperationException("Unknown game type");
         }
 
         kanobu.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
-
-        if (!humanFound)
-        {
-            kanobu.AddGameLogListener(field);
-        }
 
         return kanobu;
     }

@@ -30,9 +30,17 @@ public partial class LevelBase
         {
             var fig = new KaNoBuFigure(unit.PlayerNumber, unit.UnitType, true, 0);
             var pos = this.WorldToMap(unit.Position);
-            field2D.trySet(new Point((int)pos.x, (int)pos.y), fig);
+            var x = (int)pos.x;
+            var y = (int)pos.y;
+            field2D[x, y] = fig;
         }
-
+        for (var x = 0; x < 8; x++)
+            for (var y = 0; y < 8; y++)
+            {
+                var pos = new Vector2(x, y);
+                field2D.walls[x, y] = this.beach.GetCellv(pos) >= 0;
+            }
+        GD.Print(field2D);
         return field2D;
     }
 }

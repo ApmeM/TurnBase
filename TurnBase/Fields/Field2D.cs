@@ -1,61 +1,35 @@
+using System.Data.Common;
+
 namespace TurnBase
 {
-    public enum SetStatus
-    {
-        OK,
-        OUT_OF_BOUNDS,
-        OCCUPIED,
-        READ_ONLY,
-    }
-
     public class Field2D : IField
     {
         public IFigure[,] realField;
+        public bool[,] walls;
         public int Width => this.realField.GetLength(0);
         public int Height => this.realField.GetLength(1);
 
         public static Field2D Create(int width, int height)
         {
-            return new Field2D(new IFigure[width, height]);
+            return new Field2D(new IFigure[width, height], new bool[width, height]);
         }
 
-        public Field2D(IFigure[,] realField)
+        public Field2D(IFigure[,] realField, bool[,] walls)
         {
             this.realField = realField;
+            this.walls = walls;
         }
 
-        public IFigure get(Point from)
+        public IFigure this[Point key]
         {
-            if (!IsInBounds(from))
-            {
-                return null;
-            }
-
-            return realField[from.X, from.Y];
+            get => this.realField[key.X, key.Y];
+            set => this.realField[key.X, key.Y] = value;
         }
 
-        public SetStatus trySet(Point to, IFigure ship)
+        public IFigure this[int x, int y]
         {
-            if (!IsInBounds(to))
-            {
-                return SetStatus.OUT_OF_BOUNDS;
-            }
-
-            if (ship != null && this.realField[to.X, to.Y] != null)
-            {
-                return SetStatus.OCCUPIED;
-            }
-
-            if (ship == null)
-            {
-                this.realField[to.X, to.Y] = null;
-                return SetStatus.OK;
-            }
-            else
-            {
-                this.realField[to.X, to.Y] = ship;
-                return SetStatus.OK;
-            }
+            get => this.realField[x, y];
+            set => this.realField[x, y] = value;
         }
 
         public IField copyForPlayer(int PlayerId)
@@ -65,6 +39,7 @@ namespace TurnBase
             {
                 for (int y = 0; y < this.Height; y++)
                 {
+                    result.walls[x, y] = this.walls[x, y];
                     var figure = this.realField[x, y];
                     if (figure != null)
                     {
@@ -114,8 +89,15 @@ namespace TurnBase
                 result += $"  {i}";
                 for (int j = 0; j < this.Width; j++)
                 {
-                    var ship = this.realField[j, i];
-                    result += $" {ship?.ToString() ?? "  "}";
+                    if (this.walls[j, i])
+                    {
+                        result += $" ##";
+                    }
+                    else
+                    {
+                        var ship = this.realField[j, i];
+                        result += $" {ship?.ToString() ?? "  "}";
+                    }
                 }
 
                 result += $"   {i}\n";

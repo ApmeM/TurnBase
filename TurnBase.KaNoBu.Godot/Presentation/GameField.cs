@@ -74,7 +74,7 @@ public partial class GameField :
                 cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 2 / 4);
                 break;
         }
-        
+
         var newZoom = Vector2.One / 1.3f;
 
         var newSize = this.GetViewport().Size * newZoom;
@@ -139,8 +139,7 @@ public partial class GameField :
             {
                 for (var y = 0; y < mainField.Height; y++)
                 {
-                    var p = new Point(x, y);
-                    var originalShip = mainField.get(p) as KaNoBuFigure;
+                    var originalShip = mainField[x, y] as KaNoBuFigure;
                     if (originalShip == null)
                     {
                         continue;
@@ -250,7 +249,7 @@ public partial class GameField :
                 continue;
             }
             var p = new Point((int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y);
-            var figure = this.memorizedField.Field.get(p) as KaNoBuFigure;
+            var figure = this.memorizedField.Field[p] as KaNoBuFigure;
             unit.PlayerNumber = figure.PlayerId;
             unit.UnitType = figure.FigureType;
         }

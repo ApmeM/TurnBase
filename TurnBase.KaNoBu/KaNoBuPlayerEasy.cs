@@ -53,7 +53,7 @@ namespace TurnBase.KaNoBu
                 {
                     var p = new Point { X = i, Y = j };
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField.trySet(p, new KaNoBuFigure(this.myNumber, ship, true, 0));
+                    preparedField[p] = new KaNoBuFigure(this.myNumber, ship, true, 0);
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
@@ -67,11 +67,6 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
         {
-            // if (r.Next(100) < 20)
-            // {
-            //     return null;
-            // }
-
             var from = this.findAllMovement(model.Request.Field);
 
             if (from == null || from.Count == 0)
@@ -99,7 +94,7 @@ namespace TurnBase.KaNoBu
                 for (int y = 0; y < field.Height; y++)
                 {
                     var from = new Point { X = x, Y = y };
-                    var shipFrom = field.get(from) as KaNoBuFigure;
+                    var shipFrom = field[from] as KaNoBuFigure;
                     if (shipFrom == null)
                     {
                         continue;
@@ -134,7 +129,7 @@ namespace TurnBase.KaNoBu
                 return;
             }
 
-            var shipTo = field.get(to) as KaNoBuFigure;
+            var shipTo = field[to] as KaNoBuFigure;
             if (shipTo == null || shipTo.PlayerId != this.myNumber)
             {
                 availableShips.Add(new KaNoBuMoveResponseModel(KaNoBuMoveResponseModel.MoveStatus.MAKE_TURN, from, to));

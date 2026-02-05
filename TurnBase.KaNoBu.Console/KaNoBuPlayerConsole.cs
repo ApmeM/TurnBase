@@ -99,23 +99,23 @@ public class KaNoBuPlayerConsole :
                     var x = r.Next(model.Width);
                     var y = r.Next(model.Height);
                     var point = new Point(x, y);
-                    if (preparedField.get(point) != null)
+                    if (preparedField[point] != null)
                     {
                         continue;
                     }
-                    preparedField.trySet(point, new KaNoBuFigure(playerId, ship, true, 0));
+                    preparedField[point] = new KaNoBuFigure(playerId, ship, true, 0);
                     break;
                 }
                 ships.RemoveAt(0);
             }
             else
             {
-                if (preparedField.get(p.Value) != null)
+                if (preparedField[p.Value] != null)
                 {
                     this.showMessage("Cant place on this field. It is already occupied.");
                     continue;
                 }
-                preparedField.trySet(p.Value, new KaNoBuFigure(playerId, ship, true, 0));
+                preparedField[p.Value] = new KaNoBuFigure(playerId, ship, true, 0);
                 ships.RemoveAt(0);
             }
         }
