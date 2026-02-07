@@ -47,8 +47,8 @@ namespace TurnBase.KaNoBu
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model)
         {
             this.memorizedField.SynchronizeField((Field2D)model.Request.Field);
-            var from = this.findAllMovement(this.memorizedField.Field).OrderByDescending(a => EvaluateMove(this.memorizedField.Field, a)).ToList();
-
+            var from = this.findAllMovement(this.memorizedField.Field)
+                    .Select(move => (move, EvaluateMove(this.memorizedField.Field, move))).OrderByDescending(a => a.Item2).ToList();
             if (from.Count == 0)
             {
                 return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
@@ -57,9 +57,12 @@ namespace TurnBase.KaNoBu
                 };
             }
 
+            from = from.Where(a => a.Item2 == from[0].Item2).ToList();
+            var result = from[r.Next(from.Count)];
+
             return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
             {
-                Response = from[0]
+                Response = result.move
             };
         }
         private int EvaluateMove(IField mainField, KaNoBuMoveResponseModel a)
@@ -73,12 +76,13 @@ namespace TurnBase.KaNoBu
                 {
                     return 8; // Attack unknown enemy
                 }
-                if (shipTo.FigureType == KaNoBuRules.Looser[shipFrom.FigureType])
+                if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal || shipTo.FigureType == KaNoBuRules.Looser[shipFrom.FigureType])
                 {
                     return 10; // Attack loosing enemy
                 }
                 return -10; // Do not attack winning enemy
             }
+
             var enemyNearby = false;
             foreach (var dir in directions)
             {
@@ -93,33 +97,42 @@ namespace TurnBase.KaNoBu
                     enemyNearby = true;
                 }
             }
+
             if (enemyNearby)
             {
                 return 5; // Prioritize moving from enemy
             }
 
-            Point? myFlag = null;
+            Point? closestEnemy = null;
             for (int x = 0; x < field.Width; x++)
             {
                 for (int y = 0; y < field.Height; y++)
                 {
                     var p = new Point { X = x, Y = y };
                     var ship = field[p] as KaNoBuFigure;
-                    if (ship != null && ship.PlayerId == this.myNumber && ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+                    if (ship != null && ship.PlayerId != this.myNumber && ship.FigureType == KaNoBuFigure.FigureTypes.Unknown)
                     {
-                        myFlag = p;
+                        if (closestEnemy == null)
+                        {
+                            closestEnemy = p;
+                        }
+                        else
+                        {
+                            var dst = Math.Abs(closestEnemy.Value.X - a.From.X) + Math.Abs(closestEnemy.Value.Y - a.From.Y);
+                            var newDst = Math.Abs(p.X - a.From.X) + Math.Abs(p.Y - a.From.Y);
+                            if (newDst < dst)
+                            {
+                                closestEnemy = p;
+                            }
+                        }
                     }
                 }
             }
-
-            if (myFlag.HasValue)
             {
-                var distBefore = Math.Abs(a.From.X - myFlag.Value.X) + Math.Abs(a.From.Y - myFlag.Value.Y);
-                var distAfter = Math.Abs(a.To.X - myFlag.Value.X) + Math.Abs(a.To.Y - myFlag.Value.Y);
-                return distBefore > distAfter ? -3 : 3; // Prioritize moving from flag
+                var dst = Math.Abs(closestEnemy.Value.X - a.From.X) + Math.Abs(closestEnemy.Value.Y - a.From.Y);
+                var newDst = Math.Abs(closestEnemy.Value.X - a.To.X) + Math.Abs(closestEnemy.Value.Y - a.To.Y);
+                return dst > newDst ? 6 : -6; // Prioritize moving to closest Unknown enemy
             }
-
-            return 0;
         }
 
         private IEnumerable<KaNoBuMoveResponseModel> findAllMovement(IField mainField)
