@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Godot;
 using TurnBase;
 using TurnBase.KaNoBu;
@@ -24,7 +26,19 @@ public partial class LevelBase
 
     public Field2D generateField()
     {
-        var field2D = Field2D.Create(8, 8);
+        var cells = this.field.GetUsedCells().Cast<Vector2>().ToList();
+
+        var left = (int)cells.Min(a => a.x);
+        var right = (int)cells.Max(a => a.x + 1);
+        var top = (int)cells.Min(a => a.y);
+        var bottom = (int)cells.Max(a => a.y + 1);
+
+        if (left < 0 || top < 0)
+        {
+            throw new Exception("Unsupported");
+        }
+
+        var field2D = Field2D.Create(right, bottom);
         var allUnits = this.field.GetChildren();
         foreach (Unit unit in allUnits)
         {
@@ -34,13 +48,12 @@ public partial class LevelBase
             var y = (int)pos.y;
             field2D[x, y] = fig;
         }
-        for (var x = 0; x < 8; x++)
-            for (var y = 0; y < 8; y++)
+        for (var x = 0; x < right; x++)
+            for (var y = 0; y < bottom; y++)
             {
                 var pos = new Vector2(x, y);
-                field2D.walls[x, y] = this.beach.GetCellv(pos) >= 0;
+                field2D.walls[x, y] = this.field.GetCellv(pos) < 0;
             }
-        GD.Print(field2D);
         return field2D;
     }
 }

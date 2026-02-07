@@ -76,7 +76,7 @@ namespace TurnBase
         public override string ToString()
         {
             string result = "";
-            result += string.Format("   ");
+            result += string.Format("    ");
             for (int j = 0; j < this.Width; j++)
             {
                 result += $"  {(char)('A' + j)}";
@@ -86,7 +86,7 @@ namespace TurnBase
 
             for (int i = 0; i < this.Height; i++)
             {
-                result += $"  {i}";
+                result += $"  {i,2}";
                 for (int j = 0; j < this.Width; j++)
                 {
                     if (this.walls[j, i])
@@ -100,15 +100,15 @@ namespace TurnBase
                     }
                 }
 
-                result += $"   {i}\n";
+                result += $"   {i,2}\n";
             }
 
-            result += string.Format("   ");
+            result += string.Format("    ");
             for (int j = 0; j < this.Width; j++)
             {
                 result += $"  {(char)('A' + j)}";
             }
-            result += string.Format("   ");
+            result += string.Format("    ");
 
             return result;
         }

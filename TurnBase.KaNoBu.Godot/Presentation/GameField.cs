@@ -33,11 +33,9 @@ public partial class GameField :
 
         this.UpdateKnownShips();
 
-        var level = this.water;
-
         var dragRes = await this.drag.ToSignal(this.drag, nameof(DragControl.DragFinished));
-        var from = level.WorldToMap(level.ToLocal((Vector2)dragRes[0]));
-        var to = level.WorldToMap(level.ToLocal((Vector2)dragRes[1]));
+        var from = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[0]));
+        var to = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[1]));
 
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
         {
@@ -134,7 +132,6 @@ public partial class GameField :
 
         if (this.field.GetChildCount() == 0)
         {
-            var level = this.water;
             for (var x = 0; x < mainField.Width; x++)
             {
                 for (var y = 0; y < mainField.Height; y++)
@@ -146,11 +143,11 @@ public partial class GameField :
                     }
 
                     var mapPos = new Vector2(x, y);
-                    var worldPos = level.MapToWorld(mapPos);
+                    var worldPos = this.field.MapToWorld(mapPos);
                     var unit = (Unit)UnitScene.Instance();
 
                     unit.TargetPositionMap = mapPos;
-                    unit.Position = worldPos + level.CellSize / 2;
+                    unit.Position = worldPos + this.field.CellSize / 2;
                     unit.PlayerNumber = originalShip.PlayerId;
                     unit.UnitType = originalShip.FigureType;
                     unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
@@ -172,8 +169,7 @@ public partial class GameField :
 
         var fromMapPos = new Vector2(notification.move.From.X, notification.move.From.Y);
         var toMapPos = new Vector2(notification.move.To.X, notification.move.To.Y);
-        var level = this.water;
-        var toWorldPos = level.MapToWorld(toMapPos) + level.CellSize / 2;
+        var toWorldPos = this.field.MapToWorld(toMapPos) + this.field.CellSize / 2;
 
         var allUnits = this.field.GetChildren();
         var movedUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == fromMapPos && a.PlayerNumber == playerNumber);
@@ -286,6 +282,6 @@ public partial class GameField :
 
     public Vector2 WorldToMap(Vector2 position)
     {
-        return this.water.WorldToMap(position);
+        return this.field.WorldToMap(position);
     }
 }
