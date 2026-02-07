@@ -14,7 +14,7 @@ public partial class Unit
     private KaNoBuFigure.FigureTypes unitType = KaNoBuFigure.FigureTypes.ShipPaper;
     private int playerNumber = 0;
     private bool isSelected = false;
-    
+
     public Vector2? TargetPositionMap;
 
     [Export]
@@ -248,5 +248,25 @@ public partial class Unit
     public void CancelActions()
     {
         this.PendingTasks.Clear();
+    }
+
+    public List<Vector2> GetPossibleMoves()
+    {
+        if (
+            this.unitType == KaNoBuFigure.FigureTypes.Unknown ||
+            this.unitType == KaNoBuFigure.FigureTypes.ShipFlag ||
+            this.unitType == KaNoBuFigure.FigureTypes.ShipMine
+            )
+        {
+            return new List<Vector2>();
+        }
+
+        return new List<Vector2>
+        {
+            Vector2.Down,
+            Vector2.Left,
+            Vector2.Right,
+            Vector2.Up,
+        };
     }
 }

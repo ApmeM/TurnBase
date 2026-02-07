@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Presentation/GameField.cs" type="Script" id=1]
 [ext_resource path="res://Presentation/Unit.tscn" type="PackedScene" id=2]
@@ -6,7 +6,6 @@
 [ext_resource path="res://assets/Fonts/Xolonium-Regular.ttf" type="DynamicFontData" id=8]
 [ext_resource path="res://Presentation/Tileset.tres" type="TileSet" id=9]
 [ext_resource path="res://gd-draggableCamera/DraggableCamera.tscn" type="PackedScene" id=10]
-[ext_resource path="res://Presentation/Fog.tres" type="Material" id=11]
 [ext_resource path="res://gd-timerLabel/TimerLabel.tscn" type="PackedScene" id=12]
 
 [sub_resource type="DynamicFont" id=2]
@@ -23,7 +22,6 @@ anchor_mode = 0
 maximumZoom = 1.2
 
 [node name="Water" type="TileMap" parent="."]
-material = ExtResource( 11 )
 tile_set = ExtResource( 9 )
 cell_quadrant_size = 64
 cell_tile_origin = 1
@@ -50,7 +48,6 @@ format = 1
 tile_data = PoolIntArray( 65535, 0, 262151, 131069, 0, 262146, 65544, 0, 262150, 65546, 0, 262149, 196605, 0, 262149, 262143, 0, 262146, 196617, 0, 262145, 262153, 0, 262151, 393213, 0, 262144, 393215, 0, 262150, 327690, 0, 262150, 393224, 0, 262146, 524286, 0, 262145, 458762, 0, 262144, 589822, 0, 262151, 524297, 0, 262149, 655357, 3, 131074, 655358, 3, 262146, 589825, 0, 262144, 589833, 3, 262145, 589834, 3, 196610, 720894, 3, 327681, 720895, 3, 327680, 655360, 3, 4, 655361, 3, 131075, 655362, 3, 196610, 655365, 3, 131074, 655366, 3, 327680, 655367, 3, 131075, 655368, 3, 131075, 655369, 3, 327682, 786430, 0, 327687, 786431, 0, 327687, 720896, 0, 327687, 851966, 0, 327687, 851967, 0, 327687, 786432, 0, 327687 )
 
 [node name="Field" type="TileMap" parent="."]
-material = ExtResource( 11 )
 position = Vector2( 0, 64 )
 tile_set = ExtResource( 9 )
 cell_quadrant_size = 64

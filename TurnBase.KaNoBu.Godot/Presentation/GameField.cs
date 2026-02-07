@@ -33,9 +33,9 @@ public partial class GameField :
 
         this.UpdateKnownShips();
 
-        var dragRes = await this.drag.ToSignal(this.drag, nameof(DragControl.DragFinished));
-        var from = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[0]));
-        var to = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[1]));
+        var moveRes = await this.ToSignal(this, nameof(MoveDone));
+        var from = (Vector2)moveRes[0];
+        var to = (Vector2)moveRes[1];
 
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
         {
@@ -261,15 +261,74 @@ public partial class GameField :
         }
     }
 
-    private void OnUnitClicked(Unit unit)
+    [Signal]
+    public delegate void MoveDone(Vector2 mapFrom, Vector2 mapTo);
+
+    private void ShowSelection(Unit unit)
+    {
+        var moves = unit.GetPossibleMoves();
+        foreach (var move in moves)
+        {
+            var newPos = unit.TargetPositionMap.Value + move;
+            if (this.field.GetCellv(newPos) == 4)
+            {
+                this.field.SetCellv(newPos, 5);
+            }
+        }
+    }
+
+    private void ClearSelection()
+    {
+        this.field.GetUsedCells()
+                   .Cast<Vector2>()
+                   .Select(point => (point, this.field.GetCellv(point)))
+                   .Where(a => a.Item2 == 5)
+                   .ToList()
+                   .ForEach(p => this.field.SetCellv(p.point, 4));
+        this.GetTree().GetNodesInGroup(Groups.IsSelected)
+            .Cast<Unit>()
+            .ToList()
+            .ForEach(a => a.IsSelected = false);
+    }
+
+    private async void OnUnitClicked(Unit unit)
     {
         if (unit.PlayerNumber != this.playerId)
         {
+            // ToDo: do not emit OnUnitClicked for unclickable units.
+            if (this.field.GetCellv(unit.TargetPositionMap.Value) == 5)
+            {
+                var selectedShip = this.GetTree().GetNodesInGroup(Groups.IsSelected)
+                    .Cast<Unit>()
+                    .FirstOrDefault();
+
+                this.ClearSelection();
+                this.EmitSignal(nameof(MoveDone), selectedShip.TargetPositionMap.Value, unit.TargetPositionMap.Value);
+
+            }
             return;
         }
 
+        this.ClearSelection();
+        this.ShowSelection(unit);
+
         var drag = this.drag;
         drag.StartDragging();
+
+        var dragRes = await this.drag.ToSignal(this.drag, nameof(DragControl.DragFinished));
+        var from = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[0]));
+        var to = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[1]));
+
+        if (from != to)
+        {
+            this.ClearSelection();
+            this.EmitSignal(nameof(MoveDone), from, to);
+        }
+        else
+        {
+            unit.IsSelected = true;
+            unit.AddToGroup(Groups.IsSelected);
+        }
     }
 
     public override void _Ready()
@@ -278,6 +337,25 @@ public partial class GameField :
         this.FillMembers();
         this.AddToGroup(Groups.Field);
         this.draggableCamera.SetCameraLimits(this.water);
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        base._UnhandledInput(@event);
+
+        if (@event.IsActionPressed("left_click"))
+        {
+            var selectedShip = this.GetTree().GetNodesInGroup(Groups.IsSelected)
+                .Cast<Unit>()
+                .FirstOrDefault();
+            var selectedCell = this.field.WorldToMap(this.field.GetLocalMousePosition());
+            if (this.field.GetCellv(selectedCell) == 5 && selectedShip != null)
+            {
+                this.GetTree().SetInputAsHandled();
+                this.EmitSignal(nameof(MoveDone), selectedShip.TargetPositionMap.Value, selectedCell);
+            }
+            this.ClearSelection();
+        }
     }
 
     public Vector2 WorldToMap(Vector2 position)
