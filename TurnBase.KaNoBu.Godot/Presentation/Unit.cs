@@ -128,7 +128,7 @@ public partial class Unit
     {
         if (@event.IsActionPressed("left_click"))
         {
-            if (this.ship.GetRect().HasPoint(ship.GetLocalMousePosition()))
+            if (this.ship.GetRect().HasPoint(ship.GetLocalMousePosition()) && !this.IsDead)
             {
                 this.GetTree().SetInputAsHandled();
                 EmitSignal(nameof(UnitClicked));
