@@ -1,8 +1,8 @@
 using Godot;
-using System.Collections.Generic;
-using System.Globalization;
 
-public class WaveGenerator : Node2D
+[Tool]
+[SceneReference("WaveGenerator.tscn")]
+public partial class WaveGenerator
 {
     [Export]
     public Texture WaveItem;
@@ -24,6 +24,12 @@ public class WaveGenerator : Node2D
 
     private float timeSinceLastWave = float.MinValue;
 
+    public override void _Ready()
+    {
+        base._Ready();
+        this.FillMembers();
+    }
+    
     public override async void _Process(float delta)
     {
         base._Process(delta);
