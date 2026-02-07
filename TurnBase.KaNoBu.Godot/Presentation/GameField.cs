@@ -281,6 +281,7 @@ public partial class GameField :
         base._Ready();
         this.FillMembers();
         this.AddToGroup(Groups.Field);
+        this.draggableCamera.SetCameraLimits(this.water);
     }
 
     public Vector2 WorldToMap(Vector2 position)

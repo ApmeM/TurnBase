@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Linq;
 
 [SceneReference("DraggableCamera.tscn")]
 public partial class DraggableCamera
@@ -165,5 +166,16 @@ public partial class DraggableCamera
     private static float Map(float value, float leftMin, float leftMax, float rightMin, float rightMax)
     {
         return rightMin + (value - leftMin) * (rightMax - rightMin) / (leftMax - leftMin);
+    }
+
+    public void SetCameraLimits(TileMap floor)
+    {
+        var cells = floor.GetUsedCells().Cast<Vector2>().ToList();
+        var viewport = this.GetViewport().Size;
+
+        this.LimitLeft = (int)Math.Min(0, cells.Min(a => a.x) * floor.CellSize.x * floor.Scale.x);
+        this.LimitRight = (int)Math.Max(viewport.x, cells.Max(a => a.x + 1) * floor.CellSize.x * floor.Scale.x);
+        this.LimitTop = (int)Math.Min(0, cells.Min(a => a.y) * floor.CellSize.y * floor.Scale.x);
+        this.LimitBottom = (int)Math.Max(viewport.y, cells.Max(a => a.y + 1) * floor.CellSize.y * floor.Scale.x);
     }
 }
