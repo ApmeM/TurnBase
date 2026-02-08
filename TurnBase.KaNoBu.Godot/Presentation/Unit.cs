@@ -18,6 +18,9 @@ public partial class Unit
     public Vector2? TargetPositionMap;
 
     [Export]
+    public bool IsClickable;
+
+    [Export]
     public bool IsDead;
 
     [Signal]
@@ -126,7 +129,7 @@ public partial class Unit
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event.IsActionPressed("left_click"))
+        if (@event.IsActionPressed("left_click") && this.IsClickable)
         {
             if (this.ship.GetRect().HasPoint(ship.GetLocalMousePosition()) && !this.IsDead)
             {

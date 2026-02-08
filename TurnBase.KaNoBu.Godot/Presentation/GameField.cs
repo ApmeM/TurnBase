@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using TurnBase;
@@ -148,14 +149,14 @@ public partial class GameField :
 
                     unit.TargetPositionMap = mapPos;
                     unit.Position = worldPos + this.field.CellSize / 2;
-                    unit.PlayerNumber = originalShip.PlayerId;
-                    unit.UnitType = originalShip.FigureType;
                     unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
 
                     this.field.AddChild(unit);
                 }
             }
         }
+
+        this.UpdateKnownShips();
     }
 
     public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)
@@ -258,6 +259,7 @@ public partial class GameField :
             var figure = this.memorizedField.Field[p] as KaNoBuFigure;
             unit.PlayerNumber = figure.PlayerId;
             unit.UnitType = figure.FigureType;
+            unit.IsClickable = figure.PlayerId == this.playerId;
         }
     }
 
@@ -288,27 +290,15 @@ public partial class GameField :
         this.GetTree().GetNodesInGroup(Groups.IsSelected)
             .Cast<Unit>()
             .ToList()
-            .ForEach(a => a.IsSelected = false);
+            .ForEach(a =>
+            {
+                a.IsSelected = false;
+                a.RemoveFromGroup(Groups.IsSelected);
+            });
     }
 
     private async void OnUnitClicked(Unit unit)
     {
-        if (unit.PlayerNumber != this.playerId)
-        {
-            // ToDo: do not emit OnUnitClicked for unclickable units.
-            if (this.field.GetCellv(unit.TargetPositionMap.Value) == 5)
-            {
-                var selectedShip = this.GetTree().GetNodesInGroup(Groups.IsSelected)
-                    .Cast<Unit>()
-                    .FirstOrDefault();
-
-                this.ClearSelection();
-                this.EmitSignal(nameof(MoveDone), selectedShip.TargetPositionMap.Value, unit.TargetPositionMap.Value);
-
-            }
-            return;
-        }
-
         this.ClearSelection();
         this.ShowSelection(unit);
 
@@ -349,7 +339,7 @@ public partial class GameField :
                 .Cast<Unit>()
                 .FirstOrDefault();
             var selectedCell = this.field.WorldToMap(this.field.GetLocalMousePosition());
-            if (this.field.GetCellv(selectedCell) == 5 && selectedShip != null)
+            if (this.field.GetCellv(selectedCell) == 5 && selectedShip?.TargetPositionMap != null)
             {
                 this.GetTree().SetInputAsHandled();
                 this.EmitSignal(nameof(MoveDone), selectedShip.TargetPositionMap.Value, selectedCell);
