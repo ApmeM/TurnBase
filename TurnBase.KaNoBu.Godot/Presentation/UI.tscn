@@ -10,109 +10,215 @@
 script = ExtResource( 1 )
 Levels = [ ExtResource( 4 ), ExtResource( 5 ) ]
 
-[node name="UIContainer" type="VBoxContainer" parent="."]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -119.5
-margin_top = -153.0
-margin_right = 5.5
-margin_bottom = 5.0
-rect_scale = Vector2( 2, 2 )
+[node name="Server" parent="." instance=ExtResource( 2 )]
 
-[node name="ServerIpInfo" type="Label" parent="UIContainer"]
-margin_right = 125.0
+[node name="Client" parent="." instance=ExtResource( 3 )]
+
+[node name="GameType" type="TabContainer" parent="."]
+anchor_right = 1.0
+margin_bottom = 56.0
+tab_align = 0
+
+[node name="Custom" type="VBoxContainer" parent="GameType"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+custom_constants/separation = 10
+
+[node name="ServerMyIpInfo" type="Label" parent="GameType/Custom"]
+margin_right = 632.0
 margin_bottom = 14.0
 text = "127.0.0.1"
 autowrap = true
 
-[node name="GameType" type="OptionButton" parent="UIContainer"]
+[node name="ServerPlayerContainer" type="GridContainer" parent="GameType/Custom"]
+margin_top = 24.0
+margin_right = 632.0
+margin_bottom = 62.0
+columns = 4
+
+[node name="LabelServerPlayer1" type="Label" parent="GameType/Custom/ServerPlayerContainer"]
+margin_right = 150.0
+margin_bottom = 14.0
+text = "Player red"
+
+[node name="LabelServerPlayer2" type="Label" parent="GameType/Custom/ServerPlayerContainer"]
+margin_left = 154.0
+margin_right = 304.0
+margin_bottom = 14.0
+text = "Player blue"
+
+[node name="LabelServerPlayer3" type="Label" parent="GameType/Custom/ServerPlayerContainer"]
+margin_left = 308.0
+margin_right = 458.0
+margin_bottom = 14.0
+text = "Player white"
+
+[node name="LabelServerPlayer4" type="Label" parent="GameType/Custom/ServerPlayerContainer"]
+margin_left = 462.0
+margin_right = 612.0
+margin_bottom = 14.0
+text = "Player gray"
+
+[node name="ServerPlayer1" type="OptionButton" parent="GameType/Custom/ServerPlayerContainer"]
 margin_top = 18.0
-margin_right = 125.0
+margin_right = 150.0
 margin_bottom = 38.0
-text = "Levels"
-items = [ "Server", null, false, 0, null, "Client", null, false, 1, null, "Replay", null, true, 2, null, "Levels", null, false, 3, null ]
-selected = 3
-
-[node name="ServerGameType" type="VBoxContainer" parent="UIContainer"]
-visible = false
-margin_top = 42.0
-margin_right = 150.0
-margin_bottom = 134.0
-
-[node name="ServerPlayer1" type="OptionButton" parent="UIContainer/ServerGameType"]
-margin_right = 150.0
-margin_bottom = 20.0
+rect_min_size = Vector2( 150, 0 )
 text = "Human"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
 selected = 1
 
-[node name="ServerPlayer2" type="OptionButton" parent="UIContainer/ServerGameType"]
-margin_top = 24.0
-margin_right = 150.0
-margin_bottom = 44.0
+[node name="ServerPlayer2" type="OptionButton" parent="GameType/Custom/ServerPlayerContainer"]
+margin_left = 154.0
+margin_top = 18.0
+margin_right = 304.0
+margin_bottom = 38.0
+rect_min_size = Vector2( 150, 0 )
 text = "Computer easy"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
 selected = 2
 
-[node name="ServerPlayer3" type="OptionButton" parent="UIContainer/ServerGameType"]
-margin_top = 48.0
-margin_right = 150.0
-margin_bottom = 68.0
+[node name="ServerPlayer3" type="OptionButton" parent="GameType/Custom/ServerPlayerContainer"]
+margin_left = 308.0
+margin_top = 18.0
+margin_right = 458.0
+margin_bottom = 38.0
+rect_min_size = Vector2( 150, 0 )
 text = "Computer medium"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
 selected = 4
 
-[node name="ServerPlayer4" type="OptionButton" parent="UIContainer/ServerGameType"]
+[node name="ServerPlayer4" type="OptionButton" parent="GameType/Custom/ServerPlayerContainer"]
+margin_left = 462.0
+margin_top = 18.0
+margin_right = 612.0
+margin_bottom = 38.0
+rect_min_size = Vector2( 150, 0 )
+text = "Computer medium"
+items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
+selected = 4
+
+[node name="ServerPlayerSeparator" type="HSeparator" parent="GameType/Custom"]
 margin_top = 72.0
-margin_right = 150.0
-margin_bottom = 92.0
-text = "Computer medium"
-items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
-selected = 4
+margin_right = 632.0
+margin_bottom = 76.0
 
-[node name="ClientGameType" type="VBoxContainer" parent="UIContainer"]
+[node name="ServerSettingsContainer" type="GridContainer" parent="GameType/Custom"]
+margin_top = 86.0
+margin_right = 632.0
+margin_bottom = 130.0
+columns = 2
+
+[node name="MapSizeLabel" type="Label" parent="GameType/Custom/ServerSettingsContainer"]
+margin_top = 1.0
+margin_right = 101.0
+margin_bottom = 15.0
+text = "Map size"
+
+[node name="MapSizeSelector" type="HSlider" parent="GameType/Custom/ServerSettingsContainer"]
+margin_left = 105.0
+margin_right = 255.0
+margin_bottom = 16.0
+rect_min_size = Vector2( 150, 0 )
+min_value = 8.0
+max_value = 20.0
+value = 8.0
+exp_edit = true
+rounded = true
+tick_count = 1
+ticks_on_borders = true
+
+[node name="AllShipVisibleLabel" type="Label" parent="GameType/Custom/ServerSettingsContainer"]
+margin_top = 25.0
+margin_right = 101.0
+margin_bottom = 39.0
+text = "All ships visible"
+
+[node name="AllShipsVisibleSelector" type="CheckBox" parent="GameType/Custom/ServerSettingsContainer"]
+margin_left = 105.0
+margin_top = 20.0
+margin_right = 255.0
+margin_bottom = 44.0
+
+[node name="StartServerButton" type="Button" parent="GameType/Custom"]
+margin_top = 140.0
+margin_right = 632.0
+margin_bottom = 160.0
+text = "Start"
+
+[node name="Connect" type="VBoxContainer" parent="GameType"]
 visible = false
-margin_top = 138.0
-margin_right = 125.0
-margin_bottom = 182.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
 
-[node name="ServerIpInput" type="TextEdit" parent="UIContainer/ClientGameType"]
-margin_right = 125.0
-margin_bottom = 20.0
+[node name="ClientMyIpInfo" type="Label" parent="GameType/Connect"]
+margin_right = 632.0
+margin_bottom = 14.0
+text = "127.0.0.1"
+autowrap = true
+
+[node name="ServerIpInput" type="TextEdit" parent="GameType/Connect"]
+margin_top = 18.0
+margin_right = 632.0
+margin_bottom = 38.0
 rect_min_size = Vector2( 0, 20 )
 rect_clip_content = true
 text = "127.0.0.1"
 
-[node name="ClientPlayer" type="OptionButton" parent="UIContainer/ClientGameType"]
-margin_right = 150.0
-margin_bottom = 20.0
+[node name="ClientPlayer" type="OptionButton" parent="GameType/Connect"]
+margin_top = 42.0
+margin_right = 632.0
+margin_bottom = 62.0
+rect_min_size = Vector2( 150, 0 )
 text = "Human"
 items = [ "None", null, false, 0, null, "Human", null, false, 1, null, "Computer easy", null, false, 2, null, "Remote", null, false, 3, null, "Computer medium", null, false, 4, null ]
 selected = 1
 
-[node name="ReplayGameType" type="VBoxContainer" parent="UIContainer"]
-visible = false
-margin_top = 162.0
-margin_right = 150.0
-margin_bottom = 162.0
-
-[node name="LevelsGameType" type="VBoxContainer" parent="UIContainer"]
-margin_top = 42.0
-margin_right = 125.0
-margin_bottom = 62.0
-
-[node name="LevelType" type="OptionButton" parent="UIContainer/LevelsGameType"]
-margin_right = 125.0
-margin_bottom = 20.0
-
-[node name="StartButton" type="Button" parent="UIContainer"]
+[node name="StartClientButton" type="Button" parent="GameType/Connect"]
 margin_top = 66.0
-margin_right = 125.0
+margin_right = 632.0
 margin_bottom = 86.0
 text = "Start"
 
-[node name="Server" parent="." instance=ExtResource( 2 )]
+[node name="Replays" type="VBoxContainer" parent="GameType"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
 
-[node name="Client" parent="." instance=ExtResource( 3 )]
+[node name="StartReplayButton" type="Button" parent="GameType/Replays"]
+margin_right = 632.0
+margin_bottom = 20.0
+disabled = true
+text = "Start"
+
+[node name="Campaign" type="VBoxContainer" parent="GameType"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="LevelType" type="OptionButton" parent="GameType/Campaign"]
+margin_right = 632.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 150, 0 )
+
+[node name="StartLevelsButton" type="Button" parent="GameType/Campaign"]
+margin_top = 24.0
+margin_right = 632.0
+margin_bottom = 44.0
+text = "Start"

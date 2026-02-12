@@ -154,7 +154,7 @@ public partial class DraggableCamera
             if (buttonEvent.ButtonIndex == (int)ButtonList.WheelDown)
             {
                 this.NormalizedZoom += 0.1f;
-            } 
+            }
         }
 
         if (@event is InputEventMagnifyGesture gesture)
@@ -168,14 +168,18 @@ public partial class DraggableCamera
         return rightMin + (value - leftMin) * (rightMax - rightMin) / (leftMax - leftMin);
     }
 
-    public void SetCameraLimits(TileMap floor)
+    public void SetCameraLimits(TileMap floor, Vector2 margins)
     {
         var cells = floor.GetUsedCells().Cast<Vector2>().ToList();
+        if(cells.Count == 0)
+        {
+            return;
+        }
         var viewport = this.GetViewport().Size;
 
-        this.LimitLeft = (int)Math.Min(0, cells.Min(a => a.x) * floor.CellSize.x * floor.Scale.x);
-        this.LimitRight = (int)Math.Max(viewport.x, cells.Max(a => a.x + 1) * floor.CellSize.x * floor.Scale.x);
-        this.LimitTop = (int)Math.Min(0, cells.Min(a => a.y) * floor.CellSize.y * floor.Scale.x);
-        this.LimitBottom = (int)Math.Max(viewport.y, cells.Max(a => a.y + 1) * floor.CellSize.y * floor.Scale.x);
+        this.LimitLeft = (int)(Math.Min(0, cells.Min(a => a.x) * floor.CellSize.x * floor.Scale.x) - margins.x);
+        this.LimitRight = (int)(Math.Max(viewport.x, cells.Max(a => a.x + 1) * floor.CellSize.x * floor.Scale.x) + margins.x);
+        this.LimitTop = (int)(Math.Min(0, cells.Min(a => a.y) * floor.CellSize.y * floor.Scale.x) - margins.y);
+        this.LimitBottom = (int)(Math.Max(viewport.y, cells.Max(a => a.y + 1) * floor.CellSize.y * floor.Scale.x) + margins.y);
     }
 }

@@ -21,10 +21,13 @@ public partial class UI
     {
         this.FillMembers();
 
-        this.gameType.Connect("item_selected", this, nameof(GameTypeChanged));
-        this.startButton.Connect("pressed", this, nameof(StartButonClicked));
+        this.startServerButton.Connect("pressed", this, nameof(StartButtonClicked));
+        this.startClientButton.Connect("pressed", this, nameof(StartButtonClicked));
+        this.startReplayButton.Connect("pressed", this, nameof(StartButtonClicked));
+        this.startLevelsButton.Connect("pressed", this, nameof(StartButtonClicked));
 
-        this.serverIpInfo.Text = string.Join("\n", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
+        this.serverMyIpInfo.Text = "Your IP address: " + string.Join(", ", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
+        this.clientMyIpInfo.Text = "Your IP address: " + string.Join(", ", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
 
         if (Levels != null)
         {
@@ -35,39 +38,10 @@ public partial class UI
         }
     }
 
-    private void GameTypeChanged(int selectedId)
-    {
-        this.serverGameType.Visible = false;
-        this.clientGameType.Visible = false;
-        this.replayGameType.Visible = false;
-        this.levelsGameType.Visible = false;
-        switch (this.gameType.GetSelectedId())
-        {
-            case 0:
-                // server
-                this.serverGameType.Visible = true;
-                break;
-            case 1:
-                // client
-                this.clientGameType.Visible = true;
-                break;
-            case 2:
-                // Replay
-                this.replayGameType.Visible = true;
-                break;
-            case 3:
-                // Levels
-                this.levelsGameType.Visible = true;
-                break;
-            default:
-                throw new Exception("Unknown game type");
-        }
-    }
-
     [Signal]
     public delegate void StartGameEventhandler();
 
-    private void StartButonClicked()
+    private void StartButtonClicked()
     {
         this.EmitSignal(nameof(StartGameEventhandler));
     }
@@ -77,7 +51,7 @@ public partial class UI
     public IGame BuildGame()
     {
         IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> kanobu;
-        switch (this.gameType.GetSelectedId())
+        switch (this.gameType.CurrentTab)
         {
             case 0:
                 {
@@ -85,8 +59,8 @@ public partial class UI
                     var field = this.GameField.Instance<GameField>();
                     this.GetParent().AddChild(field);
 
-                    var rules = new KaNoBuRules(8);
-                    rules.AllFiguresVisible = false;
+                    var rules = new KaNoBuRules((int)this.mapSizeSelector.Value);
+                    rules.AllFiguresVisible = this.allShipsVisibleSelector.Pressed;
                     kanobu = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
                     var playerTypes = new[]{
@@ -122,7 +96,7 @@ public partial class UI
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
                     this.lastReplay = memoryReplay.Events;
                     kanobu.AddGameLogListener(memoryReplay);
-                    this.gameType.SetItemDisabled(2, false);
+                    this.startReplayButton.Disabled = false;
                     break;
                 }
             case 1:
@@ -142,7 +116,7 @@ public partial class UI
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
                     this.lastReplay = memoryReplay.Events;
                     kanobu.AddGameLogListener(memoryReplay);
-                    this.gameType.SetItemDisabled(2, false);
+                    this.startReplayButton.Disabled = false;
                     break;
                 }
             case 2:
@@ -161,6 +135,7 @@ public partial class UI
                 }
             case 3:
                 {
+                    // Levels
                     var levelName = this.levelType.GetItemText(this.levelType.GetSelectedId());
                     var field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
                     this.GetParent().AddChild(field);

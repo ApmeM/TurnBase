@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using Godot;
@@ -130,13 +131,30 @@ public partial class GameField :
     {
         var mainField = (Field2D)field;
         this.memorizedField.SynchronizeField(mainField);
-
+        var needCameraLimitUpdate = false;
         if (this.field.GetChildCount() == 0)
         {
             for (var x = 0; x < mainField.Width; x++)
             {
                 for (var y = 0; y < mainField.Height; y++)
                 {
+                    var pos = new Vector2(x, y);
+                    if (this.field.GetCellv(pos) == 4 && mainField.walls[x, y])
+                    {
+                        this.field.SetCellv(pos, -1);
+                    }
+                    if (this.field.GetCellv(pos) == -1 && !mainField.walls[x, y])
+                    {
+                        this.field.SetCellv(pos, 4);
+                        this.beach.SetCellv(pos, -1);
+                        this.castle.SetCellv(pos, -1);
+                        this.castle.SetCellv(pos + Vector2.Down, -1);
+                        this.castle.SetCellv(pos + Vector2.Up, -1);
+                        this.castle.SetCellv(pos + Vector2.Left, -1);
+                        this.castle.SetCellv(pos + Vector2.Right, -1);
+                        needCameraLimitUpdate = true;
+                    }
+
                     var originalShip = mainField[x, y] as KaNoBuFigure;
                     if (originalShip == null)
                     {
@@ -154,6 +172,12 @@ public partial class GameField :
                     this.field.AddChild(unit);
                 }
             }
+        }
+        if (needCameraLimitUpdate)
+        {
+            this.beach.UpdateBitmaskRegion();
+            this.castle.UpdateBitmaskRegion();
+            draggableCamera.SetCameraLimits(this.field, Vector2.One * 64);
         }
 
         this.UpdateKnownShips();
@@ -326,7 +350,7 @@ public partial class GameField :
         base._Ready();
         this.FillMembers();
         this.AddToGroup(Groups.Field);
-        this.draggableCamera.SetCameraLimits(this.water);
+        this.draggableCamera.SetCameraLimits(this.field, Vector2.One * 64);
     }
 
     public override void _UnhandledInput(InputEvent @event)
