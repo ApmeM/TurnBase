@@ -48,11 +48,22 @@ public partial class Main
         this.uI.Visible = false;
         this.infinityGameField.Visible = false;
 
+        this.draggableCamera.Current = true;
+        this.draggableCamera.Position = this.staticCamera.Position;
+        this.draggableCamera.Scale = this.staticCamera.Scale;
+        this.draggableCamera.Zoom = this.staticCamera.Zoom;
+
         await game.Play();
 
         this.GetTree().CallGroup(Groups.Field, "queue_free");
 
         this.infinityGameField.Visible = true;
         this.uI.Visible = true;
+        this.staticCamera.Current = true;        
+    }
+
+    public void SetCameraLimits(TileMap field)
+    {
+        this.draggableCamera.SetCameraLimits(field, Vector2.Zero);
     }
 }

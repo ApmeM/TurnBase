@@ -18,6 +18,8 @@ public partial class GameField :
     private int playerId = -1;
     private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
 
+    public TileMap Water => this.water;
+
     #region IPlayer region
 
     public Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model)
@@ -53,54 +55,10 @@ public partial class GameField :
 
     public async Task MoveCameraToPlayer()
     {
-        var tween = new Tween();
-        this.AddChild(tween);
-        Vector2 cameraCenter;
-        switch (playerId)
-        {
-            case 0:
-                cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 1 / 4);
-                break;
-            case 1:
-                cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 3 / 4);
-                break;
-            case 2:
-                cameraCenter = new Vector2(this.GetViewport().Size.x * 1 / 4, this.GetViewport().Size.y * 2 / 4);
-                break;
-            case 3:
-                cameraCenter = new Vector2(this.GetViewport().Size.x * 3 / 4, this.GetViewport().Size.y * 2 / 4);
-                break;
-            default:
-                cameraCenter = new Vector2(this.GetViewport().Size.x * 2 / 4, this.GetViewport().Size.y * 2 / 4);
-                break;
-        }
-
-        var newZoom = Vector2.One / 1.3f;
-
-        var newSize = this.GetViewport().Size * newZoom;
-        var newPos = cameraCenter - newSize / 2;
-        tween.InterpolateProperty(this.draggableCamera, "global_position", this.draggableCamera.GlobalPosition, newPos, 1f);
-        tween.InterpolateProperty(this.draggableCamera, "zoom", this.draggableCamera.Zoom, newZoom, 1f);
-        tween.Start();
-        await ToSignal(tween, "tween_all_completed");
-        tween.QueueFree();
     }
 
     public async Task MoveCameraToCenter()
     {
-        var tween = new Tween();
-        this.AddChild(tween);
-
-        var cameraCenter = new Vector2(this.GetViewport().Size.x / 2, this.GetViewport().Size.y / 2);
-        var newZoom = Vector2.One;
-
-        var newSize = this.GetViewport().Size * newZoom;
-        var newPos = cameraCenter - newSize / 2;
-        tween.InterpolateProperty(this.draggableCamera, "global_position", this.draggableCamera.GlobalPosition, newPos, 1f);
-        tween.InterpolateProperty(this.draggableCamera, "zoom", this.draggableCamera.Zoom, newZoom, 1f);
-        tween.Start();
-        await ToSignal(tween, "tween_all_completed");
-        tween.QueueFree();
     }
 
     #region IGameEventListener region
@@ -177,7 +135,6 @@ public partial class GameField :
         {
             this.beach.UpdateBitmaskRegion();
             this.castle.UpdateBitmaskRegion();
-            draggableCamera.SetCameraLimits(this.field, Vector2.One * 64);
         }
 
         this.UpdateKnownShips();
@@ -350,7 +307,6 @@ public partial class GameField :
         base._Ready();
         this.FillMembers();
         this.AddToGroup(Groups.Field);
-        this.draggableCamera.SetCameraLimits(this.field, Vector2.One * 64);
     }
 
     public override void _UnhandledInput(InputEvent @event)

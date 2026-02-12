@@ -58,6 +58,7 @@ public partial class UI
                     // server
                     var field = this.GameField.Instance<GameField>();
                     this.GetParent().AddChild(field);
+                    this.GetParent<Main>().SetCameraLimits(field.Water);
 
                     var rules = new KaNoBuRules((int)this.mapSizeSelector.Value);
                     rules.AllFiguresVisible = this.allShipsVisibleSelector.Pressed;
@@ -104,6 +105,7 @@ public partial class UI
                     // Client
                     var field = this.GameField.Instance<GameField>();
                     this.GetParent().AddChild(field);
+                    this.GetParent<Main>().SetCameraLimits(field.Water);
 
                     kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
                     kanobu.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), kanobu.GameId));
@@ -124,6 +126,7 @@ public partial class UI
                     // Replay
                     var field = this.Replay.Instance<GameField>();
                     this.GetParent().AddChild(field);
+                    this.GetParent<Main>().SetCameraLimits(field.Water);
 
                     if (lastReplay == null)
                     {
@@ -139,6 +142,7 @@ public partial class UI
                     var levelName = this.levelType.GetItemText(this.levelType.GetSelectedId());
                     var field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
                     this.GetParent().AddChild(field);
+                    this.GetParent<Main>().SetCameraLimits(field.Water);
                     kanobu = field.Start();
                     break;
                 }
