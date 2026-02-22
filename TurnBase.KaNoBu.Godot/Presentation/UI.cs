@@ -48,21 +48,20 @@ public partial class UI
 
     private List<ICommunicationModel> lastReplay;
 
-    public IGame BuildGame()
+    public GameField BuildGame()
     {
         IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> kanobu;
+        GameField field;
         switch (this.gameType.CurrentTab)
         {
             case 0:
                 {
                     // server
-                    var field = this.GameField.Instance<GameField>();
-                    this.GetParent().AddChild(field);
-                    this.GetParent<Main>().SetCameraLimits(field.Water);
+                    field = this.GameField.Instance<GameField>();
 
                     var rules = new KaNoBuRules((int)this.mapSizeSelector.Value);
                     rules.AllFiguresVisible = this.allShipsVisibleSelector.Pressed;
-                    kanobu = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
+                    field.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
 
                     var playerTypes = new[]{
                         this.serverPlayer1,
@@ -79,83 +78,77 @@ public partial class UI
                             if (humanFound)
                             {
                                 GD.Print("Only one human player is allowed.");
-                                kanobu.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>());
+                                field.Game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>());
                                 continue;
                             }
 
                             humanFound = true;
                         }
 
-                        kanobu.AddPlayer(BuildPlayer(playertype.GetSelectedId(), kanobu.GameId));
+                        field.Game.AddPlayer(BuildPlayer(playertype.GetSelectedId(), field));
                     }
 
                     if (!humanFound)
                     {
-                        kanobu.AddGameLogListener(field);
+                        field.Game.AddGameLogListener(field);
                     }
 
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
                     this.lastReplay = memoryReplay.Events;
-                    kanobu.AddGameLogListener(memoryReplay);
+                    field.Game.AddGameLogListener(memoryReplay);
                     this.startReplayButton.Disabled = false;
                     break;
                 }
             case 1:
                 {
                     // Client
-                    var field = this.GameField.Instance<GameField>();
-                    this.GetParent().AddChild(field);
-                    this.GetParent<Main>().SetCameraLimits(field.Water);
+                    field = this.GameField.Instance<GameField>();
 
-                    kanobu = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
-                    kanobu.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), kanobu.GameId));
+                    field.Game = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
+                    field.Game.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), field));
 
                     if (clientPlayer.GetSelectedId() != 1)
                     {
-                        kanobu.AddGameLogListener(field);
+                        field.Game.AddGameLogListener(field);
                     }
 
                     var memoryReplay = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
                     this.lastReplay = memoryReplay.Events;
-                    kanobu.AddGameLogListener(memoryReplay);
+                    field.Game.AddGameLogListener(memoryReplay);
                     this.startReplayButton.Disabled = false;
                     break;
                 }
             case 2:
                 {
                     // Replay
-                    var field = this.Replay.Instance<GameField>();
-                    this.GetParent().AddChild(field);
-                    this.GetParent<Main>().SetCameraLimits(field.Water);
+                    field = this.Replay.Instance<GameField>();
 
                     if (lastReplay == null)
                     {
                         throw new InvalidOperationException("No replay found!");
                     }
-                    kanobu = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
-                    kanobu.AddGameLogListener(field);
+                    field.Game = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(lastReplay);
+                    field.Game.AddGameLogListener(field);
                     break;
                 }
             case 3:
                 {
                     // Levels
                     var levelName = this.levelType.GetItemText(this.levelType.GetSelectedId());
-                    var field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
-                    this.GetParent().AddChild(field);
-                    this.GetParent<Main>().SetCameraLimits(field.Water);
-                    kanobu = field.Start();
+                    field = this.Levels[int.Parse(levelName)].Instance<LevelBase>();
+                    ((LevelBase)field).Initialize();
                     break;
                 }
             default:
                 throw new InvalidOperationException("Unknown game type");
         }
 
-        kanobu.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
+        field.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
 
-        return kanobu;
+        return field;
     }
 
-    public IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> BuildPlayer(int playerType, string gameId)
+    public IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> BuildPlayer(int playerType, GameField field)
     {
         switch (playerType)
         {
@@ -164,7 +157,6 @@ public partial class UI
                 return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>();
             case 1:
                 // Human
-                var field = this.GetParent().GetNode<GameField>("GameField");
                 return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
                     field,
                     async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),
@@ -181,7 +173,7 @@ public partial class UI
             case 3:
                 // Remote
                 this.server.StartServer();
-                var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, gameId);
+                var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, field.Game.GameId);
                 return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
                     player,
                     async (delay) => await this.ToSignal(this.GetTree().CreateTimer(delay / 1000f), "timeout"),

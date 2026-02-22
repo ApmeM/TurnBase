@@ -110,7 +110,7 @@ namespace TurnBase.KaNoBu
                 {
                     var p = new Point { X = x, Y = y };
                     var ship = field[p] as KaNoBuFigure;
-                    if (ship != null && ship.PlayerId != this.myNumber && ship.FigureType == KaNoBuFigure.FigureTypes.Unknown)
+                    if (ship != null && ship.PlayerId != this.myNumber && (ship.FigureType == KaNoBuFigure.FigureTypes.Unknown || ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag))
                     {
                         if (closestEnemy == null)
                         {
@@ -131,7 +131,7 @@ namespace TurnBase.KaNoBu
             {
                 var dst = Math.Abs(closestEnemy.Value.X - a.From.X) + Math.Abs(closestEnemy.Value.Y - a.From.Y);
                 var newDst = Math.Abs(closestEnemy.Value.X - a.To.X) + Math.Abs(closestEnemy.Value.Y - a.To.Y);
-                return dst > newDst ? 6 : -6; // Prioritize moving to closest Unknown enemy
+                return dst > newDst ? 6 : -6; // Prioritize moving to closest Unknown or Flag enemy
             }
         }
 

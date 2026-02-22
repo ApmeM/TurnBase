@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using TurnBase;
 using TurnBase.KaNoBu;
-
 
 [SceneReference("GameField.tscn")]
 public partial class GameField :
@@ -17,6 +14,7 @@ public partial class GameField :
     public PackedScene UnitScene;
     private int playerId = -1;
     private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
+    public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> Game;
 
     public TileMap Water => this.water;
 
@@ -331,5 +329,10 @@ public partial class GameField :
     public Vector2 WorldToMap(Vector2 position)
     {
         return this.field.WorldToMap(position);
+    }
+
+    public async Task Play()
+    {
+        await Game.Play();
     }
 }

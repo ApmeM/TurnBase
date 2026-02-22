@@ -13,6 +13,8 @@ public partial class Main
         this.infinityGameField.RemoveFromGroup(Groups.Field);
 
         StartInfinityGame();
+
+        PlayerFailProtection<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>.logger = new GDLogger();
     }
 
     private async void StartInfinityGame()
@@ -47,6 +49,9 @@ public partial class Main
 
         this.uI.Visible = false;
         this.infinityGameField.Visible = false;
+
+        this.AddChild(game);
+        this.SetCameraLimits(game.Water);
 
         this.draggableCamera.Current = true;
         this.draggableCamera.Position = this.staticCamera.Position;

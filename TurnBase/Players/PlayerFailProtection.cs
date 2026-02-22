@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace TurnBase
@@ -6,6 +7,8 @@ namespace TurnBase
         FailProtectedListener<TMoveNotificationModel>,
         IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
+        public static ILogger logger = new ConsoleLogger();
+
         private readonly IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
 
         public PlayerFailProtection(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
@@ -20,8 +23,9 @@ namespace TurnBase
             {
                 return await this.player.Init(model);
             }
-            catch
+            catch (Exception e)
             {
+                logger.Log($"Player initialization failed with exception: {e}");
                 return new InitResponseModel<TInitResponseModel>();
             }
         }
@@ -32,8 +36,9 @@ namespace TurnBase
             {
                 return await this.player.MakeTurn(model);
             }
-            catch
+            catch(Exception e)
             {
+                logger.Log($"Player turn failed with exception: {e}");
                 return new MakeTurnResponseModel<TMoveResponseModel>();
             }
         }
