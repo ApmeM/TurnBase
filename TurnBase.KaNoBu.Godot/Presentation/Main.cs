@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Godot;
 using TurnBase;
 using TurnBase.KaNoBu;
@@ -11,10 +14,17 @@ public partial class Main
 
         this.uI.Connect(nameof(UI.StartGameEventhandler), this, nameof(OnStartGameAsync));
         this.infinityGameField.RemoveFromGroup(Groups.Field);
+        this.exitGameButton.Connect(CommonSignals.Pressed, this, nameof(EndCurrentGame));
+        this.mainMenuButton.Connect(CommonSignals.Pressed, this, nameof(ShowMainMenuPopup));
 
         StartInfinityGame();
 
         PlayerFailProtection<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>.logger = new GDLogger();
+    }
+
+    private void ShowMainMenuPopup()
+    {
+        this.mainMenuPopup.Show();
     }
 
     private async void StartInfinityGame()
@@ -39,6 +49,7 @@ public partial class Main
         }
     }
 
+    private string gameId;
     private async void OnStartGameAsync()
     {
         var game = this.uI.BuildGame();
@@ -58,13 +69,35 @@ public partial class Main
         this.draggableCamera.Scale = this.staticCamera.Scale;
         this.draggableCamera.Zoom = this.staticCamera.Zoom;
 
+        this.gameId = game.Game.GameId;
+
         await game.Play();
 
-        this.GetTree().CallGroup(Groups.Field, "queue_free");
+        this.EndGame(this.gameId);
+    }
+
+    private void EndCurrentGame()
+    {
+        this.EndGame(this.gameId);
+        this.mainMenuPopup.Hide();
+    }
+
+    private void EndGame(string gameId)
+    {
+        var gameField = this.GetTree().GetNodesInGroup(Groups.Field)
+            .Cast<GameField>()
+            .FirstOrDefault(a => a.Game.GameId == gameId);
+
+        if (gameField == null)
+        {
+            return;
+        }
+
+        gameField.QueueFree();
 
         this.infinityGameField.Visible = true;
         this.uI.Visible = true;
-        this.staticCamera.Current = true;        
+        this.staticCamera.Current = true;
     }
 
     public void SetCameraLimits(TileMap field)

@@ -1,6 +1,6 @@
 [gd_resource type="TileSet" load_steps=3 format=2]
 
-[ext_resource path="res://assets/tiles_sheet.png" type="Texture" id=1]
+[ext_resource path="res://Presentation/assets/tiles_sheet.png" type="Texture" id=1]
 [ext_resource path="res://Presentation/Fog.tres" type="Material" id=2]
 
 [resource]

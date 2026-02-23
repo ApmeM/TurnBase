@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Presentation/Main.cs" type="Script" id=1]
 [ext_resource path="res://gd-draggableCamera/DraggableCamera.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Presentation/CustomField.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Presentation/UI.tscn" type="PackedScene" id=4]
+[ext_resource path="res://gd-popups/CustomPopup.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Presentation/assets/button-menu.png" type="Texture" id=6]
 
 [node name="Main" type="Node"]
 script = ExtResource( 1 )
@@ -13,6 +15,27 @@ script = ExtResource( 1 )
 [node name="UI" parent="." instance=ExtResource( 4 )]
 GameField = ExtResource( 3 )
 Replay = ExtResource( 3 )
+
+[node name="MainMenu" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="MainMenuButton" type="TextureButton" parent="MainMenu"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -68.0
+margin_bottom = 64.0
+texture_normal = ExtResource( 6 )
+
+[node name="MainMenuPopup" parent="MainMenu" instance=ExtResource( 5 )]
+layer = 11
+visible = false
+
+[node name="ExitGameButton" type="Button" parent="MainMenu/MainMenuPopup/CustomPopupContainer/PopupContainer/MarginContainer/PopupOuterMargin/ContentMargin" index="0"]
+margin_left = 9.0
+margin_top = 9.0
+margin_right = 281.0
+margin_bottom = 79.0
+text = "Exit"
 
 [node name="DraggableCamera" parent="." instance=ExtResource( 2 )]
 position = Vector2( -64, -256 )
@@ -24,3 +47,5 @@ maximumZoom = 2.0
 position = Vector2( -64, -256 )
 anchor_mode = 0
 current = true
+
+[editable path="MainMenu/MainMenuPopup"]

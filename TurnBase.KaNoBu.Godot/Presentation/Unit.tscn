@@ -1,8 +1,8 @@
 [gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Presentation/Unit.cs" type="Script" id=1]
-[ext_resource path="res://assets/shipsMiscellaneous_sheet.png" type="Texture" id=2]
-[ext_resource path="res://assets/ui.png" type="Texture" id=3]
+[ext_resource path="res://Presentation/assets/shipsMiscellaneous_sheet.png" type="Texture" id=2]
+[ext_resource path="res://Presentation/assets/ui.png" type="Texture" id=3]
 [ext_resource path="res://Presentation/WaveGenerator.tscn" type="PackedScene" id=4]
 
 [sub_resource type="AtlasTexture" id=54]

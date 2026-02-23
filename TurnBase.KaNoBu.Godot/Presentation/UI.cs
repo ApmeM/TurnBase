@@ -61,7 +61,7 @@ public partial class UI
 
                     var rules = new KaNoBuRules((int)this.mapSizeSelector.Value);
                     rules.AllFiguresVisible = this.allShipsVisibleSelector.Pressed;
-                    field.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test");
+                    field.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test" + Guid.NewGuid().ToString());
 
                     var playerTypes = new[]{
                         this.serverPlayer1,

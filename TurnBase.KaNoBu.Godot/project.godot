@@ -23,7 +23,7 @@ ResourceScriptDirectories=[ "res://" ]
 config/name="TurnBase.KaNoBu.Godot"
 config/description="This is the Stone-Scissors-Rock game based on TurnBase library."
 run/main_scene="res://Presentation/Main.tscn"
-config/icon="res://assets/Icon.png"
+config/icon="res://Presentation/assets/Icon.png"
 
 [display]
 
