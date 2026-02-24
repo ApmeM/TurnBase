@@ -14,5 +14,7 @@ namespace TurnBase
         AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player);
 
         void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener);
+        
+        void Disconnect(IGameEventListener<TMoveNotificationModel> player);
     }
 }

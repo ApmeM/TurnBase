@@ -24,6 +24,7 @@ namespace TurnBase
         public string GameId { get; private set; }
         private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
         private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
+        private bool connected;
 
         public RemoteGame(IClient client, string serverUrl, string gameId)
         {
@@ -56,7 +57,9 @@ namespace TurnBase
 
             var playerIdQueryString = new Dictionary<string, object> { { "playerId", playerId } };
 
-            while (true)
+            this.connected = true;
+
+            while (this.connected)
             {
                 var result = await this.client.SendAction(serverUrl, "wait-action", playerIdQueryString);
 
@@ -124,6 +127,11 @@ namespace TurnBase
                     }
                 }
             }
+        }
+
+        public void Disconnect(IGameEventListener<TMoveNotificationModel> player)
+        {
+            this.connected = false;
         }
     }
 }

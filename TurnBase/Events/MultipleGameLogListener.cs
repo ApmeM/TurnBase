@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace TurnBase
@@ -10,6 +9,11 @@ namespace TurnBase
         public void Add(IGameEventListener<TMoveNotificationModel> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
+        }
+
+        public void Remove(IGameEventListener<TMoveNotificationModel> gameLogListener)
+        {
+            this.gameLogListeners.Remove(gameLogListener);
         }
 
         public void GameStarted()

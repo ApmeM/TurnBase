@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : 
+    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
         IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
         private class PlayerData
@@ -47,7 +47,7 @@ namespace TurnBase
             }
 
             this.players.Add(
-                new PlayerFailProtection<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>(player), 
+                new PlayerFailProtection<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>(player),
                 new PlayerData { IsInGame = true, PlayerNumber = this.players.Count });
             return AddPlayerStatus.OK;
         }
@@ -94,12 +94,7 @@ namespace TurnBase
                     return;
                 }
 
-                //TODO: Handle disconnect player in memorization and game field.
-                var playerData = this.players[p];
-                playerData.IsInGame = false;
-                this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
-                this.players.Keys.ToList().ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
-                this.gameLogListeners.GamePlayerDisconnected(playerData.PlayerNumber);
+                this.Disconnect(p);
             }
 
             return Task.WhenAll(
@@ -217,6 +212,21 @@ namespace TurnBase
             this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
             this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
             return true;
+        }
+
+        public void Disconnect(IGameEventListener<TMoveNotificationModel> listener)
+        {
+            //TODO: Handle disconnect player in memorization and game field.
+            if (listener is IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player && this.players.ContainsKey(player))
+            {
+                var playerData = this.players[player];
+                playerData.IsInGame = false;
+                this.rules.PlayerDisconnected(this.mainField, playerData.PlayerNumber);
+                this.players.Keys.ToList().ForEach(a => a.GamePlayerDisconnected(playerData.PlayerNumber));
+                this.gameLogListeners.GamePlayerDisconnected(playerData.PlayerNumber);
+            }
+            
+            this.gameLogListeners.Remove(listener);
         }
     }
 }

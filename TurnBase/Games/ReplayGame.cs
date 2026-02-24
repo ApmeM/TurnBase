@@ -29,8 +29,9 @@ namespace TurnBase
 
         public async Task Play()
         {
-            foreach (var gameEvent in events)
+            for (var i = 0; i < events.Count; i++)
             {
+                var gameEvent = events[i];
                 if (gameEvent is GameStartedCommunicationModel gameStarted)
                 {
                     this.gameLogListeners.GameStarted();
@@ -69,6 +70,11 @@ namespace TurnBase
                     throw new System.Exception($"Incorrect event in event log: {gameEvent.GetType()}");
                 }
             }
+        }
+
+        public void Disconnect(IGameEventListener<TMoveNotificationModel> player)
+        {
+            this.events.Clear();
         }
     }
 }

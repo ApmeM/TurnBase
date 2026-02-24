@@ -93,6 +93,7 @@ public partial class Main
             return;
         }
 
+        gameField.Game.Disconnect(gameField);
         gameField.QueueFree();
 
         this.infinityGameField.Visible = true;
