@@ -1,24 +1,9 @@
 using System;
-using System.Collections.Generic;
 
 namespace TurnBase.KaNoBu
 {
     public class KaNoBuFieldMemorization
     {
-        public static readonly Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes> Winner = new Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes>
-        {
-            {KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipScissors},
-            {KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipStone},
-            {KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipPaper},
-        };
-
-        public static readonly Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes> Looser = new Dictionary<KaNoBuFigure.FigureTypes, KaNoBuFigure.FigureTypes>
-        {
-            {KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipStone},
-            {KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipPaper},
-            {KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipScissors},
-        };
-        
         public Field2D Field;
 
         public void Clear()
@@ -78,81 +63,80 @@ namespace TurnBase.KaNoBu
                 var movedUnit = this.Field[fromMapPos] as KaNoBuFigure;
                 var defenderUnit = this.Field[toMapPos] as KaNoBuFigure;
 
-                this.Field[fromMapPos] = null;
-                this.Field[toMapPos] = null;
-
-                if (notification.Battle.HasValue)
+                if (!notification.Battle.HasValue)
                 {
-                    switch (notification.Battle.Value.battleResult)
-                    {
-                        case KaNoBuMoveNotificationModel.BattleResult.Draw:
-                        {
-                            var movedType = movedUnit.FigureType;
-                            var defenderType = defenderUnit.FigureType;
-                            if (movedType != KaNoBuFigure.FigureTypes.Unknown)
-                            {
-                                defenderUnit = defenderUnit.WithFigureType(movedType);
-                            }
-                            if (defenderType != KaNoBuFigure.FigureTypes.Unknown)
-                            {
-                                movedUnit = movedUnit.WithFigureType(defenderType);
-                            }
-                            this.Field[fromMapPos] = movedUnit;
-                            this.Field[toMapPos] = defenderUnit;
-                            break;
-                        }
-                        case KaNoBuMoveNotificationModel.BattleResult.BothDestroyed:
-                            break;
-                        case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
-                        {
-                            if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
-                            {
-                                movedUnit = movedUnit.WithFigureType(KaNoBuFigure.FigureTypes.Unknown);
-                            }
-                            if (notification.Battle.Value.isDefenderFlag)
-                            {
-                                defenderUnit = defenderUnit.WithFigureType(KaNoBuFigure.FigureTypes.ShipFlag);
-                            }
-                            else
-                            {
-                                if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
-                                {
-                                    defenderUnit = defenderUnit.WithFigureType(Looser[movedUnit.FigureType]);
-                                }
-                                if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
-                                {
-                                    movedUnit = movedUnit.WithFigureType(Winner[defenderUnit.FigureType]);
-                                }
-                            }
-                            this.Field[toMapPos] = movedUnit;
-                            break;
-                        }
-                        case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
-                        {
-                            if (defenderUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
-                            {
-                                defenderUnit = defenderUnit.WithFigureType(KaNoBuFigure.FigureTypes.Unknown);
-                            }
-
-                            if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
-                            {
-                                defenderUnit = defenderUnit.WithFigureType(Winner[movedUnit.FigureType]);
-                            }
-                            if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
-                            {
-                                movedUnit = movedUnit.WithFigureType(Looser[defenderUnit.FigureType]);
-                            }
-
-                            this.Field[toMapPos] = defenderUnit;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
+                    this.Field[fromMapPos] = null;
                     this.Field[toMapPos] = movedUnit;
+                    continue;
+                }
+
+                switch (notification.Battle.Value.battleResult)
+                {
+                    case KaNoBuMoveNotificationModel.BattleResult.Draw:
+                        if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
+                        {
+                            defenderUnit = defenderUnit.WithFigureType(movedUnit.FigureType);
+                        }
+                        if (defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
+                        {
+                            movedUnit = movedUnit.WithFigureType(defenderUnit.FigureType);
+                        }
+                        this.Field[fromMapPos] = movedUnit;
+                        this.Field[toMapPos] = defenderUnit;
+                        break;
+                    case KaNoBuMoveNotificationModel.BattleResult.BothDestroyed:
+                        this.Field[fromMapPos] = null;
+                        this.Field[toMapPos] = null;
+                        break;
+                    case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
+                        if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
+                        {
+                            movedUnit = movedUnit.WithFigureType(KaNoBuFigure.FigureTypes.Unknown);
+                        }
+                        if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.Unknown && defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
+                        {
+                            movedUnit = FindFigure(movedUnit, candidate => candidate.ResolveBattle(defenderUnit).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
+                        }
+                        this.Field[fromMapPos] = null;
+                        this.Field[toMapPos] = movedUnit;
+                        break;
+                    case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
+                        if (defenderUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
+                        {
+                            defenderUnit = defenderUnit.WithFigureType(KaNoBuFigure.FigureTypes.Unknown);
+                        }
+
+                        if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown && defenderUnit.FigureType == KaNoBuFigure.FigureTypes.Unknown)
+                        {
+                            defenderUnit = FindFigure(defenderUnit, candidate => movedUnit.ResolveBattle(candidate).Outcome == KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
+                        }
+
+                        this.Field[fromMapPos] = null;
+                        this.Field[toMapPos] = defenderUnit;
+                        break;
                 }
             }
+        }
+
+        private static readonly KaNoBuFigure.FigureTypes[] BattleShipTypes =
+        {
+            KaNoBuFigure.FigureTypes.ShipPaper,
+            KaNoBuFigure.FigureTypes.ShipScissors,
+            KaNoBuFigure.FigureTypes.ShipStone,
+        };
+
+        private static KaNoBuFigure FindFigure(KaNoBuFigure template, Func<KaNoBuFigure, bool> predicate)
+        {
+            foreach (var figureType in BattleShipTypes)
+            {
+                var candidate = template.WithFigureType(figureType);
+                if (predicate(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            return template;
         }
     }
 }
