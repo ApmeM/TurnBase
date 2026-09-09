@@ -212,8 +212,12 @@ namespace TurnBase
 
             var moveResult = this.rules.MakeMove(this.mainField, playerNumber, move);
 
-            this.players.Keys.ToList().ForEach(a => a.GamePlayerTurn(playerNumber, moveResult));
-            this.gameLogListeners.GamePlayerTurn(playerNumber, moveResult);
+            this.players.Keys.ToList().ForEach(a => a.GamePlayerTurn(
+                playerNumber,
+                this.rules.GetMoveNotificationForPlayer(moveResult, players[a].PlayerNumber)));
+            this.gameLogListeners.GamePlayerTurn(
+                playerNumber,
+                this.rules.GetMoveNotificationForPlayer(moveResult, -1));
 
             this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
             this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));

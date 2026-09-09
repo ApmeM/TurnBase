@@ -74,11 +74,27 @@ public class KaNoBuFieldMemorizationTests
         Assert.That(field[DefenderPosition], Is.Null);
     }
 
+    [Test]
+    public void BattleShipTypesAreAppliedBeforeUpdatingMemory()
+    {
+        var field = UpdateMemory(
+            KaNoBuFigure.FigureTypes.Unknown,
+            KaNoBuFigure.FigureTypes.Unknown,
+            KaNoBuMoveNotificationModel.BattleResult.AttackerWon,
+            attackerBattleType: KaNoBuFigure.FigureTypes.ShipPaper,
+            defenderBattleType: KaNoBuFigure.FigureTypes.ShipStone);
+
+        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
+    }
+
     private static Field2D UpdateMemory(
         KaNoBuFigure.FigureTypes attackerType,
         KaNoBuFigure.FigureTypes defenderType,
         KaNoBuMoveNotificationModel.BattleResult battleResult,
-        bool isDefenderFlag = false)
+        bool isDefenderFlag = false,
+        KaNoBuFigure.FigureTypes attackerBattleType = KaNoBuFigure.FigureTypes.Unknown,
+        KaNoBuFigure.FigureTypes defenderBattleType = KaNoBuFigure.FigureTypes.Unknown)
     {
         var field = Field2D.Create(2, 1);
         field[AttackerPosition] = KaNoBuFigure.Create(1, attackerType, false, 0);
@@ -91,6 +107,8 @@ public class KaNoBuFieldMemorizationTests
         {
             battleResult = battleResult,
             isDefenderFlag = isDefenderFlag,
+            attackerFigureType = attackerBattleType,
+            defenderFigureType = defenderBattleType,
         };
         var notification = new KaNoBuMoveNotificationModel(
             new List<KaNoBuMoveNotificationModel.MoveNotification>

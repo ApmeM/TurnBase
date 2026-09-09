@@ -74,6 +74,11 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return mainRules.MakeMove(mainField, playerNumber, playerMove);
     }
 
+    public KaNoBuMoveNotificationModel GetMoveNotificationForPlayer(KaNoBuMoveNotificationModel notification, int playerNumber)
+    {
+        return mainRules.GetMoveNotificationForPlayer(notification, playerNumber);
+    }
+
     public void PlayerDisconnected(IField mainField, int playerNumber)
     {
         mainRules.PlayerDisconnected(mainField, playerNumber);

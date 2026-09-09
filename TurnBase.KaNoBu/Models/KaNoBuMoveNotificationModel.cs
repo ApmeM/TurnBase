@@ -26,6 +26,10 @@ namespace TurnBase.KaNoBu
         {
             public BattleResult battleResult;
             public bool isDefenderFlag;
+            public int attackerPlayerNumber;
+            public int defenderPlayerNumber;
+            public KaNoBuFigure.FigureTypes attackerFigureType;
+            public KaNoBuFigure.FigureTypes defenderFigureType;
         }
 
         public enum BattleResult

@@ -20,6 +20,7 @@ namespace TurnBase
     TMoveModel GetMoveModel(IField mainField, int playerNumber);
     bool IsMoveValid(IField mainField, int playerNumber, TMoveResponseModel move);
     TMoveNotificationModel MakeMove(IField mainField, int playerNumber, TMoveResponseModel playerMove);
+    TMoveNotificationModel GetMoveNotificationForPlayer(TMoveNotificationModel notification, int playerNumber);
     void TurnCompleted(IField mainField);
     List<int> findWinners(IField mainField);
     void PlayerDisconnected(IField mainField, int playerNumber);

@@ -275,6 +275,30 @@ namespace TurnBase.KaNoBu
             return new KaNoBuMoveNotificationModel(notifications);
         }
 
+        public KaNoBuMoveNotificationModel GetMoveNotificationForPlayer(
+            KaNoBuMoveNotificationModel notification,
+            int playerNumber)
+        {
+            var notifications = notification.MoveNotifications.Select(move =>
+            {
+                if (!move.Battle.HasValue)
+                {
+                    return move;
+                }
+
+                var battle = move.Battle.Value;
+                if (battle.attackerPlayerNumber != playerNumber && battle.defenderPlayerNumber != playerNumber)
+                {
+                    battle.attackerFigureType = KaNoBuFigure.FigureTypes.Unknown;
+                    battle.defenderFigureType = KaNoBuFigure.FigureTypes.Unknown;
+                }
+
+                return new KaNoBuMoveNotificationModel.MoveNotification(move.From, move.To, battle);
+            }).ToList();
+
+            return new KaNoBuMoveNotificationModel(notifications);
+        }
+
         private KaNoBuMoveNotificationModel.MoveNotification MakeMoveStep(IField field, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
         {
             var mainField = (Field2D)field;
@@ -332,7 +356,11 @@ namespace TurnBase.KaNoBu
             var battle = new KaNoBuMoveNotificationModel.Battle
             {
                 battleResult = resolution.Outcome,
-                isDefenderFlag = to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag
+                isDefenderFlag = to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag,
+                attackerPlayerNumber = from.PlayerId,
+                defenderPlayerNumber = to.PlayerId,
+                attackerFigureType = from.FigureType,
+                defenderFigureType = to.FigureType
             };
 
             return new KaNoBuMoveNotificationModel.MoveNotification(playerMove.From, playerMove.To, battle);

@@ -79,6 +79,38 @@ public class KaNoBuRulesTests
     }
 
     [Test]
+    public void BattleShipTypesAreVisibleOnlyToBattleParticipants()
+    {
+        var field = Field2D.Create(2, 2);
+        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
+        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, true, 0);
+
+        var rules = new KaNoBuRules(6);
+        var move = new KaNoBuMoveResponseModel(
+            new List<KaNoBuMoveResponseModel.MoveStep>
+            {
+                new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
+            });
+
+        var notification = rules.MakeMove(field, 1, move);
+        var attackerNotification = rules.GetMoveNotificationForPlayer(notification, 1);
+        var defenderNotification = rules.GetMoveNotificationForPlayer(notification, 2);
+        var spectatorNotification = rules.GetMoveNotificationForPlayer(notification, 3);
+
+        var attackerBattle = attackerNotification.MoveNotifications[0].Battle.Value;
+        var defenderBattle = defenderNotification.MoveNotifications[0].Battle.Value;
+        var spectatorBattle = spectatorNotification.MoveNotifications[0].Battle.Value;
+
+        Assert.That(attackerBattle.attackerFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipStone));
+        Assert.That(attackerBattle.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScissors));
+        Assert.That(defenderBattle.attackerFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipStone));
+        Assert.That(defenderBattle.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScissors));
+        Assert.That(spectatorBattle.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.AttackerWon));
+        Assert.That(spectatorBattle.attackerFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.Unknown));
+        Assert.That(spectatorBattle.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.Unknown));
+    }
+
+    [Test]
     public void TurnRejectsMoreFiguresThanAllowedPerTurn()
     {
         var field = Field2D.Create(4, 3);

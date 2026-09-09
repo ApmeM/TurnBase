@@ -70,7 +70,17 @@ namespace TurnBase.KaNoBu
                     continue;
                 }
 
-                switch (notification.Battle.Value.battleResult)
+                var battle = notification.Battle.Value;
+                if (battle.attackerFigureType != KaNoBuFigure.FigureTypes.Unknown)
+                {
+                    movedUnit = movedUnit.WithFigureType(battle.attackerFigureType);
+                }
+                if (battle.defenderFigureType != KaNoBuFigure.FigureTypes.Unknown)
+                {
+                    defenderUnit = defenderUnit.WithFigureType(battle.defenderFigureType);
+                }
+
+                switch (battle.battleResult)
                 {
                     case KaNoBuMoveNotificationModel.BattleResult.Draw:
                         if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
