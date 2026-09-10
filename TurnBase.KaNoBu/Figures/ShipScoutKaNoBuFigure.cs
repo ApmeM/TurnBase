@@ -1,13 +1,13 @@
 namespace TurnBase.KaNoBu
 {
-    public sealed class ShipScissorsKaNoBuFigure : KaNoBuFigure
+    public sealed class ShipScoutKaNoBuFigure : KaNoBuFigure
     {
-        public ShipScissorsKaNoBuFigure(int playerId, bool visibleForAllPlayers, int winNumber)
+        public ShipScoutKaNoBuFigure(int playerId, bool visibleForAllPlayers, int winNumber)
             : base(playerId, visibleForAllPlayers, winNumber)
         {
         }
 
-        public override FigureTypes FigureType => FigureTypes.ShipScissors;
+        public override FigureTypes FigureType => FigureTypes.ShipScout;
 
         public override bool IsMoveable => true;
 
@@ -19,6 +19,14 @@ namespace TurnBase.KaNoBu
                 new Point(0, -1),
                 new Point(1, 0),
                 new Point(-1, 0),
+                new Point(0, 2),
+                new Point(0, -2),
+                new Point(2, 0),
+                new Point(-2, 0),
+                new Point(1, 1),
+                new Point(1, -1),
+                new Point(-1, 1),
+                new Point(-1, -1),
             };
         }
 
@@ -28,18 +36,18 @@ namespace TurnBase.KaNoBu
             {
                 case FigureTypes.Unknown:
                     throw new System.Exception("Can not resolve battle with unknown ship");
-                case FigureTypes.ShipScissors:
-                    return BattleResolution.Draw();
                 case FigureTypes.ShipFlag:
-                case FigureTypes.ShipPaper:
-                case FigureTypes.ShipScout:
                     return BattleResolution.AttackerWon(this);
                 case FigureTypes.ShipStone:
+                case FigureTypes.ShipPaper:
+                case FigureTypes.ShipScissors:
                     return BattleResolution.DefenderWon(defender);
                 case FigureTypes.ShipMine:
                     return BattleResolution.BothAreDestroyed();
+                case FigureTypes.ShipScout:
+                    return BattleResolution.Draw();
                 case FigureTypes.ShipUniversal:
-                    return BattleResolution.DefenderWon(defender.WithFigureType(FigureTypes.ShipStone));
+                    return BattleResolution.DefenderWon(defender.WithFigureType(FigureTypes.ShipScout));
                 default:
                     throw new System.Exception($"Unsupported figure type {defender.FigureType}");
             }

@@ -11,9 +11,9 @@ namespace TurnBase.KaNoBu
 
         public override bool IsMoveable => false;
 
-        public override bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep)
+        public override Point[] GetPossibleMoveOffsets()
         {
-            return false;
+            return new Point[0];
         }
 
         public override BattleResolution ResolveBattle(KaNoBuFigure defender)
@@ -26,6 +26,7 @@ namespace TurnBase.KaNoBu
                 case FigureTypes.ShipPaper:
                 case FigureTypes.ShipScissors:
                 case FigureTypes.ShipUniversal:
+                case FigureTypes.ShipScout:
                     throw new System.Exception("Mine can not initialize battle");
                 case FigureTypes.Unknown:
                     throw new System.Exception("Can not resolve battle with unknown ship");

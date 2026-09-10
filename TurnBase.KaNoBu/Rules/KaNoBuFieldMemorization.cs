@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace TurnBase.KaNoBu
 {
@@ -133,17 +134,19 @@ namespace TurnBase.KaNoBu
             KaNoBuFigure.FigureTypes.ShipPaper,
             KaNoBuFigure.FigureTypes.ShipScissors,
             KaNoBuFigure.FigureTypes.ShipStone,
+            KaNoBuFigure.FigureTypes.ShipScout,
         };
 
         private static KaNoBuFigure FindFigure(KaNoBuFigure template, Func<KaNoBuFigure, bool> predicate)
         {
-            foreach (var figureType in BattleShipTypes)
+            var applicableTypes = BattleShipTypes
+                .Select(figureType => template.WithFigureType(figureType))
+                .Where(a => predicate(a))
+                .ToList();
+
+            if(applicableTypes.Count == 1)
             {
-                var candidate = template.WithFigureType(figureType);
-                if (predicate(candidate))
-                {
-                    return candidate;
-                }
+                return applicableTypes[0];
             }
 
             return template;

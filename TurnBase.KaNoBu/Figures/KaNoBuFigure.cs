@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TurnBase;
 
 namespace TurnBase.KaNoBu
@@ -16,6 +17,7 @@ namespace TurnBase.KaNoBu
             ShipScissors,
             ShipUniversal,
             ShipMine,
+            ShipScout,
         }
 
         protected KaNoBuFigure(int playerId, bool visibleForAllPlayers, int winNumber)
@@ -54,6 +56,8 @@ namespace TurnBase.KaNoBu
                     return new ShipUniversalKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
                 case FigureTypes.ShipMine:
                     return new ShipMineKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                case FigureTypes.ShipScout:
+                    return new ShipScoutKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
                 default:
                     throw new Exception("Unknown figure type");
             }
@@ -61,7 +65,24 @@ namespace TurnBase.KaNoBu
 
         public abstract bool IsMoveable { get; }
 
-        public abstract bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep);
+        public virtual bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep)
+        {
+            var offset = new Point(
+                moveStep.To.X - moveStep.From.X,
+                moveStep.To.Y - moveStep.From.Y);
+
+            foreach (var possibleOffset in this.GetPossibleMoveOffsets())
+            {
+                if (possibleOffset.X == offset.X && possibleOffset.Y == offset.Y)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public abstract Point[] GetPossibleMoveOffsets();
 
         public abstract BattleResolution ResolveBattle(KaNoBuFigure defender);
 

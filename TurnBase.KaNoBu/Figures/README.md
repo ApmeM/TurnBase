@@ -47,7 +47,7 @@
 
 **Результат боя в роли атакующего:**
 - при защитнике типа `Unknown` выбрасывает исключение `Can not resolve battle with unknown ship`;
-- при любом другом известном типе защитника (`ShipFlag`, `ShipStone`, `ShipPaper`, `ShipScissors`, `ShipUniversal`, `ShipMine`) выбрасывает исключение `Flag can not initialize battle`;
+- при любом другом известном типе защитника (`ShipFlag`, `ShipStone`, `ShipPaper`, `ShipScissors`, `ShipUniversal`, `ShipMine`, `ShipScout`) выбрасывает исключение `Flag can not initialize battle`;
 - для неподдерживаемого значения `FigureTypes` выбрасывает исключение `Unsupported figure type {figureType}`.
 
 ### `ShipMineKaNoBuFigure`
@@ -58,7 +58,7 @@
 
 **Результат боя в роли атакующего:**
 - при защитнике типа `Unknown` выбрасывает исключение `Can not resolve battle with unknown ship`;
-- при любом другом известном типе защитника (`ShipFlag`, `ShipStone`, `ShipPaper`, `ShipScissors`, `ShipUniversal`, `ShipMine`) выбрасывает исключение `Mine can not initialize battle`;
+- при любом другом известном типе защитника (`ShipFlag`, `ShipStone`, `ShipPaper`, `ShipScissors`, `ShipUniversal`, `ShipMine`, `ShipScout`) выбрасывает исключение `Mine can not initialize battle`;
 - для неподдерживаемого значения `FigureTypes` выбрасывает исключение `Unsupported figure type {figureType}`.
 
 ### `ShipStoneKaNoBuFigure`
@@ -110,7 +110,22 @@
 - против `Ножницы` атакующий получает тип `Камень` и побеждает;
 - против `Бумага` атакующий получает тип `Ножницы` и побеждает;
 - проигрывает `Мина`;
-- против `ShipUniversal` — ничья.
+- против `Универсал` — ничья;
+- против `Скаут` атакующий получает тип `Скаут` и побеждает;
+
+### `ShipScoutKaNoBuFigure`
+
+**Назначение:** подвижная фигура, которая побеждает только флаг.
+
+**Движение:** метод `IsMoveValid` разрешает перемещение на расстояние от одной до двух клеток по Манхэттену. Перемещение на большее расстояние, в ту же клетку или по диагональной траектории с Manhattan distance больше двух не допускается. Границы поля, стены, владельца фигуры и занятость цели дополнительно проверяет `KaNoBuRules`.
+
+**Результат боя в роли атакующего:**
+- при защитнике типа `Unknown` выбрасывает исключение `Can not resolve battle with unknown ship`;
+- побеждает только `Флаг`;
+- проигрывает `Камень`, `Бумага` и `Ножницы`;
+- при столкновении с `Миной` обе фигуры уничтожаются;
+- против другого `Скуат` — ничья;
+- проигрывает `Универсал`, `Универсал` меняет тип на `скаут`.
 
 ### `UnknownKaNoBuFigure`
 

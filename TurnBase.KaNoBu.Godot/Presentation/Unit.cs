@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TurnBase.KaNoBu;
 using TurnBase;
+using System.Linq;
 
 [Tool]
 [SceneReference("Unit.tscn")]
@@ -14,6 +15,7 @@ public partial class Unit
     public Task CurrentTask;
 
     private KaNoBuFigure.FigureTypes unitType = KaNoBuFigure.FigureTypes.ShipPaper;
+    private KaNoBuFigure figure;
     private int playerNumber = 0;
     private bool isSelected = false;
 
@@ -36,6 +38,11 @@ public partial class Unit
         get => this.unitType;
         set
         {
+            if (this.unitType != value || this.figure == null)
+            {
+                this.figure = KaNoBuFigure.Create(0, value, true, 0);
+            }
+            
             this.unitType = value;
             if (IsInsideTree())
             {
@@ -68,6 +75,9 @@ public partial class Unit
                         break;
                     case KaNoBuFigure.FigureTypes.ShipMine:
                         shipTypeTexture.Region = new Rect2(340, 190, 20, 20);
+                        break;
+                    case KaNoBuFigure.FigureTypes.ShipScout:
+                        shipTypeTexture.Region = new Rect2(340, 170, 20, 20);
                         break;
                 }
             }
@@ -271,21 +281,8 @@ public partial class Unit
 
     public List<Vector2> GetPossibleMoves()
     {
-        if (
-            this.unitType == KaNoBuFigure.FigureTypes.Unknown ||
-            this.unitType == KaNoBuFigure.FigureTypes.ShipFlag ||
-            this.unitType == KaNoBuFigure.FigureTypes.ShipMine
-            )
-        {
-            return new List<Vector2>();
-        }
-
-        return new List<Vector2>
-        {
-            Vector2.Down,
-            Vector2.Left,
-            Vector2.Right,
-            Vector2.Up,
-        };
+        return this.figure.GetPossibleMoveOffsets()
+            .Select(offset => new Vector2(offset.X, offset.Y))
+            .ToList();
     }
 }

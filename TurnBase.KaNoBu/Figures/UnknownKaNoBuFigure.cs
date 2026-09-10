@@ -11,9 +11,9 @@ namespace TurnBase.KaNoBu
 
         public override bool IsMoveable => false;
 
-        public override bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep)
+        public override Point[] GetPossibleMoveOffsets()
         {
-            return false;
+            return new Point[0];
         }
 
         public override BattleResolution ResolveBattle(KaNoBuFigure defender)

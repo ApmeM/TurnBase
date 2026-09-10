@@ -74,10 +74,11 @@ namespace TurnBase.KaNoBu
             availableShips.Add(KaNoBuFigure.FigureTypes.ShipMine);
             for (int i = 2; i < fieldSize; i++)
             {
-                var shipN = i % 3;
+                var shipN = i % 4;
                 if (shipN == 0) availableShips.Add(KaNoBuFigure.FigureTypes.ShipStone);
                 if (shipN == 1) availableShips.Add(KaNoBuFigure.FigureTypes.ShipScissors);
                 if (shipN == 2) availableShips.Add(KaNoBuFigure.FigureTypes.ShipPaper);
+                if (shipN == 3) availableShips.Add(KaNoBuFigure.FigureTypes.ShipScout);
             }
 
             return new KaNoBuInitModel(initFieldWidth, initFieldHeight, availableShips, this.MaxMovesPerTurn);
@@ -359,8 +360,12 @@ namespace TurnBase.KaNoBu
                 isDefenderFlag = to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag,
                 attackerPlayerNumber = from.PlayerId,
                 defenderPlayerNumber = to.PlayerId,
-                attackerFigureType = from.FigureType,
-                defenderFigureType = to.FigureType
+                attackerFigureType = resolution.Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon
+                    ? resolution.Winner.FigureType
+                    : from.FigureType,
+                defenderFigureType = resolution.Outcome == KaNoBuMoveNotificationModel.BattleResult.DefenderWon
+                    ? resolution.Winner.FigureType
+                    : to.FigureType
             };
 
             return new KaNoBuMoveNotificationModel.MoveNotification(playerMove.From, playerMove.To, battle);

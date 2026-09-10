@@ -25,6 +25,58 @@ public class KaNoBuFieldMemorizationTests
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(expectedWinnerType));
     }
 
+    [TestCase(KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipPaper)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipScissors)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipStone)]
+    public void KnownRegularAttackerRevealsUniqueDefender(
+        KaNoBuFigure.FigureTypes attackerType,
+        KaNoBuFigure.FigureTypes expectedDefenderType)
+    {
+        var field = UpdateMemory(
+            attackerType,
+            KaNoBuFigure.FigureTypes.Unknown,
+            KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
+
+        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(expectedDefenderType));
+    }
+
+    [Test]
+    public void ScoutAttackerKeepsUnknownDefenderWhenItLoses()
+    {
+        var field = UpdateMemory(
+            KaNoBuFigure.FigureTypes.ShipScout,
+            KaNoBuFigure.FigureTypes.Unknown,
+            KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
+
+        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.Unknown));
+    }
+
+    [Test]
+    public void UnknownAttackerKeepsUnknownTypeWhenItDefeatsScout()
+    {
+        var field = UpdateMemory(
+            KaNoBuFigure.FigureTypes.Unknown,
+            KaNoBuFigure.FigureTypes.ShipScout,
+            KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
+
+        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.Unknown));
+    }
+
+    [Test]
+    public void ScoutDrawRevealsTheOtherScout()
+    {
+        var field = UpdateMemory(
+            KaNoBuFigure.FigureTypes.ShipScout,
+            KaNoBuFigure.FigureTypes.Unknown,
+            KaNoBuMoveNotificationModel.BattleResult.Draw);
+
+        Assert.That(GetFigureType(field, AttackerPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+    }
+
     [Test]
     public void AttackingWithUniversalShipRevealsItsEffectiveType()
     {

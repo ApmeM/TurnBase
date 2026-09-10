@@ -11,9 +11,15 @@ namespace TurnBase.KaNoBu
 
         public override bool IsMoveable => true;
 
-        public override bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep)
+        public override Point[] GetPossibleMoveOffsets()
         {
-            return moveStep.From.IsAdjacentTo(moveStep.To);
+            return new[]
+            {
+                new Point(0, 1),
+                new Point(0, -1),
+                new Point(1, 0),
+                new Point(-1, 0),
+            };
         }
 
         public override BattleResolution ResolveBattle(KaNoBuFigure defender)
@@ -34,6 +40,8 @@ namespace TurnBase.KaNoBu
                     return BattleResolution.Draw();
                 case FigureTypes.ShipMine:
                     return BattleResolution.BothAreDestroyed();
+                case FigureTypes.ShipScout:
+                    return BattleResolution.AttackerWon(WithFigureType(FigureTypes.ShipScout));
                 default:
                     throw new System.Exception($"Unsupported figure type {defender.FigureType}");
             }
