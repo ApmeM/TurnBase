@@ -69,6 +69,9 @@ public partial class Unit
                     case KaNoBuFigure.FigureTypes.ShipMine:
                         shipTypeTexture.Region = new Rect2(340, 190, 20, 20);
                         break;
+                    case KaNoBuFigure.FigureTypes.ShipScout:
+                        shipTypeTexture.Region = new Rect2(340, 170, 20, 20);
+                        break;
                 }
             }
         }

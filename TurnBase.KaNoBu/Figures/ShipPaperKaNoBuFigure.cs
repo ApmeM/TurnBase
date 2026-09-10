@@ -26,6 +26,7 @@ namespace TurnBase.KaNoBu
                     return BattleResolution.Draw();
                 case FigureTypes.ShipFlag:
                 case FigureTypes.ShipStone:
+                case FigureTypes.ShipScout:
                     return BattleResolution.AttackerWon(this);
                 case FigureTypes.ShipScissors:
                     return BattleResolution.DefenderWon(defender);

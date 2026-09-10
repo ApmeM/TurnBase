@@ -27,6 +27,7 @@ namespace TurnBase.KaNoBu
                 case FigureTypes.ShipScissors:
                 case FigureTypes.ShipUniversal:
                 case FigureTypes.ShipMine:
+                case FigureTypes.ShipScout:
                 case FigureTypes.ShipFlag:
                     throw new System.Exception("Flag can not initialize battle");
                 default:

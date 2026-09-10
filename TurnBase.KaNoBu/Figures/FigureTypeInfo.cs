@@ -22,6 +22,8 @@ namespace TurnBase.KaNoBu
                     return "U";
                 case KaNoBuFigure.FigureTypes.ShipMine:
                     return "M";
+                case KaNoBuFigure.FigureTypes.ShipScout:
+                    return "C";
                 default:
                     throw new Exception("Unknown figure type");
             }

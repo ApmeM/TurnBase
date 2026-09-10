@@ -151,6 +151,38 @@ public class KaNoBuRulesTests
     }
 
     [Test]
+    public void InitModelDistributesShipsAcrossFourMobileTypes()
+    {
+        var initModel = new KaNoBuRules(7).GetInitModel(0);
+
+        Assert.That(initModel.AvailableFigures, Does.Contain(KaNoBuFigure.FigureTypes.ShipStone));
+        Assert.That(initModel.AvailableFigures, Does.Contain(KaNoBuFigure.FigureTypes.ShipPaper));
+        Assert.That(initModel.AvailableFigures, Does.Contain(KaNoBuFigure.FigureTypes.ShipScissors));
+        Assert.That(initModel.AvailableFigures, Does.Contain(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(initModel.AvailableFigures.FindAll(type => type == KaNoBuFigure.FigureTypes.ShipScout).Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void UniversalBecomesScoutWhenItBattlesScout()
+    {
+        var field = Field2D.Create(2, 1);
+        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, true, 0);
+        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipUniversal, true, 0);
+        var rules = new KaNoBuRules(6);
+
+        var notification = rules.MakeMove(field, 1, new KaNoBuMoveResponseModel(
+            new List<KaNoBuMoveResponseModel.MoveStep>
+            {
+                new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
+            }));
+
+        Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.DefenderWon));
+        Assert.That(notification.MoveNotifications[0].Battle.Value.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(field[0, 0], Is.Null);
+        Assert.That(((KaNoBuFigure)field[1, 0]).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+    }
+
+    [Test]
     public void MultiMoveTurnAppliesStepsInOrder()
     {
         var field = Field2D.Create(4, 3);

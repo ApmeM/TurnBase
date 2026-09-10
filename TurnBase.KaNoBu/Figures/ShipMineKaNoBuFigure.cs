@@ -26,6 +26,7 @@ namespace TurnBase.KaNoBu
                 case FigureTypes.ShipPaper:
                 case FigureTypes.ShipScissors:
                 case FigureTypes.ShipUniversal:
+                case FigureTypes.ShipScout:
                     throw new System.Exception("Mine can not initialize battle");
                 case FigureTypes.Unknown:
                     throw new System.Exception("Can not resolve battle with unknown ship");
