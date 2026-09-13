@@ -42,7 +42,7 @@ public partial class LevelBase
         foreach (Unit unit in allUnits)
         {
             var fig = KaNoBuFigure.Create(unit.PlayerNumber, unit.UnitType, true, 0);
-            var pos = this.WorldToMap(unit.Position);
+            var pos = this.field.WorldToMap(unit.Position);
             var x = (int)pos.x;
             var y = (int)pos.y;
             field2D[x, y] = fig;

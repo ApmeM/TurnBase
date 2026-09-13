@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://Presentation/GameField.cs" type="Script" id=1]
+[ext_resource path="res://Presentation/GameInit.cs" type="Script" id=1]
 [ext_resource path="res://Presentation/Unit.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Presentation/GameInit.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Presentation/DragControl.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Presentation/assets/Fonts/Xolonium-Regular.ttf" type="DynamicFontData" id=8]
 [ext_resource path="res://Presentation/Tileset.tres" type="TileSet" id=9]
@@ -11,7 +10,7 @@
 [sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 8 )
 
-[node name="GameField" type="CanvasLayer"]
+[node name="GameInit" type="CanvasLayer"]
 follow_viewport_enable = true
 script = ExtResource( 1 )
 UnitScene = ExtResource( 2 )
@@ -80,12 +79,10 @@ rect_min_size = Vector2( 174, 56 )
 size_flags_horizontal = 3
 text = "Send"
 
-[node name="ResetButton" type="Button" parent="UIOverlay/MoveButtons"]
+[node name="RandomButton" type="Button" parent="UIOverlay/MoveButtons"]
 margin_left = 186.0
 margin_right = 360.0
 margin_bottom = 56.0
 rect_min_size = Vector2( 174, 56 )
 size_flags_horizontal = 3
-text = "Reset"
-
-[node name="GameInit" parent="." instance=ExtResource( 3 )]
+text = "Random"

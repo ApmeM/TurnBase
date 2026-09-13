@@ -47,3 +47,6 @@ anchor_top = 1.0
 margin_top = -103.0
 
 [node name="HighlitePointer" parent="." index="6" instance=ExtResource( 8 )]
+
+[node name="GameInit" parent="." index="7"]
+visible = false

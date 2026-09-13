@@ -107,7 +107,7 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < preparedField.Height; j++)
                 {
-                    var shipType = (preparedField[i, j] as KaNoBuFigure).FigureType;
+                    var shipType = (preparedField[i, j] as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown;
                     if (!availableShips.ContainsKey(shipType))
                     {
                         return false;

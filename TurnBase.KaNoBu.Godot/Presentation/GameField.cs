@@ -29,7 +29,8 @@ public partial class GameField :
         this.playerId = model.PlayerId;
         this.maxMovesPerTurn = model.Request.MaxMovesPerTurn;
         _ = MoveCameraToPlayer();
-        return new KaNoBuPlayerEasy().Init(model, token);
+
+        return this.gameInit.Run(model, token).WrapCancellation(token);
     }
 
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model, CancellationToken token = default)
@@ -427,11 +428,6 @@ public partial class GameField :
             : Math.Max(0, this.maxMovesPerTurn - pendingMoveCount).ToString();
         this.sendButton.Text = $"Send ({remainingMoves})";
         this.sendButton.Disabled = pendingMoveCount == 0;
-    }
-
-    public Vector2 WorldToMap(Vector2 position)
-    {
-        return this.field.WorldToMap(position);
     }
 
     public async Task Play(CancellationToken token = default)
