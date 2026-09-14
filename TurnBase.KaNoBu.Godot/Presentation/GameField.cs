@@ -13,6 +13,8 @@ public partial class GameField :
 {
     [Export]
     public PackedScene UnitScene;
+    [Export]
+    public PackedScene GameInitScene;
     public int playerId { get; private set; } = -1;
     private int maxMovesPerTurn = int.MaxValue;
     public List<int> Winners { get; private set; }
@@ -24,17 +26,27 @@ public partial class GameField :
 
     #region IPlayer region
 
-    public Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model, CancellationToken token = default)
+    public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model, CancellationToken token = default)
     {
+        this.moveButtons.Visible = false;
+
+        var gameInit = this.GameInitScene.Instance();
+        this.AddChild(gameInit);
+
         this.playerId = model.PlayerId;
         this.maxMovesPerTurn = model.Request.MaxMovesPerTurn;
         _ = MoveCameraToPlayer();
 
-        return this.gameInit.Run(model, token).WrapCancellation(token);
+        var result = await ((IGameInit)gameInit).Run(model, token).WrapCancellation(token);
+
+        this.RemoveChild(gameInit);
+        return result;        
     }
 
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model, CancellationToken token = default)
     {
+        this.moveButtons.Visible = true;
+
         this.timerLabel.ShowMessage("Your turn", 1f);
         this.memorizedField.SynchronizeField((Field2D)model.Request.Field);
         this.UpdateKnownShips();

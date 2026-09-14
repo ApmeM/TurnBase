@@ -8,7 +8,7 @@ using TurnBase;
 using TurnBase.KaNoBu;
 
 [SceneReference("GameInit.tscn")]
-public partial class GameInit
+public partial class GameInit: IGameInit
 {
     [Export]
     public PackedScene UnitScene;
@@ -80,7 +80,6 @@ public partial class GameInit
                 this.field.RemoveChildren();
             }
         }
-
     }
 
     private void ShowSelection(Unit unit)
@@ -168,7 +167,9 @@ public partial class GameInit
     private void MoveShip(Unit unit, Vector2 to)
     {
         var unitFrom = unit.TargetPositionMap;
-        var toUnit = this.field.GetChildren().OfType<Unit>().Where(a => a.TargetPositionMap == to).SingleOrDefault();
+        var toUnit = this.field.GetChildren()
+            .OfType<Unit>()
+            .SingleOrDefault(a => a.TargetPositionMap == to);
 
         unit.MoveUnitToLogic(to);
         unit.MoveUnitToAnimation(this.field.MapToWorld(to) + this.field.CellSize / 2);
