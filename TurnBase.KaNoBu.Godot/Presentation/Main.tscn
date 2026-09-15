@@ -2,11 +2,11 @@
 
 [ext_resource path="res://Presentation/Main.cs" type="Script" id=1]
 [ext_resource path="res://gd-plugins/gd-draggableCamera/DraggableCamera.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Presentation/CustomField.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Presentation/GameFields/CustomField.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Presentation/GameInits/GameInit.tscn" type="PackedScene" id=4]
 [ext_resource path="res://gd-plugins/gd-popups/CustomPopup.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Presentation/Client.tscn" type="PackedScene" id=6]
-[ext_resource path="res://Presentation/Levels/LevelMap.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Presentation/GameFields/LevelMap.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Presentation/assets/button-custom.png" type="Texture" id=8]
 [ext_resource path="res://Presentation/assets/button-replay.png" type="Texture" id=9]
 [ext_resource path="res://Presentation/assets/button-mainmenu.png" type="Texture" id=10]

@@ -8,7 +8,7 @@ using TurnBase;
 using TurnBase.KaNoBu;
 
 [SceneReference("GameInit.tscn")]
-public partial class GameInit: IGameInit
+public partial class GameInit : IGameInit
 {
     [Export]
     public PackedScene UnitScene;
@@ -52,7 +52,6 @@ public partial class GameInit: IGameInit
             var worldPos = this.field.MapToWorld(mapPos);
             var unit = (Unit)UnitScene.Instance();
 
-            unit.MoveUnitToLogic(mapPos);
             unit.PlayerNumber = model.PlayerId;
             unit.UnitType = originalShip;
             unit.Position = worldPos + this.field.CellSize / 2 + Vector2.One * 200f;
@@ -164,24 +163,26 @@ public partial class GameInit: IGameInit
         }
     }
 
-    private void MoveShip(Unit unit, Vector2 to)
+    private void MoveShip(Unit unitFrom, Vector2 toMap)
     {
-        var unitFrom = unit.TargetPositionMap;
-        var toUnit = this.field.GetChildren()
-            .OfType<Unit>()
-            .SingleOrDefault(a => a.TargetPositionMap == to);
+        var fromMap = unitFrom.TargetPositionMap;
+        var fromPos = unitFrom.Position;
+        var toPos = this.field.MapToWorld(toMap) + this.field.CellSize / 2;
 
-        unit.MoveUnitToLogic(to);
-        unit.MoveUnitToAnimation(this.field.MapToWorld(to) + this.field.CellSize / 2);
-        toUnit?.MoveUnitToLogic(unitFrom);
-        if (unitFrom.HasValue)
-        {
-            toUnit?.MoveUnitToAnimation(this.field.MapToWorld(unitFrom.Value) + this.field.CellSize / 2);
-        }
-        else
-        {
-            toUnit?.MoveUnitToAnimation(this.field.MapToWorld(new Vector2(10, 10)) + this.field.CellSize / 2);
-        }
+        var unitTo = this.field.GetChildren()
+            .OfType<Unit>()
+            .SingleOrDefault(a => a.TargetPositionMap == toMap && a.TargetPositionMap.HasValue);
+
+        unitFrom.MoveUnitToLogic(toMap);
+        unitFrom.CancelAnimations();
+        unitFrom.CallbackAnimation((u) => u.RotateUnitToAnimation(toPos));
+        unitFrom.CallbackAnimation((u) => u.MoveUnitToAnimation(toPos));
+
+        unitTo?.MoveUnitToLogic(fromMap);
+        unitTo?.CancelAnimations();
+        unitTo?.CallbackAnimation((u) => u.RotateUnitToAnimation(fromPos));
+        unitTo?.CallbackAnimation((u) => u.MoveUnitToAnimation(fromPos));
+
         UpdateBattleButton();
     }
 
@@ -219,8 +220,15 @@ public partial class GameInit: IGameInit
         {
             var index = this.r.Next(i + 1);
 
-            units[i].MoveUnitToLogic(positions[index]);
-            units[i].MoveUnitToAnimation(this.field.MapToWorld(positions[index]) + this.field.CellSize / 2);
+            var toPos = this.field.MapToWorld(positions[index]) + this.field.CellSize / 2;
+            var toMap = positions[index];
+            units[i].MoveUnitToLogic(toMap);
+
+            units[i].MoveUnitToLogic(toMap);
+            units[i].CancelAnimations();
+            units[i].CallbackAnimation((u) => u.RotateUnitToAnimation(toPos));
+            units[i].CallbackAnimation((u) => u.MoveUnitToAnimation(toPos));
+
             positions.RemoveAt(index);
         }
 

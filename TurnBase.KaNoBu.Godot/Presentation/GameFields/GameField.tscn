@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://Presentation/GameField.cs" type="Script" id=1]
+[ext_resource path="res://Presentation/GameFields/GameField.cs" type="Script" id=1]
 [ext_resource path="res://Presentation/Unit.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Presentation/GameInits/GameInit.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Presentation/DragControl.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Presentation/assets/Fonts/Xolonium-Regular.ttf" type="DynamicFontData" id=8]
 [ext_resource path="res://Presentation/Tileset.tres" type="TileSet" id=9]
@@ -15,7 +14,6 @@ font_data = ExtResource( 8 )
 follow_viewport_enable = true
 script = ExtResource( 1 )
 UnitScene = ExtResource( 2 )
-GameInitScene = ExtResource( 3 )
 
 [node name="Water" type="TileMap" parent="."]
 tile_set = ExtResource( 9 )
