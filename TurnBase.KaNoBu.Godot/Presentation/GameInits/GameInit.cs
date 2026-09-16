@@ -41,6 +41,8 @@ public partial class GameInit : IGameInit
             }
         }
 
+        this.field.Position = new Vector2(5 - model.Request.Width / 2, 1) * this.field.CellSize;
+
         for (var f = 0; f < model.Request.AvailableFigures.Count; f++)
         {
             var x = f % model.Request.Width;
@@ -49,12 +51,12 @@ public partial class GameInit : IGameInit
             var originalShip = model.Request.AvailableFigures[f];
 
             var mapPos = new Vector2(x, y);
-            var worldPos = this.field.MapToWorld(mapPos);
+            var worldPos = this.field.MapToWorld(mapPos + new Vector2(0, 8));
             var unit = (Unit)UnitScene.Instance();
 
             unit.PlayerNumber = model.PlayerId;
             unit.UnitType = originalShip;
-            unit.Position = worldPos + this.field.CellSize / 2 + Vector2.One * 200f;
+            unit.Position = worldPos + this.field.CellSize / 2;
             unit.IsClickable = true;
             unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
 
@@ -122,7 +124,7 @@ public partial class GameInit : IGameInit
         var from = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[0]));
         var to = this.field.WorldToMap(this.field.ToLocal((Vector2)dragRes[1]));
 
-        if (from != to)
+        if (from != to && this.field.GetCellv(to) == 5)
         {
             this.ClearSelection();
             this.MoveShip(unit, to);
@@ -169,17 +171,42 @@ public partial class GameInit : IGameInit
         var fromPos = unitFrom.Position;
         var toPos = this.field.MapToWorld(toMap) + this.field.CellSize / 2;
 
+        var centerBottomMap = new Vector2(this.model.Request.Width / 2 - 1, 7);
+        var centerBottomPos = this.field.MapToWorld(centerBottomMap) + this.field.CellSize / 2;
+        var centerTopMap = new Vector2(this.model.Request.Width / 2 - 1, 5);
+        var centerTopPos = this.field.MapToWorld(centerTopMap) + this.field.CellSize / 2;
+
         var unitTo = this.field.GetChildren()
             .OfType<Unit>()
             .SingleOrDefault(a => a.TargetPositionMap == toMap && a.TargetPositionMap.HasValue);
 
         unitFrom.MoveUnitToLogic(toMap);
         unitFrom.CancelAnimations();
+        if (unitFrom.Position.y >= centerBottomPos.y)
+        {
+            unitFrom.CallbackAnimation((u) => u.RotateUnitToAnimation(centerBottomPos));
+            unitFrom.CallbackAnimation((u) => u.MoveUnitToAnimation(centerBottomPos));
+        }
+        if (unitFrom.Position.y >= centerTopPos.y)
+        {
+            unitFrom.CallbackAnimation((u) => u.RotateUnitToAnimation(centerTopPos));
+            unitFrom.CallbackAnimation((u) => u.MoveUnitToAnimation(centerTopPos));
+        }
         unitFrom.CallbackAnimation((u) => u.RotateUnitToAnimation(toPos));
         unitFrom.CallbackAnimation((u) => u.MoveUnitToAnimation(toPos));
 
         unitTo?.MoveUnitToLogic(fromMap);
         unitTo?.CancelAnimations();
+        if (unitTo?.Position.y < centerTopPos.y && !fromMap.HasValue)
+        {
+            unitTo?.CallbackAnimation((u) => u.RotateUnitToAnimation(centerTopPos));
+            unitTo?.CallbackAnimation((u) => u.MoveUnitToAnimation(centerTopPos));
+        }
+        if (unitTo?.Position.y < centerBottomPos.y && !fromMap.HasValue)
+        {
+            unitTo?.CallbackAnimation((u) => u.RotateUnitToAnimation(centerBottomPos));
+            unitTo?.CallbackAnimation((u) => u.MoveUnitToAnimation(centerBottomPos));
+        }
         unitTo?.CallbackAnimation((u) => u.RotateUnitToAnimation(fromPos));
         unitTo?.CallbackAnimation((u) => u.MoveUnitToAnimation(fromPos));
 
@@ -215,6 +242,11 @@ public partial class GameInit : IGameInit
             }
         }
 
+        var centerBottomMap = new Vector2(this.model.Request.Width / 2 - 1, 7);
+        var centerBottomPos = this.field.MapToWorld(centerBottomMap) + this.field.CellSize / 2;
+        var centerTopMap = new Vector2(this.model.Request.Width / 2 - 1, 5);
+        var centerTopPos = this.field.MapToWorld(centerTopMap) + this.field.CellSize / 2;
+
         var units = this.field.GetChildren().OfType<Unit>().ToList();
         for (var i = positions.Count - 1; i >= 0; i--)
         {
@@ -226,6 +258,16 @@ public partial class GameInit : IGameInit
 
             units[i].MoveUnitToLogic(toMap);
             units[i].CancelAnimations();
+            if (units[i].Position.y > centerBottomPos.y)
+            {
+                units[i].CallbackAnimation((u) => u.RotateUnitToAnimation(centerBottomPos));
+                units[i].CallbackAnimation((u) => u.MoveUnitToAnimation(centerBottomPos));
+            }
+            if (units[i].Position.y > centerTopPos.y)
+            {
+                units[i].CallbackAnimation((u) => u.RotateUnitToAnimation(centerTopPos));
+                units[i].CallbackAnimation((u) => u.MoveUnitToAnimation(centerTopPos));
+            }
             units[i].CallbackAnimation((u) => u.RotateUnitToAnimation(toPos));
             units[i].CallbackAnimation((u) => u.MoveUnitToAnimation(toPos));
 
