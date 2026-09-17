@@ -12,6 +12,13 @@ public partial class LevelBase
         base._Ready();
         this.FillMembers();
         this.AddToGroup(Groups.Level);
+
+        this.beach.GetUsedCells()
+            .Cast<Vector2>()
+            .Where(point => this.castle.GetCellv(point) == -1)
+            .ToList()
+            .ForEach(point => this.castle.SetCellv(point, 6));
+        this.castle.UpdateBitmaskRegion();
     }
 
     public void Initialize()

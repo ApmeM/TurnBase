@@ -19,6 +19,7 @@ public partial class GameInit : IGameInit
 
     private Random r = new Random();
 
+
     public async Task<InitResponseModel<KaNoBuInitResponseModel>> Run(InitModel<KaNoBuInitModel> model, CancellationToken token = default)
     {
         if (this.model != null)
@@ -144,6 +145,13 @@ public partial class GameInit : IGameInit
 
         this.sendButton.Connect(CommonSignals.Pressed, this, nameof(SendButtonClicked));
         this.randomButton.Connect(CommonSignals.Pressed, this, nameof(RandomButtonClicked));
+
+        this.beach.GetUsedCells()
+            .Cast<Vector2>()
+            .Where(point => this.castle.GetCellv(point) == -1)
+            .ToList()
+            .ForEach(point => this.castle.SetCellv(point, 6));
+        this.castle.UpdateBitmaskRegion();
     }
 
     public override void _UnhandledInput(InputEvent @event)
