@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 
 [SceneReference("LevelMap.tscn")]
@@ -18,11 +19,23 @@ public partial class LevelMap
             }
         }
 
-        this.highlitePointer.Show(new Vector2(-1, -1), 1f);
-        await this.dialog.Show("Hello captain! Nice to see you here again. Those enemies are attacking us and we need to defeat them to protect our land!", true, null);
+        await this.ShowDialog("Hello captain! Nice to see you here again. Those enemies are attacking us and we need to defeat them to protect our land!", true);
         this.highlitePointer.Show(new Vector2(270, 654), 50f);
-        await this.dialog.Show("Hello! I'll do my best. Click on this ship to attack them.", false, null);
-        await this.dialog.Show("To arms my brothers!", true, null);
+        await this.ShowDialog("Hello! I'll do my best. Click on this ship to attack them.", false);
+        await this.ShowDialog("To arms my brothers!", true);
+    }
+
+    private async Task ShowDialog(string text, bool left)
+    {
+        this.dialogContainer.Show();
+        try
+        {
+            await this.dialog.Show(text, left, null);
+        }
+        finally
+        {
+            this.dialogContainer.Hide();
+        }
     }
 
     public override async void _UnhandledInput(InputEvent @event)
