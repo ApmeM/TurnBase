@@ -45,9 +45,9 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
         with:
-          cmdline-tools-version: 12266719
+          cmdline-tools-version: 14742923
 
       - name: Restore packages
         run: |
