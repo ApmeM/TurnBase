@@ -18,7 +18,7 @@ public partial class GameInitNone : IGameInit
             {
                 var p = new Point { X = i, Y = j };
                 var ship = model.Request.AvailableFigures[0];
-                preparedField[p] = KaNoBuFigure.Create(model.PlayerId, ship, true, 0);
+                preparedField[p] = KaNoBuFigure.Create(model.PlayerId, ship, 0);
                 model.Request.AvailableFigures.Remove(ship);
             }
         }

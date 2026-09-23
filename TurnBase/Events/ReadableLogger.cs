@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace TurnBase
 {
-    public class ReadableLogger<TMoveNotificationModel> : IGameEventListener<TMoveNotificationModel>
+    public class ReadableLogger<TMoveNotificationModel, TField> : IGameEventListener<TMoveNotificationModel, TField>
     {
         private ILogger logger;
 
@@ -31,7 +31,7 @@ namespace TurnBase
             this.logger.Log("All players initialized.");
         }
 
-        public void GameLogCurrentField(IField field)
+        public void GameLogCurrentField(TField field)
         {
             this.logger.Log($"Current field state: \n{field}");
         }

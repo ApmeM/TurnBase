@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class ReplayGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : 
-        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+    public class ReplayGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> : 
+        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
     {
         private readonly List<ICommunicationModel> events;
-        private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
+        private MultipleGameLogListener<TMoveNotificationModel, TField> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel, TField>();
 
         public string GameId => "replay_game";
         public Func<Task> playerTurnDelayAction;
@@ -19,12 +19,12 @@ namespace TurnBase
             this.events = events;
         }
 
-        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener)
+        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
         }
 
-        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player)
         {
             // Replay cant not have real players.
             return AddPlayerStatus.MAX_PLAYERS_REACHED;
@@ -49,7 +49,7 @@ namespace TurnBase
                 {
                     this.gameLogListeners.PlayersInitialized();
                 }
-                else if (gameEvent is GameLogCurrentFieldCommunicationModel gameLogCurrentField)
+                else if (gameEvent is GameLogCurrentFieldCommunicationModel<TField> gameLogCurrentField)
                 {
                     this.gameLogListeners.GameLogCurrentField(gameLogCurrentField.field);
                 }
@@ -78,7 +78,7 @@ namespace TurnBase
             }
         }
 
-        public void Disconnect(IGameEventListener<TMoveNotificationModel> player)
+        public void Disconnect(IGameEventListener<TMoveNotificationModel, TField> player)
         {
             this.events.Clear();
         }

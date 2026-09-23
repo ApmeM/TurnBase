@@ -10,8 +10,8 @@ public class KaNoBuRulesTests
     public void PromotionKeepsCorrectBattleResult()
     {
         var field = Field2D.Create(2, 2);
-        var attacker = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, true, 2);
-        var defender = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, true, 0);
+        var attacker = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 2);
+        var defender = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, 0);
         field[0, 0] = attacker;
         field[1, 0] = defender;
 
@@ -38,8 +38,8 @@ public class KaNoBuRulesTests
     public void BattleResultUsesPlayerIdentityWhenWinnerInstanceChanges()
     {
         var field = Field2D.Create(2, 2);
-        var attacker = new FakeWinningFigure(1, KaNoBuFigure.FigureTypes.ShipUniversal, true, 0);
-        var defender = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
+        var attacker = new FakeWinningFigure(1, KaNoBuFigure.FigureTypes.ShipUniversal, 0);
+        var defender = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipStone, 0);
         field[0, 0] = attacker;
         field[1, 0] = defender;
 
@@ -61,8 +61,8 @@ public class KaNoBuRulesTests
     public void BattleWithMineDestroysBothFigures()
     {
         var field = Field2D.Create(2, 2);
-        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
-        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipMine, true, 0);
+        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0);
+        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipMine, 0);
 
         var rules = new KaNoBuRules(6);
         var move = new KaNoBuMoveResponseModel(
@@ -82,8 +82,8 @@ public class KaNoBuRulesTests
     public void BattleShipTypesAreVisibleOnlyToBattleParticipants()
     {
         var field = Field2D.Create(2, 2);
-        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
-        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, true, 0);
+        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0);
+        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, 0);
 
         var rules = new KaNoBuRules(6);
         var move = new KaNoBuMoveResponseModel(
@@ -114,9 +114,9 @@ public class KaNoBuRulesTests
     public void TurnRejectsMoreFiguresThanAllowedPerTurn()
     {
         var field = Field2D.Create(4, 3);
-        var firstFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
-        var secondFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipPaper, true, 0);
-        var thirdFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScissors, true, 0);
+        var firstFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0);
+        var secondFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipPaper, 0);
+        var thirdFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScissors, 0);
         field[0, 0] = firstFigure;
         field[2, 1] = secondFigure;
         field[0, 2] = thirdFigure;
@@ -166,8 +166,8 @@ public class KaNoBuRulesTests
     public void UniversalBecomesScoutWhenItBattlesScout()
     {
         var field = Field2D.Create(2, 1);
-        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, true, 0);
-        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipUniversal, true, 0);
+        field[0, 0] = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, 0);
+        field[1, 0] = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipUniversal, 0);
         var rules = new KaNoBuRules(6);
 
         var notification = rules.MakeMove(field, 1, new KaNoBuMoveResponseModel(
@@ -186,8 +186,8 @@ public class KaNoBuRulesTests
     public void MultiMoveTurnAppliesStepsInOrder()
     {
         var field = Field2D.Create(4, 3);
-        var firstFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
-        var secondFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipPaper, true, 0);
+        var firstFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0);
+        var secondFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipPaper, 0);
         field[0, 0] = firstFigure;
         field[2, 1] = secondFigure;
 
@@ -211,8 +211,8 @@ public class KaNoBuRulesTests
     private sealed class FakeWinningFigure : KaNoBuFigure
     {
         private readonly KaNoBuFigure.FigureTypes _type;
-        public FakeWinningFigure(int playerId, KaNoBuFigure.FigureTypes figureType, bool visibleForAllPlayers, int winNumber)
-            : base(playerId, visibleForAllPlayers, winNumber)
+        public FakeWinningFigure(int playerId, KaNoBuFigure.FigureTypes figureType, int winNumber)
+            : base(playerId, winNumber)
         {
             _type = figureType;
         }
@@ -233,7 +233,7 @@ public class KaNoBuRulesTests
 
         public override BattleResolution ResolveBattle(KaNoBuFigure defender)
         {
-            return BattleResolution.AttackerWon(KaNoBuFigure.Create(this.PlayerId, KaNoBuFigure.FigureTypes.ShipStone, true, 0));
+            return BattleResolution.AttackerWon(KaNoBuFigure.Create(this.PlayerId, KaNoBuFigure.FigureTypes.ShipStone, 0));
         }
     }
 }

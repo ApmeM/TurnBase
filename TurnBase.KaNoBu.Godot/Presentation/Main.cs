@@ -35,7 +35,7 @@ public partial class Main
         this.serverMyIpInfo.Text = "Your IP address: " + string.Join(", ", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
         this.clientMyIpInfo.Text = "Your IP address: " + string.Join(", ", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
 
-        PlayerFailProtection<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>.logger = new GDLogger();
+        PlayerFailProtection<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>.logger = new GDLogger();
     }
 
     private void ShowMainMenuPopup()
@@ -57,7 +57,7 @@ public partial class Main
     {
         var field = mapUnit.GameToLaunch.Instance<LevelBase>();
         field.Initialize();
-        field.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
+        field.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
         this.AttachReplayStorageListener(field);
         var result = await this.StartGame(field);
         levelMap.LevelFinished(mapUnit, result);
@@ -72,14 +72,14 @@ public partial class Main
         }
 
         var field = this.Replay.Instance<GameField>();
-        var replay = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new List<ICommunicationModel>(this.lastReplay))
+        var replay = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(new List<ICommunicationModel>(this.lastReplay))
         {
             playerTurnDelayAction = async () => await this.GetTree().CreateTimer(0.5f).ToMySignal(CommonSignals.Timeout)
         };
 
-        field.Game = replay;                    
+        field.Game = replay;
         field.Game.AddGameLogListener(field);
-        field.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
+        field.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
 
         await this.StartGame(field);
     }
@@ -90,10 +90,13 @@ public partial class Main
         var game = this.GameField.Instance<GameField>();
 
         var rules = new KaNoBuRules((int)this.mapSizeSelector.Value);
-        rules.AllFiguresVisible = this.allShipsVisibleSelector.Pressed;
+        if (!this.allShipsVisibleSelector.Pressed)
+        {
+            rules.HideEnemyShips();
+        }
         rules.WithDocks = this.withDocksSelector.Pressed;
         rules.MaxMovesPerTurn = (int)this.maxMovesPerTurnSelector.Value;
-        game.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "test" + Guid.NewGuid().ToString());
+        game.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(rules, "test" + Guid.NewGuid().ToString());
 
         var playerTypes = new[]{
             this.serverPlayer1,
@@ -110,7 +113,7 @@ public partial class Main
                 if (humanFound)
                 {
                     GD.Print("Only one human player is allowed.");
-                    game.Game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>());
+                    game.Game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>());
                     continue;
                 }
 
@@ -125,7 +128,7 @@ public partial class Main
             game.Game.AddGameLogListener(game);
         }
 
-        game.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
+        game.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
 
         this.AttachReplayStorageListener(game);
         await this.StartGame(game);
@@ -135,7 +138,7 @@ public partial class Main
     {
         var game = this.GameField.Instance<GameField>();
 
-        game.Game = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
+        game.Game = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
         game.Game.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), game));
 
         if (clientPlayer.GetSelectedId() != 1)
@@ -143,26 +146,26 @@ public partial class Main
             game.Game.AddGameLogListener(game);
         }
 
-        game.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
+        game.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
 
         this.AttachReplayStorageListener(game);
         await this.StartGame(game);
     }
 
-    private IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> BuildPlayer(int playerType, GameField field)
+    private IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> BuildPlayer(int playerType, GameField field)
     {
         switch (playerType)
         {
             case 0:
                 // None
-                return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>();
+                return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>();
             case 1:
                 // Human
                 return field;
             case 2:
                 // Computer Easy
                 var playerEasy = new KaNoBuPlayerEasy();
-                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
+                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
                     playerEasy,
                     async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout),
                     1,
@@ -170,8 +173,8 @@ public partial class Main
             case 3:
                 // Remote
                 this.server.StartServer();
-                var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(server, field.Game.GameId);
-                return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
+                var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(server, field.Game.GameId);
+                return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
                     player,
                     async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout),
                     600000,
@@ -179,7 +182,7 @@ public partial class Main
             case 4:
                 // Computer Medium
                 var playerMedium = new KaNoBuPlayerMedium();
-                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(
+                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
                     playerMedium,
                     async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout),
                     1,
@@ -277,7 +280,7 @@ public partial class Main
 
     private void AttachReplayStorageListener(GameField field)
     {
-        var replayMemoryStorageListener = new MemoryStorageEventListener<KaNoBuMoveNotificationModel>();
+        var replayMemoryStorageListener = new MemoryStorageEventListener<KaNoBuMoveNotificationModel, Field2D>();
         this.lastReplay = replayMemoryStorageListener.Events;
         field.Game.AddGameLogListener(replayMemoryStorageListener);
         this.replayButton.Visible = true;

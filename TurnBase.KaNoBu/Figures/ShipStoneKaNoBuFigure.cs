@@ -2,8 +2,8 @@ namespace TurnBase.KaNoBu
 {
     public sealed class ShipStoneKaNoBuFigure : KaNoBuFigure
     {
-        public ShipStoneKaNoBuFigure(int playerId, bool visibleForAllPlayers, int winNumber)
-            : base(playerId, visibleForAllPlayers, winNumber)
+        public ShipStoneKaNoBuFigure(int playerId, int winNumber)
+            : base(playerId, winNumber)
         {
         }
 

@@ -40,7 +40,7 @@ public partial class Unit
         {
             if (this.unitType != value || this.figure == null)
             {
-                this.figure = KaNoBuFigure.Create(0, value, true, 0);
+                this.figure = KaNoBuFigure.Create(0, value, 0);
             }
             
             this.unitType = value;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace TurnBase
 {
     
-    public class MemoryStorageEventListener<TMoveNotificationModel> : IGameEventListener<TMoveNotificationModel>
+    public class MemoryStorageEventListener<TMoveNotificationModel, TField> : IGameEventListener<TMoveNotificationModel, TField>
     {
         public readonly List<ICommunicationModel> Events = new List<ICommunicationModel>();
 
@@ -27,9 +27,9 @@ namespace TurnBase
             this.Events.Add(new GamePlayersInitializedCommunicationModel());
         }
 
-        public void GameLogCurrentField(IField field)
+        public void GameLogCurrentField(TField field)
         {
-            this.Events.Add(new GameLogCurrentFieldCommunicationModel { field = field });
+            this.Events.Add(new GameLogCurrentFieldCommunicationModel<TField> { field = field });
         }
 
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)

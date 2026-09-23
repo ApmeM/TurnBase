@@ -17,14 +17,14 @@ namespace TurnBase
         Task<ClientResponse> SendAction(string serverUrl, string action, Dictionary<string, object> queryData, ICommunicationModel body, CancellationToken token);
     }
 
-    public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
-        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+    public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> :
+        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
     {
         private readonly IClient client;
         private readonly string serverUrl;
         public string GameId { get; private set; }
-        private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
-        private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
+        private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player;
+        private MultipleGameLogListener<TMoveNotificationModel, TField> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel, TField>();
         private bool connected;
 
         public RemoteGame(IClient client, string serverUrl, string gameId)
@@ -34,7 +34,7 @@ namespace TurnBase
             this.GameId = gameId;
         }
 
-        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player)
         {
             // Remote game supports only one player.
             if (this.player == null)
@@ -46,7 +46,7 @@ namespace TurnBase
             return AddPlayerStatus.MAX_PLAYERS_REACHED;
         }
 
-        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener)
+        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
         }
@@ -97,7 +97,7 @@ namespace TurnBase
                         this.player.PlayersInitialized();
                         this.gameLogListeners.PlayersInitialized();
                     }
-                    else if (result.body is GameLogCurrentFieldCommunicationModel gameLogCurrentField)
+                    else if (result.body is GameLogCurrentFieldCommunicationModel<TField> gameLogCurrentField)
                     {
                         this.player.GameLogCurrentField(gameLogCurrentField.field);
                         this.gameLogListeners.GameLogCurrentField(gameLogCurrentField.field);
@@ -131,7 +131,7 @@ namespace TurnBase
             }
         }
 
-        public void Disconnect(IGameEventListener<TMoveNotificationModel> player)
+        public void Disconnect(IGameEventListener<TMoveNotificationModel, TField> player)
         {
             this.connected = false;
         }

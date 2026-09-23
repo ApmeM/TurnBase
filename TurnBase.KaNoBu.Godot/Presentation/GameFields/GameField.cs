@@ -9,7 +9,7 @@ using TurnBase.KaNoBu;
 
 [SceneReference("GameField.tscn")]
 public partial class GameField :
-    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
+    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
 {
     [Export]
     public PackedScene UnitScene;
@@ -20,7 +20,7 @@ public partial class GameField :
     public List<int> Winners { get; private set; }
     private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
     private readonly List<Unit> movePreviews = new List<Unit>();
-    public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> Game;
+    public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> Game;
 
     public TileMap Water => this.water;
 
@@ -151,9 +151,9 @@ public partial class GameField :
         this.field.RemoveChildren();
     }
 
-    public virtual void GameLogCurrentField(IField field)
+    public virtual void GameLogCurrentField(Field2D mainField)
     {
-        var mainField = (Field2D)field;
+        GD.Print("GameLogCurrentField:\n", mainField.ToString());
         this.memorizedField.SynchronizeField(mainField);
         if (this.field.GetChildCount() == 0)
         {
@@ -188,8 +188,6 @@ public partial class GameField :
 
     public async void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel turnNotification)
     {
-        this.memorizedField.UpdateKnownShips(turnNotification);
-
         if (turnNotification.MoveNotifications.Count == 0)
         {
             return;
@@ -249,6 +247,7 @@ public partial class GameField :
             }
         }
 
+        this.memorizedField.UpdateKnownShips(turnNotification);
         this.UpdateKnownShips();
     }
 

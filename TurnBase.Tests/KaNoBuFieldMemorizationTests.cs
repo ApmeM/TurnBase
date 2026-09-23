@@ -149,8 +149,8 @@ public class KaNoBuFieldMemorizationTests
         KaNoBuFigure.FigureTypes defenderBattleType = KaNoBuFigure.FigureTypes.Unknown)
     {
         var field = Field2D.Create(2, 1);
-        field[AttackerPosition] = KaNoBuFigure.Create(1, attackerType, false, 0);
-        field[DefenderPosition] = KaNoBuFigure.Create(2, defenderType, false, 0);
+        field[AttackerPosition] = KaNoBuFigure.Create(1, attackerType, 0);
+        field[DefenderPosition] = KaNoBuFigure.Create(2, defenderType, 0);
 
         var memorization = new KaNoBuFieldMemorization();
         memorization.SynchronizeField(field);

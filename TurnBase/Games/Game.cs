@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
-        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+    public class Game<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> :
+        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
     {
         private class PlayerData
         {
@@ -15,7 +15,7 @@ namespace TurnBase
             public int PlayerNumber;
         }
 
-        public Game(IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules, string gameId)
+        public Game(IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> rules, string gameId)
         {
             this.GameId = gameId;
             this.rules = rules;
@@ -24,13 +24,13 @@ namespace TurnBase
 
         public string GameId { get; private set; }
 
-        private IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> rules;
-        private Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>, PlayerData> players = new Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>, PlayerData>();
-        private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
+        private IGameRules<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> rules;
+        private Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>, PlayerData> players = new Dictionary<IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>, PlayerData>();
+        private MultipleGameLogListener<TMoveNotificationModel, TField> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel, TField>();
         private bool GameIsRunning = false;
-        private IField mainField;
+        private TField mainField;
 
-        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player)
         {
             if (this.players.Count >= this.rules.getMaxPlayersCount())
             {
@@ -48,14 +48,14 @@ namespace TurnBase
             }
 
             this.players.Add(
-                new PlayerFailProtection<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>(player),
+                new PlayerFailProtection<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>(player),
                 new PlayerData { IsInGame = true, PlayerNumber = this.players.Count });
             return AddPlayerStatus.OK;
         }
 
-        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener)
+        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
         {
-            this.gameLogListeners.Add(new FailProtectedListener<TMoveNotificationModel>(gameLogListener));
+            this.gameLogListeners.Add(new FailProtectedListener<TMoveNotificationModel, TField>(gameLogListener));
         }
 
         public async Task Play(CancellationToken token = default)
@@ -63,7 +63,7 @@ namespace TurnBase
             for (var i = this.players.Count; i < this.rules.getMinPlayersCount(); i++)
             {
                 // Add enough players, but all of them will loose.
-                this.AddPlayer(new PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>());
+                this.AddPlayer(new PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>());
             }
 
             this.GameIsRunning = true;
@@ -75,20 +75,31 @@ namespace TurnBase
 
             this.players.Keys.ToList().ForEach(a => a.PlayersInitialized());
             this.gameLogListeners.PlayersInitialized();
-            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
+            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(CopyForPlayer(this.mainField, players[a].PlayerNumber)));
+            this.gameLogListeners.GameLogCurrentField(CopyForPlayer(this.mainField, -1));
 
             await this.MovePlayers(token);
 
-            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
+            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(CopyForPlayer(this.mainField, players[a].PlayerNumber)));
+            this.gameLogListeners.GameLogCurrentField(CopyForPlayer(this.mainField, -1));
             this.players.Keys.ToList().ForEach(a => a.GameFinished(this.rules.findWinners(this.mainField)));
             this.gameLogListeners.GameFinished(this.rules.findWinners(this.mainField));
         }
 
+        private TField CopyForPlayer(TField mainField, int playerNumber)
+        {
+            var copiers = this.rules.GetFieldCopiers();
+            var fieldCopy = mainField;
+            foreach (var copier in copiers)
+            {
+                fieldCopy = copier.CopyForPlayer(fieldCopy, playerNumber);
+            }
+            return fieldCopy;
+        }
+
         private Task GroupAction(List<IPlayer> nextPlayers, Func<IPlayer, Task<bool>> action)
         {
-            async Task SingleAction(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> p)
+            async Task SingleAction(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> p)
             {
                 if (await action(p))
                 {
@@ -100,7 +111,7 @@ namespace TurnBase
 
             return Task.WhenAll(
                 nextPlayers
-                    .Select(a => (IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)a)
+                    .Select(a => (IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>)a)
                     .Where(a => this.players[a].IsInGame)
                     .Select(SingleAction)
                     .ToArray());
@@ -112,7 +123,7 @@ namespace TurnBase
             var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
 
             var nextPlayers = rotator.MoveNext(null, allPlayers);
-            Task<bool> action(IPlayer player) => this.InitPlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)player, token);
+            Task<bool> action(IPlayer player) => this.InitPlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>)player, token);
 
             while (true)
             {
@@ -127,7 +138,7 @@ namespace TurnBase
             }
         }
 
-        private async Task<bool> InitPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player, CancellationToken token)
+        private async Task<bool> InitPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player, CancellationToken token)
         {
             var playerNumber = this.players[player].PlayerNumber;
 
@@ -148,8 +159,8 @@ namespace TurnBase
             this.players.Keys.ToList().ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
             this.gameLogListeners.GamePlayerInit(playerNumber, initResponseModel.Name);
 
-            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
+            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(CopyForPlayer(this.mainField, players[a].PlayerNumber)));
+            this.gameLogListeners.GameLogCurrentField(CopyForPlayer(this.mainField, -1));
             return true;
         }
 
@@ -159,7 +170,7 @@ namespace TurnBase
             var allPlayers = this.players.Keys.Cast<IPlayer>().ToList();
 
             var nextPlayers = rotator.MoveNext(null, allPlayers);
-            Task<bool> action(IPlayer player) => this.MovePlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)player, token);
+            Task<bool> action(IPlayer player) => this.MovePlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>)player, token);
 
             while (this.rules.findWinners(this.mainField) == null)
             {
@@ -175,13 +186,13 @@ namespace TurnBase
                     this.players.Keys.ToList().ForEach(a => a.GameTurnFinished());
                     this.gameLogListeners.GameTurnFinished();
 
-                    this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-                    this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
+                    this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(CopyForPlayer(this.mainField, players[a].PlayerNumber)));
+                    this.gameLogListeners.GameLogCurrentField(CopyForPlayer(this.mainField, -1));
                 }
             }
         }
 
-        private async Task<bool> MovePlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player, CancellationToken token)
+        private async Task<bool> MovePlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player, CancellationToken token)
         {
             var playerNumber = this.players[player].PlayerNumber;
 
@@ -219,16 +230,16 @@ namespace TurnBase
                 playerNumber,
                 this.rules.GetMoveNotificationForPlayer(moveResult, -1));
 
-            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.mainField.copyForPlayer(players[a].PlayerNumber)));
-            this.gameLogListeners.GameLogCurrentField(this.mainField.copyForPlayer(-1));
+            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(CopyForPlayer(this.mainField, players[a].PlayerNumber)));
+            this.gameLogListeners.GameLogCurrentField(CopyForPlayer(this.mainField, -1));
             return true;
         }
 
-        public void Disconnect(IGameEventListener<TMoveNotificationModel> listener)
+        public void Disconnect(IGameEventListener<TMoveNotificationModel, TField> listener)
         {
             //TODO: Handle disconnect player in memorization and game field.
             if (
-                listener is IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player && 
+                listener is IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player && 
                 this.players.ContainsKey(player)
                 )
             {

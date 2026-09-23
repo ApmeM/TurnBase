@@ -13,7 +13,7 @@ public class KaNoBuPlayerMediumTests
     {
         var player = new KaNoBuPlayerMedium();
         var field = Field2D.Create(2, 2);
-        field[0, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
+        field[0, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, 0);
         field.walls[0, 1] = true;
         field.walls[1, 0] = true;
 
@@ -54,9 +54,9 @@ public class KaNoBuPlayerMediumTests
     private static Field2D CreateFieldWithThreeMovableShips()
     {
         var field = Field2D.Create(7, 2);
-        field[0, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, true, 0);
-        field[3, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipPaper, true, 0);
-        field[6, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipScissors, true, 0);
+        field[0, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, 0);
+        field[3, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipPaper, 0);
+        field[6, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipScissors, 0);
         return field;
     }
 }

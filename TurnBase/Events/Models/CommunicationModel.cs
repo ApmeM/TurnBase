@@ -58,9 +58,9 @@ public class GamePlayersInitializedCommunicationModel : ICommunicationModel
 {
 }
 
-public class GameLogCurrentFieldCommunicationModel : ICommunicationModel
+public class GameLogCurrentFieldCommunicationModel<TField> : ICommunicationModel
 {
-    public IField field;
+    public TField field;
 }
 
 public class GamePlayerTurnCommunicationModel<TMoveNotificationModel> : ICommunicationModel

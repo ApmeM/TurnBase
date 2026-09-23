@@ -15,7 +15,7 @@ public class KaNoBuMoveTests
     [TestCase(KaNoBuFigure.FigureTypes.Unknown, false)]
     public void FigureMovementDependsOnType(KaNoBuFigure.FigureTypes figureType, bool expectedCanMove)
     {
-        var figure = KaNoBuFigure.Create(1, figureType, true, 0);
+        var figure = KaNoBuFigure.Create(1, figureType, 0);
 
         var adjacentMove = new KaNoBuMoveResponseModel.MoveStep(
             new Point { X = 1, Y = 1 },
@@ -31,7 +31,7 @@ public class KaNoBuMoveTests
     [TestCase(KaNoBuFigure.FigureTypes.ShipScout)]
     public void MovableFigureRejectsNonAdjacentMove(KaNoBuFigure.FigureTypes figureType)
     {
-        var figure = KaNoBuFigure.Create(1, figureType, true, 0);
+        var figure = KaNoBuFigure.Create(1, figureType, 0);
         var nonAdjacentMove = new KaNoBuMoveResponseModel.MoveStep(
             new Point { X = 1, Y = 1 },
             new Point { X = 3, Y = 3 });
@@ -42,7 +42,7 @@ public class KaNoBuMoveTests
     [Test]
     public void ScoutCanMoveUpToTwoManhattanCells()
     {
-        var scout = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, true, 0);
+        var scout = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, 0);
 
         Assert.That(scout.IsMoveValid(new KaNoBuMoveResponseModel.MoveStep(
             new Point { X = 1, Y = 1 },
@@ -80,7 +80,7 @@ public class KaNoBuMoveTests
     [TestCase(KaNoBuFigure.FigureTypes.ShipScout)]
     public void FigureCannotMoveToSamePosition(KaNoBuFigure.FigureTypes figureType)
     {
-        var figure = KaNoBuFigure.Create(1, figureType, true, 0);
+        var figure = KaNoBuFigure.Create(1, figureType, 0);
         var samePositionMove = new KaNoBuMoveResponseModel.MoveStep(
             new Point { X = 1, Y = 1 },
             new Point { X = 1, Y = 1 });

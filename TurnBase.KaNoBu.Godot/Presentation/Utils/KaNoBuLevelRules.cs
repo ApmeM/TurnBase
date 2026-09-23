@@ -2,27 +2,30 @@ using System.Collections.Generic;
 using TurnBase;
 using TurnBase.KaNoBu;
 
-public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
+public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
 {
     private readonly KaNoBuRules mainRules;
 
     public KaNoBuLevelRules(int size, bool visibleShips)
     {
         this.mainRules = new KaNoBuRules(size);
-        this.mainRules.AllFiguresVisible = visibleShips;
+        if(!visibleShips)
+        {
+            this.mainRules.HideEnemyShips();
+        }
     }
 
-    public KaNoBuMoveResponseModel AutoMove(IField mainField, int playerNumber)
+    public KaNoBuMoveResponseModel AutoMove(Field2D mainField, int playerNumber)
     {
         return this.mainRules.AutoMove(mainField, playerNumber);
     }
 
-    public bool IsMoveValid(IField mainField, int playerNumber, KaNoBuMoveResponseModel move)
+    public bool IsMoveValid(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel move)
     {
         return this.mainRules.IsMoveValid(mainField, playerNumber, move);
     }
 
-    public List<int> findWinners(IField mainField)
+    public List<int> findWinners(Field2D mainField)
     {
         return this.mainRules.findWinners(mainField);
     }
@@ -34,9 +37,9 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         this.field = field;
     }
 
-    public IField generateGameField()
+    public Field2D generateGameField()
     {
-        return this.field.copyForPlayer(-1);
+        return new SimpleCopier().CopyForPlayer(this.field, -1);
     }
 
     public KaNoBuInitModel GetInitModel(int playerNumber)
@@ -58,8 +61,13 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
     {
         return this.mainRules.getMinPlayersCount();
     }
+    
+    public IFieldCopier<Field2D>[] GetFieldCopiers()
+    {
+        return new IFieldCopier<Field2D>[] { new HideEnemyCopier() };
+    }
 
-    public KaNoBuMoveModel GetMoveModel(IField mainField, int playerNumber)
+    public KaNoBuMoveModel GetMoveModel(Field2D mainField, int playerNumber)
     {
         return mainRules.GetMoveModel(mainField, playerNumber);
     }
@@ -69,7 +77,7 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return mainRules.GetMoveRotator();
     }
 
-    public KaNoBuMoveNotificationModel MakeMove(IField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
+    public KaNoBuMoveNotificationModel MakeMove(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
     {
         return mainRules.MakeMove(mainField, playerNumber, playerMove);
     }
@@ -79,17 +87,17 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return mainRules.GetMoveNotificationForPlayer(notification, playerNumber);
     }
 
-    public void PlayerDisconnected(IField mainField, int playerNumber)
+    public void PlayerDisconnected(Field2D mainField, int playerNumber)
     {
         mainRules.PlayerDisconnected(mainField, playerNumber);
     }
 
-    public bool TryApplyInitResponse(IField mainField, int playerNumber, KaNoBuInitResponseModel playerResponse)
+    public bool TryApplyInitResponse(Field2D mainField, int playerNumber, KaNoBuInitResponseModel playerResponse)
     {
         return true;
     }
 
-    public void TurnCompleted(IField mainField)
+    public void TurnCompleted(Field2D mainField)
     {
         this.mainRules.TurnCompleted(mainField);
     }

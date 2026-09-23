@@ -233,7 +233,7 @@ public partial class GameInit : IGameInit
         foreach (var unit in units)
         {
             var position = unit.TargetPositionMap.Value;
-            result[(int)position.x, (int)position.y] = KaNoBuFigure.Create(this.model.PlayerId, unit.UnitType, true, 0);
+            result[(int)position.x, (int)position.y] = KaNoBuFigure.Create(this.model.PlayerId, unit.UnitType, 0);
         }
 
         this.completion.TrySetResult(result);

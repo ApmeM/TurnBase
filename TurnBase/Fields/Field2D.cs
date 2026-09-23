@@ -2,7 +2,7 @@ using System.Data.Common;
 
 namespace TurnBase
 {
-    public class Field2D : IField
+    public class Field2D
     {
         public IFigure[,] realField;
         public bool[,] walls;
@@ -30,24 +30,6 @@ namespace TurnBase
         {
             get => this.realField[x, y];
             set => this.realField[x, y] = value;
-        }
-
-        public IField copyForPlayer(int PlayerId)
-        {
-            var result = Field2D.Create(this.Width, this.Height);
-            for (int x = 0; x < this.Width; x++)
-            {
-                for (int y = 0; y < this.Height; y++)
-                {
-                    result.walls[x, y] = this.walls[x, y];
-                    var figure = this.realField[x, y];
-                    if (figure != null)
-                    {
-                        result.realField[x, y] = figure.CopyForPlayer(PlayerId);
-                    }
-                }
-            }
-            return result;
         }
 
         public bool IsInBounds(Point point)

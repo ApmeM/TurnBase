@@ -2,11 +2,11 @@ using System.Collections.Generic;
 
 namespace TurnBase
 {
-    public class PassThroughListener<TMoveNotificationModel> : IGameEventListener<TMoveNotificationModel>
+    public class PassThroughListener<TMoveNotificationModel, TField> : IGameEventListener<TMoveNotificationModel, TField>
     {
-        private readonly IGameEventListener<TMoveNotificationModel> listener;
+        private readonly IGameEventListener<TMoveNotificationModel, TField> listener;
 
-        public PassThroughListener(IGameEventListener<TMoveNotificationModel> listener)
+        public PassThroughListener(IGameEventListener<TMoveNotificationModel, TField> listener)
         {
             this.listener = listener;
         }
@@ -31,7 +31,7 @@ namespace TurnBase
             this.listener.PlayersInitialized();
         }
 
-        public void GameLogCurrentField(IField field)
+        public void GameLogCurrentField(TField field)
         {
             this.listener.GameLogCurrentField(field);
         }

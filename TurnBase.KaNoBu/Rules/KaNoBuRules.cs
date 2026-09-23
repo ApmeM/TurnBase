@@ -4,13 +4,18 @@ using System.Linq;
 
 namespace TurnBase.KaNoBu
 {
-    public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
+    public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
     {
         private readonly int size;
 
-        public bool AllFiguresVisible;
         public bool WithDocks;
         public int MaxMovesPerTurn = int.MaxValue;
+        
+        public List<IFieldCopier<Field2D>> FieldCopiers = new List<IFieldCopier<Field2D>>();
+        public void HideEnemyShips()
+        {
+            this.FieldCopiers.Add(new HideEnemyCopier());
+        }
 
         public KaNoBuRules(int size)
         {
@@ -22,7 +27,7 @@ namespace TurnBase.KaNoBu
             this.size = size;
         }
 
-        public IField generateGameField()
+        public Field2D generateGameField()
         {
             var field = Field2D.Create(this.size, this.size);
             if (this.WithDocks)
@@ -50,6 +55,11 @@ namespace TurnBase.KaNoBu
         public int getMinPlayersCount()
         {
             return 2;
+        }
+
+        public IFieldCopier<Field2D>[] GetFieldCopiers()
+        {
+            return this.FieldCopiers.ToArray();
         }
 
         public IPlayerRotator GetInitRotator()
@@ -84,10 +94,9 @@ namespace TurnBase.KaNoBu
             return new KaNoBuInitModel(initFieldWidth, initFieldHeight, availableShips, this.MaxMovesPerTurn);
         }
 
-        public bool TryApplyInitResponse(IField field, int playerNumber, KaNoBuInitResponseModel initResponse)
+        public bool TryApplyInitResponse(Field2D mainField, int playerNumber, KaNoBuInitResponseModel initResponse)
         {
-            var preparedField = (Field2D)initResponse.Field;
-            var mainField = (Field2D)field;
+            var preparedField = initResponse.Field;
 
             var ships = this.GetInitModel(playerNumber).AvailableFigures;
             var availableShips = new Dictionary<KaNoBuFigure.FigureTypes, int>();
@@ -126,7 +135,6 @@ namespace TurnBase.KaNoBu
             {
                 return false;
             }
-
 
             var initFieldHeight = size / 3;
             var initFieldWidth = size - 2 * initFieldHeight;
@@ -170,23 +178,31 @@ namespace TurnBase.KaNoBu
                         throw new Exception("Unsupported number of players.");
                     }
 
-                    mainField[position] = null;
-                    mainField[position] = KaNoBuFigure.Create(playerNumber, playerShip, this.AllFiguresVisible, 0);
+                    mainField[position] = KaNoBuFigure.Create(playerNumber, playerShip, 0);
                 }
             }
 
             return true;
         }
 
-        public KaNoBuMoveModel GetMoveModel(IField mainField, int playerNumber)
+        public KaNoBuMoveModel GetMoveModel(Field2D mainField, int playerNumber)
         {
-            return new KaNoBuMoveModel(mainField.copyForPlayer(playerNumber));
+            return new KaNoBuMoveModel(CopyForPlayer(mainField, playerNumber));
         }
 
-        public KaNoBuMoveResponseModel AutoMove(IField field, int playerNumber)
+        private Field2D CopyForPlayer(Field2D mainField, int playerNumber)
         {
-            var mainField = (Field2D)field;
+            var copiers = this.GetFieldCopiers();
+            var fieldCopy = mainField;
+            foreach (var copier in copiers)
+            {
+                fieldCopy = copier.CopyForPlayer(fieldCopy, playerNumber);
+            }
+            return fieldCopy;
+        }
 
+        public KaNoBuMoveResponseModel AutoMove(Field2D mainField, int playerNumber)
+        {
             var mainWidth = mainField.Width;
             var mainHeight = mainField.Height;
             var canMove = false;
@@ -220,7 +236,7 @@ namespace TurnBase.KaNoBu
             }
         }
 
-        public bool IsMoveValid(IField field, int playerNumber, KaNoBuMoveResponseModel playerMove)
+        public bool IsMoveValid(Field2D field, int playerNumber, KaNoBuMoveResponseModel playerMove)
         {
             if (playerMove.Moves.Count > this.MaxMovesPerTurn)
             {
@@ -231,7 +247,7 @@ namespace TurnBase.KaNoBu
             return true;
         }
 
-        private bool IsMoveValid(IField field, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
+        private bool IsMoveValid(Field2D field, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
         {
             var mainField = (Field2D)field;
 
@@ -253,7 +269,7 @@ namespace TurnBase.KaNoBu
                 (to == null || to.PlayerId != from.PlayerId);
         }
 
-        public KaNoBuMoveNotificationModel MakeMove(IField field, int playerNumber, KaNoBuMoveResponseModel playerMove)
+        public KaNoBuMoveNotificationModel MakeMove(Field2D field, int playerNumber, KaNoBuMoveResponseModel playerMove)
         {
             var mainField = (Field2D)field;
             var notifications = new List<KaNoBuMoveNotificationModel.MoveNotification>();
@@ -300,9 +316,8 @@ namespace TurnBase.KaNoBu
             return new KaNoBuMoveNotificationModel(notifications);
         }
 
-        private KaNoBuMoveNotificationModel.MoveNotification MakeMoveStep(IField field, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
+        private KaNoBuMoveNotificationModel.MoveNotification MakeMoveStep(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
         {
-            var mainField = (Field2D)field;
             var from = (KaNoBuFigure)mainField[playerMove.From];
             var to = (KaNoBuFigure)mainField[playerMove.To];
 
@@ -371,7 +386,7 @@ namespace TurnBase.KaNoBu
             return new KaNoBuMoveNotificationModel.MoveNotification(playerMove.From, playerMove.To, battle);
         }
 
-        public List<int> findWinners(IField mainField)
+        public List<int> findWinners(Field2D mainField)
         {
             var winners = new List<int>();
             for (var i = 0; i < getMaxPlayersCount(); i++)
@@ -401,12 +416,12 @@ namespace TurnBase.KaNoBu
             return attacker.ResolveBattle(defender);
         }
 
-        public void TurnCompleted(IField mainField)
+        public void TurnCompleted(Field2D mainField)
         {
             // Nothing to do here.
         }
 
-        public void PlayerDisconnected(IField field, int playerNumber)
+        public void PlayerDisconnected(Field2D field, int playerNumber)
         {
         }
     }

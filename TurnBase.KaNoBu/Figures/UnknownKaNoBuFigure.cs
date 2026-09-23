@@ -2,8 +2,8 @@ namespace TurnBase.KaNoBu
 {
     public sealed class UnknownKaNoBuFigure : KaNoBuFigure
     {
-        public UnknownKaNoBuFigure(int playerId, bool visibleForAllPlayers, int winNumber)
-            : base(playerId, visibleForAllPlayers, winNumber)
+        public UnknownKaNoBuFigure(int playerId, int winNumber)
+            : base(playerId, winNumber)
         {
         }
 

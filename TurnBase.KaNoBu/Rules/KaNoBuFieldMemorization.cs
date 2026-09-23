@@ -16,7 +16,7 @@ namespace TurnBase.KaNoBu
         {
             if (Field == null)
             {
-                Field = (Field2D)model.copyForPlayer(-1);
+                Field = (Field2D)new SimpleCopier().CopyForPlayer(model, -1);
             }
             else
             {

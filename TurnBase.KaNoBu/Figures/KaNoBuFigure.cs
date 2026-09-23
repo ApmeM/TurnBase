@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using TurnBase;
 
 namespace TurnBase.KaNoBu
 {
     public abstract class KaNoBuFigure : IFigure
     {
-        private readonly bool visibleForAllPlayers;
-
         public enum FigureTypes
         {
             Unknown,
@@ -20,44 +16,41 @@ namespace TurnBase.KaNoBu
             ShipScout,
         }
 
-        protected KaNoBuFigure(int playerId, bool visibleForAllPlayers, int winNumber)
+        protected KaNoBuFigure(int playerId, int winNumber)
         {
-            PlayerId = playerId;
-            this.visibleForAllPlayers = visibleForAllPlayers;
-            WinNumber = winNumber;
+            this.PlayerId = playerId;
+            this.WinNumber = winNumber;
         }
 
         public int PlayerId { get; set; }
         public abstract FigureTypes FigureType { get; }
         public int WinNumber { get; set; }
 
-        public bool VisibleForAllPlayers => this.visibleForAllPlayers;
-
         public KaNoBuFigure WithFigureType(FigureTypes figureType)
         {
-            return Create(this.PlayerId, figureType, this.VisibleForAllPlayers, this.WinNumber);
+            return Create(this.PlayerId, figureType, this.WinNumber);
         }
 
-        public static KaNoBuFigure Create(int playerId, FigureTypes figureType, bool visibleForAllPlayers, int winNumber)
+        public static KaNoBuFigure Create(int playerId, FigureTypes figureType, int winNumber)
         {
             switch (figureType)
             {
                 case FigureTypes.Unknown:
-                    return new UnknownKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new UnknownKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipFlag:
-                    return new ShipFlagKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new ShipFlagKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipStone:
-                    return new ShipStoneKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new ShipStoneKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipPaper:
-                    return new ShipPaperKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new ShipPaperKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipScissors:
-                    return new ShipScissorsKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new ShipScissorsKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipUniversal:
-                    return new ShipUniversalKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new ShipUniversalKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipMine:
-                    return new ShipMineKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new ShipMineKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipScout:
-                    return new ShipScoutKaNoBuFigure(playerId, visibleForAllPlayers, winNumber);
+                    return new ShipScoutKaNoBuFigure(playerId, winNumber);
                 default:
                     throw new Exception("Unknown figure type");
             }
@@ -101,14 +94,9 @@ namespace TurnBase.KaNoBu
             }
         }
 
-        public IFigure CopyForPlayer(int playerId)
+        public IFigure Clone()
         {
-            if (this.PlayerId == playerId || playerId == -1 || this.VisibleForAllPlayers)
-            {
-                return Create(this.PlayerId, this.FigureType, this.VisibleForAllPlayers, this.WinNumber);
-            }
-
-            return Create(this.PlayerId, FigureTypes.Unknown, this.VisibleForAllPlayers, this.WinNumber);
+            return Create(this.PlayerId, this.FigureType, this.WinNumber);
         }
 
         public override string ToString()

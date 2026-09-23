@@ -8,14 +8,20 @@ namespace TurnBase
         Task Play(CancellationToken token = default);
     }
 
-    public interface IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IGame
+    public interface IGame<
+        TInitModel, 
+        TInitResponseModel, 
+        TMoveModel, 
+        TMoveResponseModel, 
+        TMoveNotificationModel, 
+        TField> : IGame
     {
         string GameId { get; }
 
-        AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player);
+        AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player);
 
-        void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener);
+        void AddGameLogListener(IGameEventListener<TMoveNotificationModel, TField> gameLogListener);
         
-        void Disconnect(IGameEventListener<TMoveNotificationModel> player);
+        void Disconnect(IGameEventListener<TMoveNotificationModel, TField> player);
     }
 }

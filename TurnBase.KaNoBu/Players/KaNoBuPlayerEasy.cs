@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
 {
-    public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
+    public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
     {
         private Random r = new Random();
         private string name = "Computer easy";
@@ -30,7 +29,7 @@ namespace TurnBase.KaNoBu
         {
         }
 
-        public void GameLogCurrentField(IField field)
+        public void GameLogCurrentField(Field2D field)
         {
         }
 
@@ -58,7 +57,7 @@ namespace TurnBase.KaNoBu
                 {
                     var p = new Point { X = i, Y = j };
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField[p] = KaNoBuFigure.Create(this.myNumber, ship, true, 0);
+                    preparedField[p] = KaNoBuFigure.Create(this.myNumber, ship, 0);
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
@@ -104,9 +103,8 @@ namespace TurnBase.KaNoBu
             };
         }
 
-        private List<(Point from, Point to)> findAllMovement(IField mainField)
+        private List<(Point from, Point to)> findAllMovement(Field2D field)
         {
-            var field = (Field2D)mainField;
             var availableShips = new List<(Point from, Point to)>();
             for (int x = 0; x < field.Width; x++)
             {
@@ -139,9 +137,8 @@ namespace TurnBase.KaNoBu
             return availableShips;
         }
 
-        private void tryAdd(List<(Point from, Point to)> availableShips, IField mainField, Point from, int x, int y)
+        private void tryAdd(List<(Point from, Point to)> availableShips, Field2D field, Point from, int x, int y)
         {
-            var field = (Field2D)mainField;
             var to = new Point { X = x, Y = y };
             if (!field.IsInBounds(to))
             {

@@ -25,9 +25,9 @@ public partial class LevelBase
     {
         var rules = new KaNoBuLevelRules(8, true);
         rules.SetInitialField(this.generateField());
-        this.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(rules, "level");
+        this.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(rules, "level");
         this.Game.AddPlayer(this);
-        this.Game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>());
+        this.Game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>());
     }
 
     public Field2D generateField()
@@ -48,7 +48,7 @@ public partial class LevelBase
         var allUnits = this.field.GetChildren();
         foreach (Unit unit in allUnits)
         {
-            var fig = KaNoBuFigure.Create(unit.PlayerNumber, unit.UnitType, true, 0);
+            var fig = KaNoBuFigure.Create(unit.PlayerNumber, unit.UnitType, 0);
             var pos = this.field.WorldToMap(unit.Position);
             var x = (int)pos.x;
             var y = (int)pos.y;

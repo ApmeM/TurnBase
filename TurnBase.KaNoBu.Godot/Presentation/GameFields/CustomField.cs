@@ -9,11 +9,10 @@ public partial class CustomField
         base._Ready();
         this.FillMembers();
     }
-    public override void GameLogCurrentField(IField field)
+    public override void GameLogCurrentField(Field2D mainField)
     {
-        base.GameLogCurrentField(field);
+        base.GameLogCurrentField(mainField);
         
-        var mainField = (Field2D)field;
         var needUpdateBitmask = false;
         for (var x = 0; x < mainField.Width; x++)
         {

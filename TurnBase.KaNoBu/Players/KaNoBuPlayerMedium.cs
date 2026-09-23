@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TurnBase.KaNoBu
 {
     public class KaNoBuPlayerMedium :
-        IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
+        IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
     {
         private Random r = new Random();
         private string name = "Computer medium";
@@ -35,7 +35,7 @@ namespace TurnBase.KaNoBu
                 for (var j = 0; j < model.Request.Height; j++)
                 {
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField[i, j] = KaNoBuFigure.Create(this.myNumber, ship, true, 0);
+                    preparedField[i, j] = KaNoBuFigure.Create(this.myNumber, ship, 0);
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
@@ -49,7 +49,7 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model, CancellationToken token = default)
         {
-            this.memorizedField.SynchronizeField((Field2D)model.Request.Field);
+            this.memorizedField.SynchronizeField(model.Request.Field);
             var from = this.findAllMovement(this.memorizedField.Field)
                     .Select(move => (move.from, move.to, EvaluateMove(this.memorizedField.Field, move)))
                     .OrderByDescending(a => a.Item3)
@@ -86,7 +86,7 @@ namespace TurnBase.KaNoBu
                 Response = new KaNoBuMoveResponseModel(selectedMoves)
             };
         }
-        private int EvaluateMove(IField mainField, (Point from, Point to) move)
+        private int EvaluateMove(Field2D mainField, (Point from, Point to) move)
         {
             var from = move.from;
             var to = move.to;
@@ -173,7 +173,7 @@ namespace TurnBase.KaNoBu
             }
         }
 
-        private IEnumerable<(Point from, Point to)> findAllMovement(IField mainField)
+        private IEnumerable<(Point from, Point to)> findAllMovement(Field2D mainField)
         {
             var field = (Field2D)mainField;
             for (int x = 0; x < field.Width; x++)
@@ -234,9 +234,9 @@ namespace TurnBase.KaNoBu
             this.memorizedField.Clear();
         }
 
-        public void GameLogCurrentField(IField mainField)
+        public void GameLogCurrentField(Field2D mainField)
         {
-            this.memorizedField.SynchronizeField((Field2D)mainField);
+            this.memorizedField.SynchronizeField(mainField);
         }
 
         public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)

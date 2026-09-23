@@ -11,8 +11,8 @@ public interface IServer
     Task<T> SendRequest<T>(string playerId, ICommunicationModel model, CancellationToken token = default);
 }
 
-public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
-        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> :
+        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
 {
     private readonly IServer server;
 
@@ -54,9 +54,9 @@ public class ServerPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveRespo
         this.server.SendRequest(PlayerId, new GamePlayersInitializedCommunicationModel());
     }
 
-    public void GameLogCurrentField(IField field)
+    public void GameLogCurrentField(TField field)
     {
-        this.server.SendRequest(PlayerId, new GameLogCurrentFieldCommunicationModel
+        this.server.SendRequest(PlayerId, new GameLogCurrentFieldCommunicationModel<TField>
         {
             field = field
         });

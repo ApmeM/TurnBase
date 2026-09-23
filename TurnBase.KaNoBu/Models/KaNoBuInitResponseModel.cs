@@ -2,11 +2,11 @@ namespace TurnBase.KaNoBu
 {
     public class KaNoBuInitResponseModel
     {
-        public KaNoBuInitResponseModel(IField field)
+        public KaNoBuInitResponseModel(Field2D field)
         {
             Field = field;
         }
 
-        public readonly IField Field;
+        public readonly Field2D Field;
     }
 }

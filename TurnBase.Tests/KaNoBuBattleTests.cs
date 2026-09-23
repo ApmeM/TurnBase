@@ -44,8 +44,8 @@ public class KaNoBuBattleTests
     [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipUniversal, KaNoBuFigure.FigureTypes.ShipScout, KaNoBuMoveNotificationModel.BattleResult.DefenderWon)]
     public void BattlesAsExpected(KaNoBuFigure.FigureTypes attackerType, KaNoBuFigure.FigureTypes defenderType, KaNoBuFigure.FigureTypes? expectedWinnerType, KaNoBuMoveNotificationModel.BattleResult expectedBattleResult)
     {
-        var attacker = KaNoBuFigure.Create(1, attackerType, true, 0);
-        var defender = KaNoBuFigure.Create(2, defenderType, true, 0);
+        var attacker = KaNoBuFigure.Create(1, attackerType, 0);
+        var defender = KaNoBuFigure.Create(2, defenderType, 0);
 
         var resolution = attacker.ResolveBattle(defender);
 
@@ -72,8 +72,8 @@ public class KaNoBuBattleTests
     {
         foreach (KaNoBuFigure.FigureTypes defenderType in System.Enum.GetValues(typeof(KaNoBuFigure.FigureTypes)))
         {
-            var attacker = KaNoBuFigure.Create(1, attackerType, true, 0);
-            var defender = KaNoBuFigure.Create(2, defenderType, true, 0);
+            var attacker = KaNoBuFigure.Create(1, attackerType, 0);
+            var defender = KaNoBuFigure.Create(2, defenderType, 0);
 
             var exception = Assert.Throws<System.Exception>(() => attacker.ResolveBattle(defender));
             var expectedMessage = defenderType == KaNoBuFigure.FigureTypes.Unknown

@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
+    public class PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> : 
+        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
     {
 
         public void GameStarted()
@@ -23,7 +24,7 @@ namespace TurnBase
         {
         }
 
-        public void GameLogCurrentField(IField field)
+        public void GameLogCurrentField(TField field)
         {
         }
 

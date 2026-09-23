@@ -4,6 +4,6 @@ namespace TurnBase
     {
         int PlayerId { get; }
 
-        IFigure CopyForPlayer(int playerId);
+        IFigure Clone();
     }
 }

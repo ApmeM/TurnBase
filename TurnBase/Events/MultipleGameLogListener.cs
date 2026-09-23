@@ -2,16 +2,16 @@ using System.Collections.Generic;
 
 namespace TurnBase
 {
-    public class MultipleGameLogListener<TMoveNotificationModel> : IGameEventListener<TMoveNotificationModel>
+    public class MultipleGameLogListener<TMoveNotificationModel, TField> : IGameEventListener<TMoveNotificationModel, TField>
     {
-        private List<IGameEventListener<TMoveNotificationModel>> gameLogListeners = new List<IGameEventListener<TMoveNotificationModel>>();
+        private List<IGameEventListener<TMoveNotificationModel, TField>> gameLogListeners = new List<IGameEventListener<TMoveNotificationModel, TField>>();
 
-        public void Add(IGameEventListener<TMoveNotificationModel> gameLogListener)
+        public void Add(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
         }
 
-        public void Remove(IGameEventListener<TMoveNotificationModel> gameLogListener)
+        public void Remove(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
         {
             this.gameLogListeners.Remove(gameLogListener);
         }
@@ -36,7 +36,7 @@ namespace TurnBase
             this.gameLogListeners.ForEach(a => a.PlayersInitialized());
         }
 
-        public void GameLogCurrentField(IField field)
+        public void GameLogCurrentField(TField field)
         {
             this.gameLogListeners.ForEach(a => a.GameLogCurrentField(field));
         }
