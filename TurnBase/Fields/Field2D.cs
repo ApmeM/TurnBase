@@ -2,10 +2,12 @@ using System.Data.Common;
 
 namespace TurnBase
 {
-    public class Field2D
+
+    public class Field2D : IField2D
     {
-        public IFigure[,] realField;
-        public bool[,] walls;
+        private IFigure[,] realField;
+        private bool[,] walls;
+
         public int Width => this.realField.GetLength(0);
         public int Height => this.realField.GetLength(1);
 
@@ -20,16 +22,44 @@ namespace TurnBase
             this.walls = walls;
         }
 
-        public IFigure this[Point key]
+        public IFigure GetFigure(Point key)
         {
-            get => this.realField[key.X, key.Y];
-            set => this.realField[key.X, key.Y] = value;
+            return this.realField[key.X, key.Y];
         }
 
-        public IFigure this[int x, int y]
+        public void SetFigure(Point key, IFigure value)
         {
-            get => this.realField[x, y];
-            set => this.realField[x, y] = value;
+            this.realField[key.X, key.Y] = value;
+        }
+
+        public IFigure GetFigure(int x, int y)
+        {
+            return this.realField[x, y];
+        }
+
+        public void SetFigure(int x, int y, IFigure value)
+        {
+            this.realField[x, y] = value;
+        }
+
+        public bool GetWall(Point key)
+        {
+            return this.walls[key.X, key.Y];
+        }
+
+        public void SetWall(Point key, bool value)
+        {
+            this.walls[key.X, key.Y] = value;
+        }
+
+        public bool GetWall(int x, int y)
+        {
+            return this.walls[x, y];
+        }
+
+        public void SetWall(int x, int y, bool value)
+        {
+            this.walls[x, y] = value;
         }
 
         public bool IsInBounds(Point point)

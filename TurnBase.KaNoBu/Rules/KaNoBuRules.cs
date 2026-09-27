@@ -37,10 +37,10 @@ namespace TurnBase.KaNoBu
                 {
                     for (var j = 0; j < blockSize; j++)
                     {
-                        field.walls[i, j] = true;
-                        field.walls[i, size - 1 - j] = true;
-                        field.walls[size - 1 - i, j] = true;
-                        field.walls[size - 1 - i, size - 1 - j] = true;
+                        field.SetWall(i, j, true);
+                        field.SetWall(i, size - 1 - j, true);
+                        field.SetWall(size - 1 - i, j, true);
+                        field.SetWall(size - 1 - i, size - 1 - j, true);
                     }
                 }
             }
@@ -116,7 +116,7 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < preparedField.Height; j++)
                 {
-                    var shipType = (preparedField[i, j] as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown;
+                    var shipType = (preparedField.GetFigure(i, j) as KaNoBuFigure)?.FigureType ?? KaNoBuFigure.FigureTypes.Unknown;
                     if (!availableShips.ContainsKey(shipType))
                     {
                         return false;
@@ -155,7 +155,7 @@ namespace TurnBase.KaNoBu
                 for (var j = 0; j < playerHeight; j++)
                 {
                     var p = new Point(i, j);
-                    var playerShip = (preparedField[i, j] as KaNoBuFigure).FigureType;
+                    var playerShip = (preparedField.GetFigure(i, j) as KaNoBuFigure).FigureType;
                     Point position;
                     if (playerNumber == 0)
                     {
@@ -178,7 +178,7 @@ namespace TurnBase.KaNoBu
                         throw new Exception("Unsupported number of players.");
                     }
 
-                    mainField[position] = KaNoBuFigure.Create(playerNumber, playerShip, 0);
+                    mainField.SetFigure(position, KaNoBuFigure.Create(playerNumber, playerShip, 0));
                 }
             }
 
@@ -211,7 +211,7 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < mainHeight; j++)
                 {
-                    var playerShip = (KaNoBuFigure)mainField[i, j];
+                    var playerShip = (KaNoBuFigure)mainField.GetFigure(i, j);
                     canMove = canMove || (
                         playerShip != null && 
                         playerShip.PlayerId == playerNumber && 
@@ -254,13 +254,13 @@ namespace TurnBase.KaNoBu
             if (
                 !mainField.IsInBounds(playerMove.From) || 
                 !mainField.IsInBounds(playerMove.To) || 
-                mainField.walls[playerMove.To.X, playerMove.To.Y])
+                mainField.GetWall(playerMove.To))
             {
                 return false;
             }
 
-            var from = (KaNoBuFigure)mainField[playerMove.From];
-            var to = (KaNoBuFigure)mainField[playerMove.To];
+            var from = (KaNoBuFigure)mainField.GetFigure(playerMove.From);
+            var to = (KaNoBuFigure)mainField.GetFigure(playerMove.To);
 
             return 
                 from != null && 
@@ -318,13 +318,13 @@ namespace TurnBase.KaNoBu
 
         private KaNoBuMoveNotificationModel.MoveNotification MakeMoveStep(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
         {
-            var from = (KaNoBuFigure)mainField[playerMove.From];
-            var to = (KaNoBuFigure)mainField[playerMove.To];
+            var from = (KaNoBuFigure)mainField.GetFigure(playerMove.From);
+            var to = (KaNoBuFigure)mainField.GetFigure(playerMove.To);
 
             if (to == null)
             {
-                mainField[playerMove.To] = from;
-                mainField[playerMove.From] = null;
+                mainField.SetFigure(playerMove.To, from);
+                mainField.SetFigure(playerMove.From, null);
                 return new KaNoBuMoveNotificationModel.MoveNotification(playerMove.From, playerMove.To);
             }
 
@@ -333,18 +333,18 @@ namespace TurnBase.KaNoBu
 
             if (resolution.Outcome == KaNoBuMoveNotificationModel.BattleResult.BothDestroyed)
             {
-                mainField[playerMove.From] = null;
-                mainField[playerMove.To] = null;
+                mainField.SetFigure(playerMove.From, null);
+                mainField.SetFigure(playerMove.To, null);
             }
             else if (winner != null)
             {
-                mainField[playerMove.From] = null;
-                mainField[playerMove.To] = winner;
+                mainField.SetFigure(playerMove.From, null);
+                mainField.SetFigure(playerMove.To, winner);
                 winner.WinNumber++;
                 if (winner.WinNumber % 3 == 0)
                 {
                     winner = winner.WithFigureType(KaNoBuFigure.FigureTypes.ShipUniversal);
-                    mainField[playerMove.To] = winner;
+                    mainField.SetFigure(playerMove.To, winner);
                 }
 
                 if (to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
@@ -354,7 +354,7 @@ namespace TurnBase.KaNoBu
                     {
                         for (int j = 0; j < mainField.Height; j++)
                         {
-                            var playerShip = (KaNoBuFigure)mainField[i, j];
+                            var playerShip = (KaNoBuFigure)mainField.GetFigure(i, j);
                             if (playerShip == null)
                             {
                                 continue;

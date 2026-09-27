@@ -19,11 +19,11 @@ public partial class CustomField
             for (var y = 0; y < mainField.Height; y++)
             {
                 var pos = new Vector2(x, y);
-                if (this.field.GetCellv(pos) == 4 && mainField.walls[x, y])
+                if (this.field.GetCellv(pos) == 4 && mainField.GetWall(x, y))
                 {
                     this.field.SetCellv(pos, -1);
                 }
-                if (this.field.GetCellv(pos) == -1 && !mainField.walls[x, y])
+                if (this.field.GetCellv(pos) == -1 && !mainField.GetWall(x, y))
                 {
                     this.field.SetCellv(pos, 4);
                     this.beach.SetCellv(pos, -1);

@@ -163,7 +163,7 @@ public partial class GameField :
                 {
                     var pos = new Vector2(x, y);
 
-                    var originalShip = mainField[x, y] as KaNoBuFigure;
+                    var originalShip = mainField.GetFigure(x, y) as KaNoBuFigure;
                     if (originalShip == null)
                     {
                         continue;
@@ -284,7 +284,7 @@ public partial class GameField :
                 continue;
             }
             var p = new Point((int)unit.TargetPositionMap.Value.x, (int)unit.TargetPositionMap.Value.y);
-            var figure = this.memorizedField.Field[p] as KaNoBuFigure;
+            var figure = this.memorizedField.Field.GetFigure(p) as KaNoBuFigure;
             unit.PlayerNumber = figure.PlayerId;
             unit.UnitType = figure.FigureType;
             unit.IsClickable = figure.PlayerId == this.playerId;

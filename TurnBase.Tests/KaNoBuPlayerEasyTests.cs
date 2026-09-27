@@ -13,9 +13,9 @@ public class KaNoBuPlayerEasyTests
     {
         var player = new KaNoBuPlayerEasy();
         var field = Field2D.Create(2, 2);
-        field[0, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, 0);
-        field.walls[0, 1] = true;
-        field.walls[1, 0] = true;
+        field.SetFigure(0, 0, KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, 0));
+        field.SetWall(0, 1, true);
+        field.SetWall(1, 0, true);
 
         var result = await player.MakeTurn(new MakeTurnModel<KaNoBuMoveModel>
         {
@@ -54,9 +54,9 @@ public class KaNoBuPlayerEasyTests
     private static Field2D CreateFieldWithThreeMovableShips()
     {
         var field = Field2D.Create(7, 2);
-        field[0, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, 0);
-        field[3, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipPaper, 0);
-        field[6, 0] = KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipScissors, 0);
+        field.SetFigure(0, 0, KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipStone, 0));
+        field.SetFigure(3, 0, KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipPaper, 0));
+        field.SetFigure(6, 0, KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipScissors, 0));
         return field;
     }
 }

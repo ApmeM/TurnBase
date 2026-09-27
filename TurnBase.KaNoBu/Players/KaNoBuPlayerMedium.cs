@@ -35,7 +35,7 @@ namespace TurnBase.KaNoBu
                 for (var j = 0; j < model.Request.Height; j++)
                 {
                     var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField[i, j] = KaNoBuFigure.Create(this.myNumber, ship, 0);
+                    preparedField.SetFigure(i, j, KaNoBuFigure.Create(this.myNumber, ship, 0));
                     model.Request.AvailableFigures.Remove(ship);
                 }
             }
@@ -92,8 +92,8 @@ namespace TurnBase.KaNoBu
             var to = move.to;
             
             var field = (Field2D)mainField;
-            var shipFrom = field[from] as KaNoBuFigure;
-            var shipTo = field[to] as KaNoBuFigure;
+                    var shipFrom = field.GetFigure(from) as KaNoBuFigure;
+                    var shipTo = field.GetFigure(to) as KaNoBuFigure;
             if (shipTo != null && shipTo.PlayerId != this.myNumber)
             {
                 if (shipTo.FigureType == KaNoBuFigure.FigureTypes.Unknown)
@@ -124,7 +124,7 @@ namespace TurnBase.KaNoBu
                 {
                     continue;
                 }
-                var shipNearby = field[checkTo] as KaNoBuFigure;
+                var shipNearby = field.GetFigure(checkTo) as KaNoBuFigure;
                 if (shipNearby != null && shipNearby.PlayerId != this.myNumber)
                 {
                     enemyNearby = true;
@@ -142,7 +142,7 @@ namespace TurnBase.KaNoBu
                 for (int y = 0; y < field.Height; y++)
                 {
                     var p = new Point { X = x, Y = y };
-                    var ship = field[p] as KaNoBuFigure;
+                    var ship = field.GetFigure(p) as KaNoBuFigure;
                     if (ship != null && ship.PlayerId != this.myNumber && (ship.FigureType == KaNoBuFigure.FigureTypes.Unknown || ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag))
                     {
                         if (closestEnemy == null)
@@ -181,7 +181,7 @@ namespace TurnBase.KaNoBu
                 for (int y = 0; y < field.Height; y++)
                 {
                     var from = new Point { X = x, Y = y };
-                    var shipFrom = field[from] as KaNoBuFigure;
+                        var shipFrom = field.GetFigure(from) as KaNoBuFigure;
                     if (shipFrom == null)
                     {
                         continue;
@@ -205,12 +205,12 @@ namespace TurnBase.KaNoBu
                             continue;
                         }
 
-                        if (field.walls[to.X, to.Y])
+                        if (field.GetWall(to))
                         {
                             continue;
                         }
 
-                        var shipTo = field[to] as KaNoBuFigure;
+                        var shipTo = field.GetFigure(to) as KaNoBuFigure;
                         if (shipTo == null || shipTo.PlayerId != this.myNumber)
                         {
                             yield return (from, to);

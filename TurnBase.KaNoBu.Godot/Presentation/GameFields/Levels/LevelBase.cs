@@ -52,13 +52,13 @@ public partial class LevelBase
             var pos = this.field.WorldToMap(unit.Position);
             var x = (int)pos.x;
             var y = (int)pos.y;
-            field2D[x, y] = fig;
+            field2D.SetFigure(x, y, fig);
         }
         for (var x = 0; x < right; x++)
             for (var y = 0; y < bottom; y++)
             {
                 var pos = new Vector2(x, y);
-                field2D.walls[x, y] = this.field.GetCellv(pos) < 0;
+                field2D.SetWall(x, y, this.field.GetCellv(pos) < 0);
             }
         return field2D;
     }

@@ -21,7 +21,7 @@ public class KaNoBuFieldMemorizationTests
     {
         var field = UpdateMemory(attackerType, defenderType, battleResult);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(expectedWinnerType));
     }
 
@@ -37,7 +37,7 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuFigure.FigureTypes.Unknown,
             KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(expectedDefenderType));
     }
 
@@ -49,7 +49,7 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuFigure.FigureTypes.Unknown,
             KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.Unknown));
     }
 
@@ -61,7 +61,7 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuFigure.FigureTypes.ShipScout,
             KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.Unknown));
     }
 
@@ -85,7 +85,7 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuFigure.FigureTypes.ShipStone,
             KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
     }
 
@@ -97,7 +97,7 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuFigure.FigureTypes.ShipUniversal,
             KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
     }
 
@@ -110,7 +110,7 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuMoveNotificationModel.BattleResult.AttackerWon,
             isDefenderFlag: true);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
     }
 
@@ -122,8 +122,8 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuFigure.FigureTypes.ShipMine,
             KaNoBuMoveNotificationModel.BattleResult.BothDestroyed);
 
-        Assert.That(field[AttackerPosition], Is.Null);
-        Assert.That(field[DefenderPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
+        Assert.That(field.GetFigure(DefenderPosition), Is.Null);
     }
 
     [Test]
@@ -136,7 +136,7 @@ public class KaNoBuFieldMemorizationTests
             attackerBattleType: KaNoBuFigure.FigureTypes.ShipPaper,
             defenderBattleType: KaNoBuFigure.FigureTypes.ShipStone);
 
-        Assert.That(field[AttackerPosition], Is.Null);
+        Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
     }
 
@@ -149,8 +149,8 @@ public class KaNoBuFieldMemorizationTests
         KaNoBuFigure.FigureTypes defenderBattleType = KaNoBuFigure.FigureTypes.Unknown)
     {
         var field = Field2D.Create(2, 1);
-        field[AttackerPosition] = KaNoBuFigure.Create(1, attackerType, 0);
-        field[DefenderPosition] = KaNoBuFigure.Create(2, defenderType, 0);
+        field.SetFigure(AttackerPosition, KaNoBuFigure.Create(1, attackerType, 0));
+        field.SetFigure(DefenderPosition, KaNoBuFigure.Create(2, defenderType, 0));
 
         var memorization = new KaNoBuFieldMemorization();
         memorization.SynchronizeField(field);
@@ -174,6 +174,6 @@ public class KaNoBuFieldMemorizationTests
 
     private static KaNoBuFigure.FigureTypes GetFigureType(Field2D field, Point position)
     {
-        return ((KaNoBuFigure)field[position]).FigureType;
+        return ((KaNoBuFigure)field.GetFigure(position)).FigureType;
     }
 }

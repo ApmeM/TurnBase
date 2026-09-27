@@ -24,8 +24,8 @@ namespace TurnBase.KaNoBu
                 {
                     for (var y = 0; y < model.Height; y++)
                     {
-                        var requestShip = model[x, y] as KaNoBuFigure;
-                        var memorizedShip = Field[x, y] as KaNoBuFigure;
+                        var requestShip = model.GetFigure(x, y) as KaNoBuFigure;
+                        var memorizedShip = Field.GetFigure(x, y) as KaNoBuFigure;
 
                         if (requestShip != null && memorizedShip == null || memorizedShip != null && requestShip == null)
                         {
@@ -43,7 +43,7 @@ namespace TurnBase.KaNoBu
                             memorizedShip = memorizedShip.WithFigureType(requestShip.FigureType);
                         }
 
-                        Field[x, y] = memorizedShip;
+                        Field.SetFigure(x, y, memorizedShip);
                     }
                 }
             }
@@ -61,13 +61,13 @@ namespace TurnBase.KaNoBu
                 var fromMapPos = notification.From;
                 var toMapPos = notification.To;
 
-                var movedUnit = this.Field[fromMapPos] as KaNoBuFigure;
-                var defenderUnit = this.Field[toMapPos] as KaNoBuFigure;
+                var movedUnit = this.Field.GetFigure(fromMapPos) as KaNoBuFigure;
+                var defenderUnit = this.Field.GetFigure(toMapPos) as KaNoBuFigure;
 
                 if (!notification.Battle.HasValue)
                 {
-                    this.Field[fromMapPos] = null;
-                    this.Field[toMapPos] = movedUnit;
+                    this.Field.SetFigure(fromMapPos, null);
+                    this.Field.SetFigure(toMapPos, movedUnit);
                     continue;
                 }
 
@@ -92,12 +92,12 @@ namespace TurnBase.KaNoBu
                         {
                             movedUnit = movedUnit.WithFigureType(defenderUnit.FigureType);
                         }
-                        this.Field[fromMapPos] = movedUnit;
-                        this.Field[toMapPos] = defenderUnit;
+                        this.Field.SetFigure(fromMapPos, movedUnit);
+                        this.Field.SetFigure(toMapPos, defenderUnit);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.BothDestroyed:
-                        this.Field[fromMapPos] = null;
-                        this.Field[toMapPos] = null;
+                        this.Field.SetFigure(fromMapPos, null);
+                        this.Field.SetFigure(toMapPos, null);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
                         if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
@@ -108,8 +108,8 @@ namespace TurnBase.KaNoBu
                         {
                             movedUnit = FindFigure(movedUnit, candidate => candidate.ResolveBattle(defenderUnit).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
                         }
-                        this.Field[fromMapPos] = null;
-                        this.Field[toMapPos] = movedUnit;
+                        this.Field.SetFigure(fromMapPos, null);
+                        this.Field.SetFigure(toMapPos, movedUnit);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                         if (defenderUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
@@ -122,8 +122,8 @@ namespace TurnBase.KaNoBu
                             defenderUnit = FindFigure(defenderUnit, candidate => movedUnit.ResolveBattle(candidate).Outcome == KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
                         }
 
-                        this.Field[fromMapPos] = null;
-                        this.Field[toMapPos] = defenderUnit;
+                        this.Field.SetFigure(fromMapPos, null);
+                        this.Field.SetFigure(toMapPos, defenderUnit);
                         break;
                 }
             }

@@ -9,8 +9,8 @@ namespace TurnBase
             {
                 for (int y = 0; y < source.Height; y++)
                 {
-                    result.walls[x, y] = source.walls[x, y];
-                    result.realField[x, y] = source.realField[x, y]?.Clone();
+                    result.SetWall(x, y, source.GetWall(x, y));
+                    result.SetFigure(x, y, source.GetFigure(x, y)?.Clone());
                 }
             }
             return result;
