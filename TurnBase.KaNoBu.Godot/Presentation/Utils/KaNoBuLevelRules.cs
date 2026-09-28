@@ -8,11 +8,10 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
 
     public KaNoBuLevelRules(int size, bool visibleShips)
     {
-        this.mainRules = new KaNoBuRules(size);
-        if(!visibleShips)
+        this.mainRules = new KaNoBuRules(size)
         {
-            this.mainRules.HideEnemyShips();
-        }
+            EnemyVisible = visibleShips
+        };
     }
 
     public KaNoBuMoveResponseModel AutoMove(Field2D mainField, int playerNumber)
@@ -25,9 +24,9 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return this.mainRules.IsMoveValid(mainField, playerNumber, move);
     }
 
-    public List<int> findWinners(Field2D mainField)
+    public List<int> FindWinners(Field2D mainField)
     {
-        return this.mainRules.findWinners(mainField);
+        return this.mainRules.FindWinners(mainField);
     }
 
     private Field2D field;
@@ -39,10 +38,10 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
 
     public Field2D generateGameField()
     {
-        return new SimpleCopier().CopyForPlayer(this.field, -1);
+        return this.field;
     }
 
-    public KaNoBuInitModel GetInitModel(int playerNumber)
+    public KaNoBuInitModel GetInitModelForPlayer(int playerNumber)
     {
         return new KaNoBuInitModel(1, 1, new List<KaNoBuFigure.FigureTypes> { KaNoBuFigure.FigureTypes.ShipFlag }, this.mainRules.MaxMovesPerTurn);
     }
@@ -61,15 +60,15 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
     {
         return this.mainRules.getMinPlayersCount();
     }
-    
-    public IFieldCopier<Field2D>[] GetFieldCopiers()
-    {
-        return new IFieldCopier<Field2D>[] { new HideEnemyCopier() };
-    }
 
-    public KaNoBuMoveModel GetMoveModel(Field2D mainField, int playerNumber)
+    public Field2D GetFieldNotificationForPlayer(Field2D mainField, int playerNumber)
     {
-        return mainRules.GetMoveModel(mainField, playerNumber);
+        return this.mainRules.GetFieldNotificationForPlayer(mainField, playerNumber);
+    }
+    
+    public KaNoBuMoveModel GetMoveModelForPlayer(Field2D mainField, int playerNumber)
+    {
+        return mainRules.GetMoveModelForPlayer(mainField, playerNumber);
     }
 
     public IPlayerRotator GetMoveRotator()
@@ -77,9 +76,9 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return mainRules.GetMoveRotator();
     }
 
-    public KaNoBuMoveNotificationModel MakeMove(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
+    public KaNoBuMoveNotificationModel TryApplyMoveResponse(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
     {
-        return mainRules.MakeMove(mainField, playerNumber, playerMove);
+        return mainRules.TryApplyMoveResponse(mainField, playerNumber, playerMove);
     }
 
     public KaNoBuMoveNotificationModel GetMoveNotificationForPlayer(KaNoBuMoveNotificationModel notification, int playerNumber)

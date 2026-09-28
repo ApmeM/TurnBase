@@ -89,13 +89,12 @@ public partial class Main
         // server
         var game = this.GameField.Instance<GameField>();
 
-        var rules = new KaNoBuRules((int)this.mapSizeSelector.Value);
-        if (!this.allShipsVisibleSelector.Pressed)
+        var rules = new KaNoBuRules((int)this.mapSizeSelector.Value)
         {
-            rules.HideEnemyShips();
-        }
-        rules.WithDocks = this.withDocksSelector.Pressed;
-        rules.MaxMovesPerTurn = (int)this.maxMovesPerTurnSelector.Value;
+            EnemyVisible = this.allShipsVisibleSelector.Pressed,
+            WithDocks = this.withDocksSelector.Pressed,
+            MaxMovesPerTurn = (int)this.maxMovesPerTurnSelector.Value
+        };
         game.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(rules, "test" + Guid.NewGuid().ToString());
 
         var playerTypes = new[]{

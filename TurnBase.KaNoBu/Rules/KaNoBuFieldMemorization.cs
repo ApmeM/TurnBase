@@ -16,35 +16,41 @@ namespace TurnBase.KaNoBu
         {
             if (Field == null)
             {
-                Field = (Field2D)new SimpleCopier().CopyForPlayer(model, -1);
-            }
-            else
-            {
+                Field = Field2D.Create(model.Width, model.Height);
                 for (var x = 0; x < model.Width; x++)
                 {
                     for (var y = 0; y < model.Height; y++)
                     {
-                        var requestShip = model.GetFigure(x, y) as KaNoBuFigure;
-                        var memorizedShip = Field.GetFigure(x, y) as KaNoBuFigure;
-
-                        if (requestShip != null && memorizedShip == null || memorizedShip != null && requestShip == null)
-                        {
-                            throw new Exception("Inconsistent field state");
-                        }
-
-                        if (requestShip == null && memorizedShip == null)
-                        {
-                            continue;
-                        }
-
-                        memorizedShip.PlayerId = requestShip.PlayerId;
-                        if (requestShip.FigureType != KaNoBuFigure.FigureTypes.Unknown)
-                        {
-                            memorizedShip = memorizedShip.WithFigureType(requestShip.FigureType);
-                        }
-
-                        Field.SetFigure(x, y, memorizedShip);
+                        Field.SetFigure(x, y, model.GetFigure(x, y) == null ? null : ((KaNoBuFigure)model.GetFigure(x, y)).WithFigureType(KaNoBuFigure.FigureTypes.Unknown));
+                        Field.SetWall(x, y, model.GetWall(x, y));
                     }
+                }
+            }
+            
+            for (var x = 0; x < model.Width; x++)
+            {
+                for (var y = 0; y < model.Height; y++)
+                {
+                    var requestShip = model.GetFigure(x, y) as KaNoBuFigure;
+                    var memorizedShip = Field.GetFigure(x, y) as KaNoBuFigure;
+
+                    if (requestShip != null && memorizedShip == null || memorizedShip != null && requestShip == null)
+                    {
+                        throw new Exception("Inconsistent field state");
+                    }
+
+                    if (requestShip == null && memorizedShip == null)
+                    {
+                        continue;
+                    }
+
+                    memorizedShip.PlayerId = requestShip.PlayerId;
+                    if (requestShip.FigureType != KaNoBuFigure.FigureTypes.Unknown)
+                    {
+                        memorizedShip = memorizedShip.WithFigureType(requestShip.FigureType);
+                    }
+
+                    Field.SetFigure(x, y, memorizedShip);
                 }
             }
         }

@@ -22,7 +22,7 @@ public class KaNoBuRulesTests
                 new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
             });
 
-        var notification = rules.MakeMove(field, 1, move);
+        var notification = rules.TryApplyMoveResponse(field, 1, move);
 
         Assert.That(notification.MoveNotifications.Count, Is.EqualTo(1));
         Assert.That(notification.MoveNotifications[0].Battle, Is.Not.Null);
@@ -50,7 +50,7 @@ public class KaNoBuRulesTests
                 new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
             });
 
-        var notification = rules.MakeMove(field, 1, move);
+        var notification = rules.TryApplyMoveResponse(field, 1, move);
 
         Assert.That(notification.MoveNotifications.Count, Is.EqualTo(1));
         Assert.That(notification.MoveNotifications[0].Battle, Is.Not.Null);
@@ -71,7 +71,7 @@ public class KaNoBuRulesTests
                 new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
             });
 
-        var notification = rules.MakeMove(field, 1, move);
+        var notification = rules.TryApplyMoveResponse(field, 1, move);
 
         Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.BothDestroyed));
         Assert.That(field.GetFigure(0, 0), Is.Null);
@@ -92,7 +92,7 @@ public class KaNoBuRulesTests
                 new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
             });
 
-        var notification = rules.MakeMove(field, 1, move);
+        var notification = rules.TryApplyMoveResponse(field, 1, move);
         var attackerNotification = rules.GetMoveNotificationForPlayer(notification, 1);
         var defenderNotification = rules.GetMoveNotificationForPlayer(notification, 2);
         var spectatorNotification = rules.GetMoveNotificationForPlayer(notification, 3);
@@ -145,7 +145,7 @@ public class KaNoBuRulesTests
             MaxMovesPerTurn = 4
         };
 
-        var initModel = rules.GetInitModel(0);
+        var initModel = rules.GetInitModelForPlayer(0);
 
         Assert.That(initModel.MaxMovesPerTurn, Is.EqualTo(4));
     }
@@ -153,7 +153,7 @@ public class KaNoBuRulesTests
     [Test]
     public void InitModelDistributesShipsAcrossFourMobileTypes()
     {
-        var initModel = new KaNoBuRules(7).GetInitModel(0);
+        var initModel = new KaNoBuRules(7).GetInitModelForPlayer(0);
 
         Assert.That(initModel.AvailableFigures, Does.Contain(KaNoBuFigure.FigureTypes.ShipStone));
         Assert.That(initModel.AvailableFigures, Does.Contain(KaNoBuFigure.FigureTypes.ShipPaper));
@@ -170,7 +170,7 @@ public class KaNoBuRulesTests
         field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipUniversal, 0));
         var rules = new KaNoBuRules(6);
 
-        var notification = rules.MakeMove(field, 1, new KaNoBuMoveResponseModel(
+        var notification = rules.TryApplyMoveResponse(field, 1, new KaNoBuMoveResponseModel(
             new List<KaNoBuMoveResponseModel.MoveStep>
             {
                 new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
@@ -201,7 +201,7 @@ public class KaNoBuRulesTests
 
         Assert.That(rules.IsMoveValid(field, 1, move), Is.EqualTo(true));
 
-        var notification = rules.MakeMove(field, 1, move);
+        var notification = rules.TryApplyMoveResponse(field, 1, move);
 
         Assert.That(notification.MoveNotifications.Count, Is.EqualTo(2));
         Assert.That(((KaNoBuFigure)field.GetFigure(0, 1)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipStone));

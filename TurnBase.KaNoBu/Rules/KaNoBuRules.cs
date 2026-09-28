@@ -10,13 +10,8 @@ namespace TurnBase.KaNoBu
 
         public bool WithDocks;
         public int MaxMovesPerTurn = int.MaxValue;
+        public bool EnemyVisible = false;
         
-        public List<IFieldCopier<Field2D>> FieldCopiers = new List<IFieldCopier<Field2D>>();
-        public void HideEnemyShips()
-        {
-            this.FieldCopiers.Add(new HideEnemyCopier());
-        }
-
         public KaNoBuRules(int size)
         {
             if (size < 6)
@@ -57,11 +52,6 @@ namespace TurnBase.KaNoBu
             return 2;
         }
 
-        public IFieldCopier<Field2D>[] GetFieldCopiers()
-        {
-            return this.FieldCopiers.ToArray();
-        }
-
         public IPlayerRotator GetInitRotator()
         {
             return new PlayerRotatorNormal();
@@ -73,7 +63,7 @@ namespace TurnBase.KaNoBu
             return new PlayerRotatorNormal();
         }
 
-        public KaNoBuInitModel GetInitModel(int playerNumber)
+        public KaNoBuInitModel GetInitModelForPlayer(int playerNumber)
         {
             var initFieldHeight = size / 3;
             var initFieldWidth = size - 2 * initFieldHeight;
@@ -98,7 +88,7 @@ namespace TurnBase.KaNoBu
         {
             var preparedField = initResponse.Field;
 
-            var ships = this.GetInitModel(playerNumber).AvailableFigures;
+            var ships = this.GetInitModelForPlayer(playerNumber).AvailableFigures;
             var availableShips = new Dictionary<KaNoBuFigure.FigureTypes, int>();
             foreach (KaNoBuFigure.FigureTypes shipType in ships)
             {
@@ -185,20 +175,9 @@ namespace TurnBase.KaNoBu
             return true;
         }
 
-        public KaNoBuMoveModel GetMoveModel(Field2D mainField, int playerNumber)
+        public KaNoBuMoveModel GetMoveModelForPlayer(Field2D mainField, int playerNumber)
         {
             return new KaNoBuMoveModel(CopyForPlayer(mainField, playerNumber));
-        }
-
-        private Field2D CopyForPlayer(Field2D mainField, int playerNumber)
-        {
-            var copiers = this.GetFieldCopiers();
-            var fieldCopy = mainField;
-            foreach (var copier in copiers)
-            {
-                fieldCopy = copier.CopyForPlayer(fieldCopy, playerNumber);
-            }
-            return fieldCopy;
         }
 
         public KaNoBuMoveResponseModel AutoMove(Field2D mainField, int playerNumber)
@@ -247,10 +226,8 @@ namespace TurnBase.KaNoBu
             return true;
         }
 
-        private bool IsMoveValid(Field2D field, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
+        private bool IsMoveValid(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
         {
-            var mainField = (Field2D)field;
-
             if (
                 !mainField.IsInBounds(playerMove.From) || 
                 !mainField.IsInBounds(playerMove.To) || 
@@ -269,9 +246,8 @@ namespace TurnBase.KaNoBu
                 (to == null || to.PlayerId != from.PlayerId);
         }
 
-        public KaNoBuMoveNotificationModel MakeMove(Field2D field, int playerNumber, KaNoBuMoveResponseModel playerMove)
+        public KaNoBuMoveNotificationModel TryApplyMoveResponse(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
         {
-            var mainField = (Field2D)field;
             var notifications = new List<KaNoBuMoveNotificationModel.MoveNotification>();
 
             if (playerMove.Moves.Count == 0)
@@ -386,7 +362,39 @@ namespace TurnBase.KaNoBu
             return new KaNoBuMoveNotificationModel.MoveNotification(playerMove.From, playerMove.To, battle);
         }
 
-        public List<int> findWinners(Field2D mainField)
+
+        public Field2D GetFieldNotificationForPlayer(Field2D mainField, int playerNumber)
+        {
+            return CopyForPlayer(mainField, playerNumber);
+        }
+
+        private Field2D CopyForPlayer(Field2D source, int playerNumber)
+        {
+            var result = Field2D.Create(source.Width, source.Height);
+            for (int x = 0; x < source.Width; x++)
+            {
+                for (int y = 0; y < source.Height; y++)
+                {
+                    result.SetWall(x, y, source.GetWall(x, y));
+                    var figure = source.GetFigure(x, y);
+                    if (figure != null)
+                    {
+                        if (figure.PlayerId == playerNumber || playerNumber == -1 || EnemyVisible)
+                        {
+                            result.SetFigure(x, y, ((KaNoBuFigure)figure).WithFigureType(((KaNoBuFigure)figure).FigureType));
+                        }
+                        else
+                        {
+                            result.SetFigure(x, y, ((KaNoBuFigure)figure).WithFigureType(KaNoBuFigure.FigureTypes.Unknown));
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public List<int> FindWinners(Field2D mainField)
         {
             var winners = new List<int>();
             for (var i = 0; i < getMaxPlayersCount(); i++)

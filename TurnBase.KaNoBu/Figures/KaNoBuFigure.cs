@@ -94,11 +94,6 @@ namespace TurnBase.KaNoBu
             }
         }
 
-        public IFigure Clone()
-        {
-            return Create(this.PlayerId, this.FigureType, this.WinNumber);
-        }
-
         public override string ToString()
         {
             return this.PlayerId + this.FigureType.PrintableName();
