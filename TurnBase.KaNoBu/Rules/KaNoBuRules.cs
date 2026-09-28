@@ -54,8 +54,8 @@ namespace TurnBase.KaNoBu
 
         public IPlayerRotator GetInitRotator()
         {
-            return new PlayerRotatorNormal();
-            // return new PlayerRotatorAllAtOnce(); // ToDo: fix it.
+            // return new PlayerRotatorNormal();
+            return new PlayerRotatorAllAtOnce(); // ToDo: fix it.
         }
 
         public IPlayerRotator GetMoveRotator()

@@ -117,7 +117,7 @@ namespace TurnBase
             while (true)
             {
                 token.ThrowIfCancellationRequested();
-                
+
                 await GroupAction(nextPlayers.PlayersInTurn, action);
                 nextPlayers = rotator.MoveNext(nextPlayers.PlayersInTurn, allPlayers);
                 if (nextPlayers.IsNewTurn)
@@ -139,18 +139,20 @@ namespace TurnBase
             {
                 return false;
             }
-
-            if (!this.rules.TryApplyInitResponse(this.mainField, playerNumber, initResponseModel.Response))
+            lock (this.mainField)
             {
-                return false;
+                if (!this.rules.TryApplyInitResponse(this.mainField, playerNumber, initResponseModel.Response))
+                {
+                    return false;
+                }
+
+                this.players.Keys.ToList().ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
+                this.gameLogListeners.GamePlayerInit(playerNumber, initResponseModel.Name);
+
+                this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.rules.GetFieldNotificationForPlayer(this.mainField, players[a].PlayerNumber)));
+                this.gameLogListeners.GameLogCurrentField(this.rules.GetFieldNotificationForPlayer(this.mainField, -1));
+                return true;
             }
-
-            this.players.Keys.ToList().ForEach(a => a.GamePlayerInit(playerNumber, initResponseModel.Name));
-            this.gameLogListeners.GamePlayerInit(playerNumber, initResponseModel.Name);
-
-            this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.rules.GetFieldNotificationForPlayer(this.mainField, players[a].PlayerNumber)));
-            this.gameLogListeners.GameLogCurrentField(this.rules.GetFieldNotificationForPlayer(this.mainField, -1));
-            return true;
         }
 
         private async Task MovePlayers(CancellationToken token)
@@ -227,7 +229,7 @@ namespace TurnBase
         public void Disconnect(IGameEventListener<TMoveNotificationModel, TField> listener)
         {
             if (
-                listener is IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player && 
+                listener is IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player &&
                 this.players.ContainsKey(player)
                 )
             {
@@ -239,7 +241,7 @@ namespace TurnBase
                 this.players.Keys.ToList().ForEach(a => a.GameLogCurrentField(this.rules.GetFieldNotificationForPlayer(this.mainField, this.players[a].PlayerNumber)));
                 this.gameLogListeners.GameLogCurrentField(this.rules.GetFieldNotificationForPlayer(this.mainField, -1));
             }
-            
+
             this.gameLogListeners.Remove(listener);
         }
     }
