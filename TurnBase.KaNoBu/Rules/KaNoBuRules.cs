@@ -22,7 +22,7 @@ namespace TurnBase.KaNoBu
             this.size = size;
         }
 
-        public Field2D generateGameField()
+        public Field2D GenerateGameField()
         {
             var field = Field2D.Create(this.size, this.size);
             if (this.WithDocks)
@@ -42,12 +42,12 @@ namespace TurnBase.KaNoBu
             return field;
         }
 
-        public int getMaxPlayersCount()
+        public int GetMaxPlayersCount()
         {
             return 4;
         }
 
-        public int getMinPlayersCount()
+        public int GetMinPlayersCount()
         {
             return 2;
         }
@@ -397,7 +397,7 @@ namespace TurnBase.KaNoBu
         public List<int> FindWinners(Field2D mainField)
         {
             var winners = new List<int>();
-            for (var i = 0; i < getMaxPlayersCount(); i++)
+            for (var i = 0; i < GetMaxPlayersCount(); i++)
             {
                 var automove = this.AutoMove(mainField, i);
                 if (automove == null)

@@ -11,9 +11,9 @@ namespace TurnBase
     TField>
   {
     // Preparing functions.
-    TField generateGameField();
-    int getMaxPlayersCount();
-    int getMinPlayersCount();
+    TField GenerateGameField();
+    int GetMaxPlayersCount();
+    int GetMinPlayersCount();
 
     // Player initialization functions.
     IPlayerRotator GetInitRotator();

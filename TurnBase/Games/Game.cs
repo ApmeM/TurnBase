@@ -19,7 +19,7 @@ namespace TurnBase
         {
             this.GameId = gameId;
             this.rules = rules;
-            this.mainField = this.rules.generateGameField();
+            this.mainField = this.rules.GenerateGameField();
         }
 
         public string GameId { get; private set; }
@@ -32,7 +32,7 @@ namespace TurnBase
 
         public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player)
         {
-            if (this.players.Count >= this.rules.getMaxPlayersCount())
+            if (this.players.Count >= this.rules.GetMaxPlayersCount())
             {
                 return AddPlayerStatus.MAX_PLAYERS_REACHED;
             }
@@ -60,7 +60,7 @@ namespace TurnBase
 
         public async Task Play(CancellationToken token = default)
         {
-            for (var i = this.players.Count; i < this.rules.getMinPlayersCount(); i++)
+            for (var i = this.players.Count; i < this.rules.GetMinPlayersCount(); i++)
             {
                 // Add enough players, but all of them will loose.
                 this.AddPlayer(new PlayerLoose<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>());

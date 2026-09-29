@@ -36,7 +36,7 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         this.field = field;
     }
 
-    public Field2D generateGameField()
+    public Field2D GenerateGameField()
     {
         return this.field;
     }
@@ -51,14 +51,14 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return this.mainRules.GetInitRotator();
     }
 
-    public int getMaxPlayersCount()
+    public int GetMaxPlayersCount()
     {
-        return this.mainRules.getMaxPlayersCount();
+        return this.mainRules.GetMaxPlayersCount();
     }
 
-    public int getMinPlayersCount()
+    public int GetMinPlayersCount()
     {
-        return this.mainRules.getMinPlayersCount();
+        return this.mainRules.GetMinPlayersCount();
     }
 
     public Field2D GetFieldNotificationForPlayer(Field2D mainField, int playerNumber)
