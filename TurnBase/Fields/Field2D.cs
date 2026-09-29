@@ -1,14 +1,19 @@
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace TurnBase
 {
 
     public class Field2D : IField2D
     {
+        [JsonProperty]
         private IFigure[,] realField;
+        [JsonProperty]
         private bool[,] walls;
 
+        [JsonIgnore]
         public int Width => this.realField.GetLength(0);
+        [JsonIgnore]
         public int Height => this.realField.GetLength(1);
 
         public static Field2D Create(int width, int height)

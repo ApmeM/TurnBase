@@ -18,6 +18,6 @@ public class KaNoBuSerializationTest
 
         Console.WriteLine(result);
 
-        Assert.AreEqual("{\"Data\":{\"$type\":\"InitResponseModel`1[[TurnBase.KaNoBu.KaNoBuInitResponseModel, TurnBase.KaNoBu]], TurnBase\",\"Name\":\"ResultName\",\"Response\":{\"Field\":{\"Width\":1,\"Height\":1}}}}", result);
+        Assert.AreEqual("{\"Data\":{\"$type\":\"InitResponseModel`1[[TurnBase.KaNoBu.KaNoBuInitResponseModel, TurnBase.KaNoBu]], TurnBase\",\"Name\":\"ResultName\",\"Response\":{\"Field\":{\"realField\":[[null]],\"walls\":[[false]]}}}}", result);
     }
 }
