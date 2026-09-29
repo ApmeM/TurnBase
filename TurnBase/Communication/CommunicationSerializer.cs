@@ -1,5 +1,4 @@
 using System;
-using Godot;
 using Newtonsoft.Json;
 
 public class CommunicationSerializer
@@ -15,7 +14,6 @@ public class CommunicationSerializer
         }
         catch (Exception ex)
         {
-            GD.Print($"Incorrect request: {ex}");
             return default;
         }
 
