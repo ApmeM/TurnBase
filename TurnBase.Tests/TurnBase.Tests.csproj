@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>TurnBase.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -11,5 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\TurnBase\TurnBase.csproj" />
     <ProjectReference Include="..\TurnBase.KaNoBu\TurnBase.KaNoBu.csproj" />
+    <ProjectReference Include="..\TurnBase.KaNoBu.Console\TurnBase.KaNoBu.Console.csproj" />
   </ItemGroup>
 </Project>

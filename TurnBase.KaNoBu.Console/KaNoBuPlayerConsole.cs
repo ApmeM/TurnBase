@@ -3,7 +3,7 @@ using System.Threading;
 namespace TurnBase.KaNoBu;
 
 public class KaNoBuPlayerConsole :
-    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
+    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
 {
     private Dictionary<int, string> players = new Dictionary<int, string>();
 
@@ -66,7 +66,7 @@ public class KaNoBuPlayerConsole :
     {
     }
 
-    public void GameLogCurrentField(IField field)
+    public void GameLogCurrentField(Field2D field)
     {
     }
 
@@ -88,7 +88,7 @@ public class KaNoBuPlayerConsole :
 
     #endregion
 
-    private async Task<IField> fillField(int playerId, KaNoBuInitModel model)
+    private async Task<Field2D> fillField(int playerId, KaNoBuInitModel model)
     {
         var ships = model.AvailableFigures;
         var preparedField = Field2D.Create(model.Width, model.Height);
@@ -108,23 +108,23 @@ public class KaNoBuPlayerConsole :
                     var x = r.Next(model.Width);
                     var y = r.Next(model.Height);
                     var point = new Point(x, y);
-                    if (preparedField[point] != null)
+                    if (preparedField.GetFigure(point) != null)
                     {
                         continue;
                     }
-                    preparedField[point] = KaNoBuFigure.Create(playerId, ship, true, 0);
+                    preparedField.SetFigure(point, KaNoBuFigure.Create(playerId, ship, 0));
                     break;
                 }
                 ships.RemoveAt(0);
             }
             else
             {
-                if (preparedField[p.Value] != null)
+                if (preparedField.GetFigure(p.Value) != null)
                 {
                     this.showMessage("Cant place on this field. It is already occupied.");
                     continue;
                 }
-                preparedField[p.Value] = KaNoBuFigure.Create(playerId, ship, true, 0);
+                preparedField.SetFigure(p.Value, KaNoBuFigure.Create(playerId, ship, 0));
                 ships.RemoveAt(0);
             }
         }
