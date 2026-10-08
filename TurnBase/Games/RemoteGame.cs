@@ -4,18 +4,6 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public struct ClientResponse
-    {
-        public int result;
-        public int code;
-        public string[] headers;
-        public ICommunicationModel body;
-    }
-
-    public interface IClient
-    {
-        Task<ClientResponse> SendAction(string serverUrl, string action, Dictionary<string, object> queryData, ICommunicationModel body, CancellationToken token);
-    }
 
     public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> :
         IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
@@ -54,7 +42,13 @@ namespace TurnBase
         public async Task Play(CancellationToken token = default)
         {
             var gameIdQueryString = new Dictionary<string, object> { { "gameId", this.GameId } };
-            var playerId = ((await this.client.SendAction(serverUrl, "join", gameIdQueryString, null, token)).body as JoinGameResponseModel).PlayerId;
+            var joinResult = await this.client.SendAction(serverUrl, RemoteProtocol.JoinAction, gameIdQueryString, null, token);
+            if (joinResult.code != 200 || !(joinResult.body is JoinGameResponseModel joinResponse) || string.IsNullOrWhiteSpace(joinResponse.PlayerId))
+            {
+                throw new System.InvalidOperationException($"Could not join game '{this.GameId}' (HTTP {joinResult.code}).");
+            }
+
+            var playerId = joinResponse.PlayerId;
 
             var playerIdQueryString = new Dictionary<string, object> { { "playerId", playerId } };
 
@@ -63,7 +57,7 @@ namespace TurnBase
             while (this.connected)
             {
                 token.ThrowIfCancellationRequested();
-                var result = await this.client.SendAction(serverUrl, "wait-action", playerIdQueryString, null, token);
+                var result = await this.client.SendAction(serverUrl, RemoteProtocol.WaitAction, playerIdQueryString, null, token);
 
                 if (result.code == 0)
                 {
@@ -75,12 +69,12 @@ namespace TurnBase
                     if (result.body is InitModel<TInitModel> init)
                     {
                         var response = await player.Init(init, token);
-                        await this.client.SendAction(serverUrl, "answer", playerIdQueryString, response, token);
+                        await this.client.SendAction(serverUrl, RemoteProtocol.AnswerAction, playerIdQueryString, response, token);
                     }
                     else if (result.body is MakeTurnModel<TMoveModel> turn)
                     {
                         var response = await player.MakeTurn(turn, token);
-                        await this.client.SendAction(serverUrl, "answer", playerIdQueryString, response, token);
+                        await this.client.SendAction(serverUrl, RemoteProtocol.AnswerAction, playerIdQueryString, response, token);
                     }
                     else if (result.body is GameStartedCommunicationModel gameStarted)
                     {

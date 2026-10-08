@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Presentation/GodotNetworkServer.cs" type="Script" id=1]
+
+[node name="GodotNetworkServer" type="Node"]
+script = ExtResource( 1 )

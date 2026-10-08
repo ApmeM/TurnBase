@@ -87,47 +87,37 @@ public partial class Main
     private async void OnStartCustomGame()
     {
         // server
-        var game = this.GameField.Instance<GameField>();
-
-        var rules = new KaNoBuRules((int)this.mapSizeSelector.Value)
+        var parameters = new KaNoBuPlayerFactory.GameParameters
         {
-            EnemyVisible = this.allShipsVisibleSelector.Pressed,
+            IsClient = false,
+            GameId = "test",
+            ServerAddress = null,
+            FieldSize = (int)this.mapSizeSelector.Value,
             WithDocks = this.withDocksSelector.Pressed,
-            MaxMovesPerTurn = (int)this.maxMovesPerTurnSelector.Value
+            EnemyVisible = this.allShipsVisibleSelector.Pressed,
+            MaxMovesPerTurn = (int)this.maxMovesPerTurnSelector.Value,
+            PlayerTypes = new[]{
+                this.serverPlayer1,
+                this.serverPlayer2,
+                this.serverPlayer3,
+                this.serverPlayer4,
+            }.Select(a => (KaNoBuPlayerType)a.GetSelectedId()).ToList()
         };
-        game.Game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(rules, "test" + Guid.NewGuid().ToString());
 
-        var playerTypes = new[]{
-            this.serverPlayer1,
-            this.serverPlayer2,
-            this.serverPlayer3,
-            this.serverPlayer4,
-        };
+        var game = this.GameField.Instance<GameField>();
+        game.Game = KaNoBuPlayerFactory.CreateGame(
+            parameters,
+            game,
+            this.client,
+            new GDLogger(),
+            this.server,
+            async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout));
 
-        var humanFound = false;
-        foreach (var playertype in playerTypes)
+        if (game.Game == null)
         {
-            if (playertype.GetSelectedId() == 1)
-            {
-                if (humanFound)
-                {
-                    GD.Print("Only one human player is allowed.");
-                    game.Game.AddPlayer(new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>());
-                    continue;
-                }
-
-                humanFound = true;
-            }
-
-            game.Game.AddPlayer(BuildPlayer(playertype.GetSelectedId(), game));
+            GD.PrintErr("TODO: Failed to create game popup.");
+            return;
         }
-
-        if (!humanFound)
-        {
-            game.Game.AddGameLogListener(game);
-        }
-
-        game.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
 
         this.AttachReplayStorageListener(game);
         await this.StartGame(game);
@@ -135,62 +125,26 @@ public partial class Main
 
     private async void OnStartConnectGame()
     {
-        var game = this.GameField.Instance<GameField>();
-
-        game.Game = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(this.client, $"http://{this.serverIpInput.Text}:8080", "test");
-        game.Game.AddPlayer(BuildPlayer(this.clientPlayer.GetSelectedId(), game));
-
-        if (clientPlayer.GetSelectedId() != 1)
+        var parameters = new KaNoBuPlayerFactory.GameParameters
         {
-            game.Game.AddGameLogListener(game);
-        }
+            IsClient = true,
+            GameId = "test",
+            ServerAddress = $"http://{this.serverIpInput.Text}:8080",
+            PlayerTypes = new List<KaNoBuPlayerType> { (KaNoBuPlayerType)this.clientPlayer.GetSelectedId() }
+        };
 
-        game.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
+        var game = this.GameField.Instance<GameField>();
+        game.Game = KaNoBuPlayerFactory.CreateGame(
+            parameters,
+            game,
+            this.client,
+            new GDLogger(),
+            this.server,
+            async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout));
 
         this.AttachReplayStorageListener(game);
         await this.StartGame(game);
     }
-
-    private IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> BuildPlayer(int playerType, GameField field)
-    {
-        switch (playerType)
-        {
-            case 0:
-                // None
-                return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>();
-            case 1:
-                // Human
-                return field;
-            case 2:
-                // Computer Easy
-                var playerEasy = new KaNoBuPlayerEasy();
-                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
-                    playerEasy,
-                    async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout),
-                    1,
-                    300);
-            case 3:
-                // Remote
-                this.server.StartServer();
-                var player = new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(server, field.Game.GameId);
-                return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
-                    player,
-                    async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout),
-                    600000,
-                    60000);
-            case 4:
-                // Computer Medium
-                var playerMedium = new KaNoBuPlayerMedium();
-                return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
-                    playerMedium,
-                    async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout),
-                    1,
-                    300);
-            default:
-                throw new InvalidOperationException("Unknown Player Type");
-        }
-    }
-
     private CancellationTokenSource currentGameCancellationTokenSource;
 
     private async Task<bool> StartGame(GameField game)

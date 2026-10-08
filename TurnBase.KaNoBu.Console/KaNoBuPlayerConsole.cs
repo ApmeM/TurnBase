@@ -1,4 +1,5 @@
 using System.Threading;
+using System.Globalization;
 
 namespace TurnBase.KaNoBu;
 
@@ -14,14 +15,14 @@ public class KaNoBuPlayerConsole :
         token.ThrowIfCancellationRequested();
         var field = makeTurnModel.Request.Field;
         this.showMessage(field.ToString());
-        this.showMessage("Select your move in format A0-A1.");
+        this.showMessage("Select your move in format A0-A1 (rows may have multiple digits).");
         Point? from = null;
         Point? to = null;
 
         while (from == null || to == null)
         {
             token.ThrowIfCancellationRequested();
-            (from, to) = await readMove();
+            (from, to) = await readMove(field.Width, field.Height);
         }
 
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
@@ -100,7 +101,7 @@ public class KaNoBuPlayerConsole :
             this.showMessage(preparedField.ToString());
             var ship = ships[0];
             this.showMessage($"Select position for {ship}, empty value = random.");
-            Point? p = await readPoint();
+            Point? p = await readPoint(model.Width, model.Height);
             if (p == null)
             {
                 while (true)
@@ -132,50 +133,62 @@ public class KaNoBuPlayerConsole :
         return preparedField;
     }
 
-    private async Task<Point?> readPoint()
+    private async Task<Point?> readPoint(int width, int height)
     {
         while (true)
         {
-            var input = await Task.Run(() => Console.ReadLine().ToUpper());
+            var input = (await Task.Run(() => Console.ReadLine()))?.Trim();
             if (string.IsNullOrWhiteSpace(input))
             {
                 return null;
             }
 
-            if (input.Length != 2)
+            if (!TryParsePoint(input, out var point) || point.X >= width || point.Y >= height)
             {
                 this.showMessage($"Invalid point value: {input}");
                 continue;
             }
 
-            var x = input[0] - 'A';
-            var y = input[1] - '0';
-            return new Point { X = x, Y = y };
+            return point;
         }
     }
 
-    private async Task<(Point, Point)> readMove()
+    private async Task<(Point, Point)> readMove(int width, int height)
     {
         while (true)
         {
-            var input = await Task.Run(() => Console.ReadLine().ToUpper());
+            var input = (await Task.Run(() => Console.ReadLine()))?.Trim();
             if (string.IsNullOrWhiteSpace(input))
             {
                 continue;
             }
 
-            if (input.Length != 5)
+            var parts = input.ToUpperInvariant().Split('-', StringSplitOptions.TrimEntries);
+            if (parts.Length != 2 ||
+                !TryParsePoint(parts[0], out var from) ||
+                !TryParsePoint(parts[1], out var to) ||
+                from.X >= width || from.Y >= height || to.X >= width || to.Y >= height)
             {
                 this.showMessage($"Invalid point value: {input}");
                 continue;
             }
 
-            var x1 = input[0] - 'A';
-            var y1 = input[1] - '0';
-            var x2 = input[3] - 'A';
-            var y2 = input[4] - '0';
-            return (new Point { X = x1, Y = y1 }, new Point { X = x2, Y = y2 });
+            return (from, to);
         }
+    }
+
+    private static bool TryParsePoint(string input, out Point point)
+    {
+        point = default;
+        input = input.Trim().ToUpperInvariant();
+        if (input.Length < 2 || input[0] < 'A' || input[0] > 'T' ||
+            !int.TryParse(input.AsSpan(1), NumberStyles.None, CultureInfo.InvariantCulture, out var y) || y < 0)
+        {
+            return false;
+        }
+
+        point = new Point(input[0] - 'A', y);
+        return true;
     }
 
     private async Task<string> getName()

@@ -7,8 +7,8 @@ using TurnBase;
 using System.Threading;
 using System;
 
-[SceneReference("Client.tscn")]
-public partial class Client : IClient
+[SceneReference("GodotClient.tscn")]
+public partial class GodotClient : IClient
 {
     private HTTPClient httpClient = new HTTPClient();
 

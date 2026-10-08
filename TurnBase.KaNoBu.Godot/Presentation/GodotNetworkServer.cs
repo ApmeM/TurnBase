@@ -1,73 +1,18 @@
-using Godot;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Godot;
+using TurnBase;
 
-[SceneReference("Server.tscn")]
-public partial class Server : IServer
+[SceneReference("GodotNetworkServer.tscn")]
+public partial class GodotNetworkServer: IServer
 {
-    private class PendingActionHub
-    {
-        // ToDo: cleanup dictionaries for players when game is finished or player is disconnected.
-        private readonly Dictionary<string, Queue<ICommunicationModel>> PendingModels = new Dictionary<string, Queue<ICommunicationModel>>();
-        private readonly Dictionary<string, TaskCompletionSource<ICommunicationModel>> PendingResponses = new Dictionary<string, TaskCompletionSource<ICommunicationModel>>();
-
-        public void PushModel(string playerId, ICommunicationModel model)
-        {
-            if (!PendingModels.ContainsKey(playerId))
-            {
-                PendingModels[playerId] = new Queue<ICommunicationModel>();
-            }
-
-            this.PendingModels[playerId].Enqueue(model);
-        }
-
-        public ICommunicationModel PopModel(string playerId)
-        {
-            if (!PendingModels.TryGetValue(playerId, out var queue))
-            {
-                return null;
-            }
-            if (queue.Count == 0)
-            {
-                return null;
-            }
-            var model = queue.Dequeue();
-            return model;
-        }
-
-        public Task<T> WaitResponse<T>(string playerId, CancellationToken token = default)
-        {
-            var tcs = new TaskCompletionSource<ICommunicationModel>();
-            this.PendingResponses[playerId] = tcs;
-            if (token.CanBeCanceled)
-            {
-                token.Register(() => {
-                    tcs.TrySetCanceled(token);
-                    PendingResponses.Remove(playerId);
-                });
-            }
-            return tcs.Task.ContinueWith(t => (T)t.Result);
-        }
-
-        public void ResolveResponse(string playerId, ICommunicationModel response)
-        {
-            if (PendingResponses.TryGetValue(playerId, out var tcs))
-            {
-                tcs.SetResult(response);
-                PendingResponses.Remove(playerId);
-            }
-        }
-    }
-
     private readonly TCP_Server server = new TCP_Server();
-    private const int Port = 8080;
 
-    private readonly PendingActionHub Actions = new PendingActionHub();
+    private readonly RemoteServerHub hub = new RemoteServerHub();
     private readonly List<StreamPeerTCP> incomingPeers = new List<StreamPeerTCP>();
     private readonly List<(StreamPeerTCP, float, string)> waitingPeers = new List<(StreamPeerTCP, float, string)>();
-    private readonly Stack<string> playerIds = new Stack<string>();
 
     public override void _Ready()
     {
@@ -75,19 +20,24 @@ public partial class Server : IServer
         this.FillMembers();
     }
 
-    public void StartServer()
+    private void StartServer(int port)
     {
         if (server.IsListening())
         {
             return;
         }
 
-        server.Listen(Port);
-        GD.Print($"Server listening on {Port}");
+        server.Listen((ushort)port);
+        GD.Print($"Server listening on {port}");
     }
 
     public override void _Process(float delta)
     {
+        if (!server.IsListening())
+        {
+            return;
+        }
+
         ProcessConnection();
         ProcessIncomingRequests();
         ProcessWaitingPeers(delta);
@@ -105,8 +55,7 @@ public partial class Server : IServer
                 continue;
             }
 
-            var model = this.Actions.PopModel(playerId);
-            if (model != null)
+            if (this.hub.TryTakeRequest(playerId, out var model))
             {
                 SendStatus(peer, 200, model); // OK
             }
@@ -146,12 +95,12 @@ public partial class Server : IServer
             var request = peer.GetUtf8String(peer.GetAvailableBytes());
             GD.Print($"Request received: {request}");
 
-            if (request.StartsWith("GET /wait-action", System.StringComparison.InvariantCultureIgnoreCase))
+            if (request.StartsWith($"GET /{RemoteProtocol.WaitAction}", System.StringComparison.InvariantCultureIgnoreCase))
             {
                 waitingPeers.Add((peer, 30, GetQueryValue(request, "playerId")));
                 continue;
             }
-            else if (request.StartsWith("OPTIONS /answer", System.StringComparison.InvariantCultureIgnoreCase))
+            else if (request.StartsWith($"OPTIONS /{RemoteProtocol.AnswerAction}", System.StringComparison.InvariantCultureIgnoreCase))
             {
                 var playerId = GetQueryValue(request, "playerId");
                 // ToDo: validate playerId
@@ -164,21 +113,26 @@ public partial class Server : IServer
                     SendStatus(peer, 204, null); // OK
                 }
             }
-            else if (request.StartsWith("POST /answer", System.StringComparison.InvariantCultureIgnoreCase))
+            else if (request.StartsWith($"POST /{RemoteProtocol.AnswerAction}", System.StringComparison.InvariantCultureIgnoreCase))
             {
                 var playerId = GetQueryValue(request, "playerId");
-                var body = request.Split("\r\n\r\n")[1];
-                var responseObj = CommunicationSerializer.DeserializeObject<ICommunicationModel>(body);
-                this.Actions.ResolveResponse(playerId, responseObj);
-                SendStatus(peer, 200, null); // OK
+                var requestParts = request.Split(new[] { "\r\n\r\n" }, 2, System.StringSplitOptions.None);
+                if (string.IsNullOrWhiteSpace(playerId) || requestParts.Length < 2)
+                {
+                    SendStatus(peer, 400, null);
+                }
+                else
+                {
+                    var responseObj = CommunicationSerializer.DeserializeObject<ICommunicationModel>(requestParts[1]);
+                    SendStatus(peer, responseObj != null && this.hub.SubmitResponse(playerId, responseObj) ? 200 : 400, null);
+                }
             }
-            else if (request.StartsWith("Get /join", System.StringComparison.InvariantCultureIgnoreCase))
+            else if (request.StartsWith($"GET /{RemoteProtocol.JoinAction}", System.StringComparison.InvariantCultureIgnoreCase))
             {
                 var gameId = GetQueryValue(request, "gameId");
 
-                if (playerIds.Count > 0)
+                if (!string.IsNullOrWhiteSpace(gameId) && this.hub.TryJoin(gameId, out var playerId))
                 {
-                    var playerId = playerIds.Pop();
                     GD.Print($"Player {playerId} joined.");
                     SendStatus(peer, 200, new JoinGameResponseModel { PlayerId = playerId }); // OK
                 }
@@ -238,18 +192,17 @@ public partial class Server : IServer
 
     public void RegisterPlayer(string playerId, string gameId)
     {
-        // ToDo: on server gameId should be used.
-        this.playerIds.Push(playerId);
+        this.StartServer(RemoteProtocol.DefaultPort);
+        this.hub.RegisterPlayer(playerId, gameId);
     }
 
     public void SendRequest(string playerId, ICommunicationModel model)
     {
-        this.Actions.PushModel(playerId, model);
+        this.hub.SendRequest(playerId, model);
     }
 
     public Task<T> SendRequest<T>(string playerId, ICommunicationModel model, CancellationToken token = default)
     {
-        this.Actions.PushModel(playerId, model);
-        return this.Actions.WaitResponse<T>(playerId, token);
+        return this.hub.SendRequest<T>(playerId, model, token);
     }
 }
