@@ -56,7 +56,7 @@ namespace TurnBase.KaNoBu
         {
             if (delayAction == null)
             {
-                throw new ArgumentNullException(nameof(delayAction));
+                return player;
             }
 
             return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
@@ -95,9 +95,9 @@ namespace TurnBase.KaNoBu
             Func<int, Task> delayAction)
         {
             var humansCount = parameters.PlayerTypes.Count(a => a == KaNoBuPlayerType.Human);
-            if (humansCount != 1)
+            if (humansCount > 1)
             {
-                logger.Log("Only one human player is allowed.");
+                logger.Log("Max one human player is allowed.");
                 return null;
             }
 
