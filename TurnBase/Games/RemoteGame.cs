@@ -41,7 +41,12 @@ namespace TurnBase
 
         public async Task Play(CancellationToken token = default)
         {
-            var gameIdQueryString = new Dictionary<string, object> { { "gameId", this.GameId } };
+            var gameIdQueryString = new Dictionary<string, object>();
+            if (!string.IsNullOrWhiteSpace(this.GameId))
+            {
+                gameIdQueryString.Add("gameId", this.GameId);
+            }
+
             var joinResult = await this.client.SendAction(serverUrl, RemoteProtocol.JoinAction, gameIdQueryString, null, token);
             if (joinResult.code != 200 || !(joinResult.body is JoinGameResponseModel joinResponse) || string.IsNullOrWhiteSpace(joinResponse.PlayerId))
             {

@@ -33,7 +33,20 @@ namespace TurnBase
         public bool TryJoin(string gameId, out string playerId)
         {
             playerId = null;
-            return this.availablePlayers.TryGetValue(gameId, out var queue) && queue.TryDequeue(out playerId);
+            if (!string.IsNullOrWhiteSpace(gameId))
+            {
+                return this.availablePlayers.TryGetValue(gameId, out var queue) && queue.TryDequeue(out playerId);
+            }
+
+            foreach (var queue in this.availablePlayers.Values)
+            {
+                if (queue.TryDequeue(out playerId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void SendRequest(string playerId, ICommunicationModel model)

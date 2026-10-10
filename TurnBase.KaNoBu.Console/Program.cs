@@ -11,7 +11,6 @@ public class Program
         var parameters = new KaNoBuPlayerFactory.GameParameters
         {
             IsClient = false,
-            GameId = "test",
             ServerAddress = null,
             FieldSize = 8,
             WithDocks = false,
@@ -26,12 +25,14 @@ public class Program
         if (parameters.IsClient)
         {
             parameters.ServerAddress = ReadNonEmpty("IP-адрес сервера (можно указать IP:порт)");
-            var kaNoBuPlayerType = ReadPlayerType("Тип игрока клиента");
+            parameters.GameId = null;
 
+            var kaNoBuPlayerType = ReadPlayerType("Тип игрока клиента");
             parameters.PlayerTypes.Add(kaNoBuPlayerType);
         }
         else
         {
+            parameters.GameId = "local" + Guid.NewGuid().ToString();
             parameters.FieldSize = ReadInt("Размер поля (8-20)", 8, 20, 8);
             parameters.WithDocks = ReadYesNo("Добавить доки/стены? (д/н)");
             parameters.EnemyVisible = ReadYesNo("Показывать типы всех кораблей? (д/н)");

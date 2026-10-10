@@ -90,7 +90,7 @@ public partial class Main
         var parameters = new KaNoBuPlayerFactory.GameParameters
         {
             IsClient = false,
-            GameId = "test",
+            GameId = "local" + Guid.NewGuid().ToString(),
             ServerAddress = null,
             FieldSize = (int)this.mapSizeSelector.Value,
             WithDocks = this.withDocksSelector.Pressed,
@@ -128,7 +128,7 @@ public partial class Main
         var parameters = new KaNoBuPlayerFactory.GameParameters
         {
             IsClient = true,
-            GameId = "test",
+            GameId = null,
             ServerAddress = $"http://{this.serverIpInput.Text}:8080",
             PlayerTypes = new List<KaNoBuPlayerType> { (KaNoBuPlayerType)this.clientPlayer.GetSelectedId() }
         };

@@ -131,7 +131,7 @@ public partial class GodotNetworkServer: IServer
             {
                 var gameId = GetQueryValue(request, "gameId");
 
-                if (!string.IsNullOrWhiteSpace(gameId) && this.hub.TryJoin(gameId, out var playerId))
+                if (this.hub.TryJoin(gameId, out var playerId))
                 {
                     GD.Print($"Player {playerId} joined.");
                     SendStatus(peer, 200, new JoinGameResponseModel { PlayerId = playerId }); // OK
