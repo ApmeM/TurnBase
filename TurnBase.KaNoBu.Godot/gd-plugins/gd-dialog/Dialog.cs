@@ -10,25 +10,74 @@ public partial class Dialog
 
     [Export]
     public int Speed;
+
+    [Export]
+    public bool BlockUnderlyingInput
+    {
+        get => blockUnderlyingInput;
+        set
+        {
+            blockUnderlyingInput = value;
+            if (this.IsInsideTree())
+            {
+                this.inputOverlay.MouseFilter = value
+                    ? Control.MouseFilterEnum.Stop
+                    : Control.MouseFilterEnum.Ignore;
+            }
+        }
+    }
+
+    private bool blockUnderlyingInput = true;
+
+    [Export]
+    public Color BackgroundColor
+    {
+        get => backgroundColor;
+        set
+        {
+            this.backgroundColor = value;
+            if (this.IsInsideTree())
+            {
+                this.backdrop.Color = value;
+            }
+        }
+    }
+
+    private Color backgroundColor = new Color(0, 0, 0, 0.427451f);
+
     public override void _Ready()
     {
         base._Ready();
         this.FillMembers();
 
         this.timer.Connect(CommonSignals.Timeout, this, nameof(Timer_Timeout));
+        this.BlockUnderlyingInput = this.BlockUnderlyingInput;
+        this.BackgroundColor = this.BackgroundColor;
     }
 
     public override void _Input(InputEvent @event)
     {
         base._Input(@event);
-        if (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed && ((ButtonList)mouseEvent.ButtonMask).HasFlag(ButtonList.Left))
+        if (!this.Visible)
         {
-            ForceFinish();
+            return;
         }
 
-        if (@event is InputEventKey keyEvent && keyEvent.Pressed && (((KeyList)keyEvent.Scancode).HasFlag(KeyList.Space) || ((KeyList)keyEvent.Scancode).HasFlag(KeyList.Escape)))
+        var advanceDialog =
+            (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed && mouseEvent.ButtonIndex == (int)ButtonList.Left)
+            // || (@event is InputEventScreenTouch touchEvent && touchEvent.Pressed)
+            || (@event is InputEventKey keyEvent && keyEvent.Pressed
+                && (((KeyList)keyEvent.Scancode).HasFlag(KeyList.Space) || ((KeyList)keyEvent.Scancode).HasFlag(KeyList.Escape)));
+
+        if (!advanceDialog)
         {
-            ForceFinish();
+            return;
+        }
+
+        this.ForceFinish();
+        if (this.BlockUnderlyingInput)
+        {
+            this.GetTree().SetInputAsHandled();
         }
     }
 

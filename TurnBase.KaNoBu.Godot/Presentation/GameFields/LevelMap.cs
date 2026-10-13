@@ -19,23 +19,23 @@ public partial class LevelMap
             }
         }
 
-        await this.ShowDialog("Hello captain! Nice to see you here again. Those enemies are attacking us and we need to defeat them to protect our land!", true);
-        this.highlitePointer.Show(new Vector2(270, 654), 50f);
-        await this.ShowDialog("Hello! I'll do my best. Click on this ship to attack them.", false);
-        await this.ShowDialog("To arms my brothers!", true);
-    }
+        this.dialog.BlockUnderlyingInput = true;
+        await this.dialog.Show("Hello captain! Nice to see you here again. Those enemies are attacking us and we need to defeat them to protect our land!", true, null);
 
-    private async Task ShowDialog(string text, bool left)
-    {
-        this.dialogContainer.Show();
-        try
-        {
-            await this.dialog.Show(text, left, null);
-        }
-        finally
-        {
-            this.dialogContainer.Hide();
-        }
+        await this.GetTree().ToMySignal("idle_frame");
+
+        this.dialog.BlockUnderlyingInput = false;
+        this.highlitePointer.Show();
+        var t1 = this.highlitePointer.ToMySignal(nameof(HighlitePointer.ClickedInsideCircle));
+        var t2 = this.dialog.Show("Hello! I'll do my best. Click on this ship to attack them.", false, null);
+        await Task.WhenAll(t1, t2);
+        this.highlitePointer.Hide();
+
+        // Let the click that completed the dialog/highlight finish reaching _UnhandledInput first.
+        await this.GetTree().ToMySignal("idle_frame");
+
+        this.dialog.BlockUnderlyingInput = true;
+        await this.dialog.Show("To arms my brothers!", true, null);
     }
 
     public override async void _UnhandledInput(InputEvent @event)
@@ -51,6 +51,7 @@ public partial class LevelMap
 
     public async void OnLevelPressed(LevelMapUnit mapUnit)
     {
+        GD.Print("LevelMap: OnLevelPressed");
         this.player.CancelAnimations();
         this.player.CallbackAnimation((unit) => unit.RotateUnitToAnimation(mapUnit.Position));
         this.player.CallbackAnimation((unit) => unit.MoveUnitToAnimation(mapUnit.Position - (mapUnit.Position - this.player.Position).Normalized() * 64));

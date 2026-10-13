@@ -21,8 +21,8 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id=2]
 resource_local_to_scene = true
 shader = SubResource( 1 )
-shader_param/hole_center = Vector2( 0, 0 )
-shader_param/hole_radius = 0.0
+shader_param/hole_center = Vector2( 50, 50 )
+shader_param/hole_radius = 50.0
 shader_param/viewport_size = Vector2( 1, 1 )
 shader_param/shade_color = Color( 0, 0, 0, 0.427451 )
 
@@ -30,7 +30,7 @@ shader_param/shade_color = Color( 0, 0, 0, 0.427451 )
 resource_name = "finger_pulse"
 loop = true
 tracks/0/type = "value"
-tracks/0/path = NodePath("Overlay/FingerAnimation/Finger:rect_position")
+tracks/0/path = NodePath("FingerAnimation/Finger:rect_position")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/imported = false
@@ -45,21 +45,18 @@ tracks/0/keys = {
 [node name="HighlitePointer" type="CanvasLayer"]
 layer = 100
 script = ExtResource( 1 )
+Center = Vector2( 50, 50 )
 
-[node name="Overlay" type="Control" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-
-[node name="Shade" type="ColorRect" parent="Overlay"]
+[node name="Shade" type="ColorRect" parent="."]
 material = SubResource( 2 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="FingerAnimation" type="Control" parent="Overlay"]
+[node name="FingerAnimation" type="Control" parent="."]
 mouse_filter = 2
 
-[node name="Finger" type="TextureRect" parent="Overlay/FingerAnimation"]
+[node name="Finger" type="TextureRect" parent="FingerAnimation"]
 margin_left = 0.583798
 margin_top = 0.583798
 margin_right = 64.5835

@@ -1,65 +1,123 @@
-using System;
-using System.Threading.Tasks;
 using Godot;
 
 /// <summary>
 /// Full-screen tutorial overlay. Add the HighlitePointer scene to the UI and await Show.
 /// The position is in viewport (screen) coordinates.
 /// </summary>
+[Tool]
 [SceneReference("HighlitePointer.tscn")]
 public partial class HighlitePointer
 {
-    private TaskCompletionSource<bool> clickCompletion;
+    [Signal]
+    public delegate void ClickedInsideCircle();
 
-    /// <summary>
-    /// Shows a dimmed screen with a circular transparent area and waits for a tap in it.
-    /// Calling Show again cancels the previous pending task.
-    /// </summary>
-    public Task Show(Vector2 position, float radius)
+    [Export]
+    public Color BackgroundColor
     {
-        if (radius <= 0)
+        get => backgroundColor;
+        set
         {
-            throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
+            backgroundColor = value;
+            if (this.IsInsideTree())
+            {
+                ((ShaderMaterial)this.shade.Material).SetShaderParam("shade_color", value);
+            }
         }
-
-        if (this.clickCompletion != null && !this.clickCompletion.Task.IsCompleted)
-        {
-            this.clickCompletion.TrySetCanceled();
-        }
-
-        var shadeMaterial = (ShaderMaterial)this.shade.Material;
-        shadeMaterial.SetShaderParam("hole_center", position);
-        shadeMaterial.SetShaderParam("hole_radius", radius);
-        shadeMaterial.SetShaderParam("viewport_size", this.GetViewport().Size);
-
-        this.fingerAnimation.RectPosition = position - this.finger.RectSize - Vector2.One.Normalized() * radius / 2;
-
-        this.clickCompletion = new TaskCompletionSource<bool>();
-        this.overlay.Show();
-        return clickCompletion.Task;
     }
+
+    private Color backgroundColor = new Color(0, 0, 0, 0.427451f);
+
+    [Export]
+    public Vector2 Center
+    {
+        get => center;
+        set
+        {
+            center = value;
+            if (this.IsInsideTree())
+            {
+                ((ShaderMaterial)this.shade.Material).SetShaderParam("hole_center", value);
+                this.fingerAnimation.RectPosition = this.Center - this.finger.RectSize - Vector2.One.Normalized() * this.Radius / 2;
+            }
+        }
+    }
+
+    private Vector2 center = new Vector2(270, 654);
+
+    [Export]
+    public float Radius
+    {
+        get => radius;
+        set
+        {
+            if (value <= 0)
+            {
+                GD.PrintErr("HighlitePointer: Radius must be greater than 0.");
+                return;
+            }
+
+            radius = value;
+            if (this.IsInsideTree())
+            {
+                ((ShaderMaterial)this.shade.Material).SetShaderParam("hole_radius", value);
+                this.fingerAnimation.RectPosition = this.Center - this.finger.RectSize - Vector2.One.Normalized() * this.Radius / 2;
+            }
+        }
+    }
+
+    private float radius = 50f;
+
+    private Vector2 lastShaderViewportSize = Vector2.Zero;
 
     public override void _Ready()
     {
         base._Ready();
         this.FillMembers();
-        this.Visible = true;
-        this.overlay.Connect("gui_input", this, nameof(OnOverlayGuiInput));
-        this.overlay.Hide();
+        this.BackgroundColor = this.BackgroundColor;
+        this.Center = this.Center;
+        this.Radius = this.Radius;
+        this.UpdateShaderViewportSize();
     }
 
-    public override void _ExitTree()
+    public override void _Process(float delta)
     {
-        if (this.clickCompletion != null && !this.clickCompletion.Task.IsCompleted)
+        base._Process(delta);
+        this.UpdateShaderViewportSize();
+    }
+
+    private void UpdateShaderViewportSize()
+    {
+        if (this.shade == null)
         {
-            this.clickCompletion.TrySetCanceled();
+            GD.PrintErr("HighlitePointer: shade node is null. Make sure the scene is set up correctly.");
+            return;
         }
 
-        base._ExitTree();
+        // Shader UV spans the ColorRect itself, so use its actual size, not the editor's outer viewport size.
+        var size = this.shade.RectSize;
+        if (size.x <= 0 || size.y <= 0)
+        {
+            GD.PrintErr("HighlitePointer: shader RectSize is invalid");
+            return;
+        }
+
+        if (size == this.lastShaderViewportSize)
+        {
+            return;
+        }
+
+        ((ShaderMaterial)this.shade.Material).SetShaderParam("viewport_size", size);
+        this.lastShaderViewportSize = size;
     }
 
-    private void OnOverlayGuiInput(InputEvent @event)
+    public override void _Input(InputEvent @event)
     {
+        base._Input(@event);
+        if (!this.Visible)
+        {
+            return;
+        }
+
         Vector2 clickPosition;
         if (@event is InputEventMouseButton mouse)
         {
@@ -89,10 +147,10 @@ public partial class HighlitePointer
         var radius = (float)material.GetShaderParam("hole_radius");
         if (clickPosition.DistanceTo(center) > radius)
         {
+            this.GetTree().SetInputAsHandled();
             return;
         }
 
-        this.overlay.Hide();
-        this.clickCompletion?.TrySetResult(true);
+        this.EmitSignal(nameof(ClickedInsideCircle));
     }
 }

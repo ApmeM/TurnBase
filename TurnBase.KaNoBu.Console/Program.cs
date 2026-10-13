@@ -4,8 +4,6 @@ namespace TurnBase.KaNoBu;
 
 public class Program
 {
-    private const int DefaultServerPort = RemoteProtocol.DefaultPort;
-
     public static async Task Main(string[] args)
     {
         var parameters = new KaNoBuPlayerFactory.GameParameters
