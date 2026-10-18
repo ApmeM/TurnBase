@@ -55,11 +55,12 @@ public partial class Main
 
     private async void OnStartLevelGame(LevelMapUnit mapUnit)
     {
-        var field = mapUnit.GameToLaunch.Instance<LevelBase>();
-        field.Initialize();
-        field.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
-        this.AttachReplayStorageListener(field);
-        var result = await this.StartGame(field);
+        var godotPlayer = mapUnit.GameToLaunch.Instance<LevelBase>();
+
+        var game = godotPlayer.Initialize();
+        game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
+        this.AttachReplayStorageListener(game);
+        var result = await this.StartGame(godotPlayer, game);
         levelMap.LevelFinished(mapUnit, result);
     }
 
@@ -71,17 +72,16 @@ public partial class Main
             return;
         }
 
-        var field = this.Replay.Instance<GameField>();
-        var replay = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(new List<ICommunicationModel>(this.lastReplay))
+        var godotPlayer = this.Replay.Instance<GameField>();
+        var game = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(new List<ICommunicationModel>(this.lastReplay))
         {
             playerTurnDelayAction = async () => await this.GetTree().CreateTimer(0.5f).ToMySignal(CommonSignals.Timeout)
         };
 
-        field.Game = replay;
-        field.Game.AddGameLogListener(field);
-        field.Game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
+        game.AddGameLogListener(godotPlayer);
+        game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
 
-        await this.StartGame(field);
+        await this.StartGame(godotPlayer, game);
     }
 
     private async void OnStartCustomGame()
@@ -104,23 +104,23 @@ public partial class Main
             }.Select(a => (KaNoBuPlayerType)a.GetSelectedId()).ToList()
         };
 
-        var game = this.GameField.Instance<GameField>();
-        game.Game = KaNoBuPlayerFactory.CreateGame(
+        var godotPlayer = this.GameField.Instance<GameField>();
+        var game = KaNoBuPlayerFactory.CreateGame(
             parameters,
-            game,
+            godotPlayer,
             this.client,
             new GDLogger(),
             this.server,
             async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout));
 
-        if (game.Game == null)
+        if (game == null)
         {
             GD.PrintErr("TODO: Failed to create game popup.");
             return;
         }
 
         this.AttachReplayStorageListener(game);
-        await this.StartGame(game);
+        await this.StartGame(godotPlayer, game);
     }
 
     private async void OnStartConnectGame()
@@ -133,29 +133,31 @@ public partial class Main
             PlayerTypes = new List<KaNoBuPlayerType> { (KaNoBuPlayerType)this.clientPlayer.GetSelectedId() }
         };
 
-        var game = this.GameField.Instance<GameField>();
-        game.Game = KaNoBuPlayerFactory.CreateGame(
+        var godotPlayer = this.GameField.Instance<GameField>();
+        var game = KaNoBuPlayerFactory.CreateGame(
             parameters,
-            game,
+            godotPlayer,
             this.client,
             new GDLogger(),
             this.server,
             async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout));
 
-        if (game.Game == null)
+        if (game == null)
         {
             GD.PrintErr("TODO: Failed to create game popup.");
             return;
         }
 
         this.AttachReplayStorageListener(game);
-        await this.StartGame(game);
+        await this.StartGame(godotPlayer, game);
     }
     private CancellationTokenSource currentGameCancellationTokenSource;
 
-    private async Task<bool> StartGame(GameField game)
+    private async Task<bool> StartGame(
+        GameField godotPlayer,
+        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> game)
     {
-        if (game == null)
+        if (godotPlayer == null)
         {
             return false;
         }
@@ -169,8 +171,8 @@ public partial class Main
         this.mainScreenButtonContainer.Visible = false;
         this.inGameButtonContainer.Visible = true;
 
-        this.AddChild(game);
-        this.SetCameraLimits(game.Water);
+        this.AddChild(godotPlayer);
+        this.SetCameraLimits(godotPlayer.Water);
 
         this.draggableCamera.Current = true;
         this.draggableCamera.Position = this.staticCamera.Position;
@@ -187,13 +189,13 @@ public partial class Main
 
         try
         {
-            await game.Play(this.currentGameCancellationTokenSource.Token);
+            await game.Play(this.currentGameCancellationTokenSource.Token).WrapCancellation(this.currentGameCancellationTokenSource.Token);
         }
         catch (OperationCanceledException)
         {
         }
 
-        return await this.EndGame(game);
+        return await this.EndGame(godotPlayer, game);
     }
 
     private async void EndCurrentGame()
@@ -201,14 +203,16 @@ public partial class Main
         this.currentGameCancellationTokenSource?.Cancel();
     }
 
-    private async Task<bool> EndGame(GameField gameField)
+    private async Task<bool> EndGame(
+        GameField godotPlayer,
+        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> game)
     {
         this.mainMenuPopup.Hide();
 
         var result = false;
 
-        var fieldPlayerId = gameField.playerId;
-        var winners = gameField.Winners?.ToHashSet();
+        var fieldPlayerId = godotPlayer.playerId;
+        var winners = godotPlayer.Winners?.ToHashSet();
         if (fieldPlayerId == -1)
         {
             this.winnerLabel.Text = $"The game is over.";
@@ -229,8 +233,8 @@ public partial class Main
         this.gameOverPopup.Show();
         await this.ToSignal(this.gameOverPopup, nameof(CustomPopup.PopupClosed));
 
-        gameField.Game.Disconnect(gameField);
-        gameField.QueueFree();
+        game.Disconnect(godotPlayer);
+        godotPlayer.QueueFree();
 
         this.levelMap.Show();
         this.staticCamera.Current = true;
@@ -242,11 +246,12 @@ public partial class Main
         this.draggableCamera.SetCameraLimits(field, Vector2.Zero);
     }
 
-    private void AttachReplayStorageListener(GameField field)
+    private void AttachReplayStorageListener(
+        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> game)
     {
         var replayMemoryStorageListener = new MemoryStorageEventListener<KaNoBuMoveNotificationModel, Field2D>();
         this.lastReplay = replayMemoryStorageListener.Events;
-        field.Game.AddGameLogListener(replayMemoryStorageListener);
+        game.AddGameLogListener(replayMemoryStorageListener);
         this.replayButton.Visible = true;
     }
 }

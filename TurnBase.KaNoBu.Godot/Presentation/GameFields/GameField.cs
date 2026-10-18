@@ -20,7 +20,6 @@ public partial class GameField :
     public List<int> Winners { get; private set; }
     private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
     private readonly List<Unit> movePreviews = new List<Unit>();
-    public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> Game;
 
     public TileMap Water => this.water;
 
@@ -453,10 +452,5 @@ public partial class GameField :
             : Math.Max(0, this.maxMovesPerTurn - pendingMoveCount).ToString();
         this.sendButton.Text = $"Send ({remainingMoves})";
         this.sendButton.Disabled = pendingMoveCount == 0;
-    }
-
-    public async Task Play(CancellationToken token = default)
-    {
-        await Game.Play(token).WrapCancellation(token);
     }
 }
