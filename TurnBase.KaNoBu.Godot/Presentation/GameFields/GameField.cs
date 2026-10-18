@@ -28,7 +28,8 @@ public partial class GameField :
 
     public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model, CancellationToken token = default)
     {
-        this.moveButtons.Visible = false;
+        this.uIOverlay.Visible = false;
+        this.fieldContainer.Visible = false;
 
         var gameInit = this.GameInitScene.Instance();
         this.AddChild(gameInit);
@@ -37,9 +38,22 @@ public partial class GameField :
         this.maxMovesPerTurn = model.Request.MaxMovesPerTurn;
         _ = MoveCameraToPlayer();
 
-        var result = await ((IGameInit)gameInit).Run(model, token).WrapCancellation(token);
+        InitResponseModel<KaNoBuInitResponseModel> result;
+
+        try
+        {
+            result = await ((IGameInit)gameInit).Run(model, token).WrapCancellation(token);
+        }
+        catch (Exception)
+        {
+            // ToDo: Freezing the system for soe reason. Need to investigate.
+            result = null;
+        }
 
         this.RemoveChild(gameInit);
+
+        this.fieldContainer.Visible = true;
+        this.uIOverlay.Visible = true;
         return result;        
     }
 

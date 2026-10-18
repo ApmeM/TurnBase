@@ -142,6 +142,12 @@ public partial class Main
             this.server,
             async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout));
 
+        if (game.Game == null)
+        {
+            GD.PrintErr("TODO: Failed to create game popup.");
+            return;
+        }
+
         this.AttachReplayStorageListener(game);
         await this.StartGame(game);
     }
@@ -154,10 +160,14 @@ public partial class Main
             return false;
         }
 
+        this.customPopup.Hide();
+        this.connectPopup.Hide();
+        this.mainMenuPopup.Hide();
+
+        this.levelMap.Hide();
+
         this.mainScreenButtonContainer.Visible = false;
         this.inGameButtonContainer.Visible = true;
-
-        this.customPopup.Hide();
 
         this.AddChild(game);
         this.SetCameraLimits(game.Water);
@@ -188,12 +198,13 @@ public partial class Main
 
     private async void EndCurrentGame()
     {
-        this.mainMenuPopup.Hide();
         this.currentGameCancellationTokenSource?.Cancel();
     }
 
     private async Task<bool> EndGame(GameField gameField)
     {
+        this.mainMenuPopup.Hide();
+
         var result = false;
 
         var fieldPlayerId = gameField.playerId;
@@ -202,7 +213,7 @@ public partial class Main
         {
             this.winnerLabel.Text = $"The game is over.";
         }
-        if (winners?.Contains(fieldPlayerId) ?? false)
+        else if (winners?.Contains(fieldPlayerId) ?? false)
         {
             this.winnerLabel.Text = "You win.";
             result = true;
@@ -221,7 +232,7 @@ public partial class Main
         gameField.Game.Disconnect(gameField);
         gameField.QueueFree();
 
-        // this.uI.Visible = true;
+        this.levelMap.Show();
         this.staticCamera.Current = true;
         return result;
     }

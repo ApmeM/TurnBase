@@ -41,7 +41,7 @@ margin_bottom = 40.0
 texture_normal = ExtResource( 10 )
 
 [node name="MainMenuPopup" parent="MainMenu/ScreenButtonContainer/InGameButtonContainer/MainMenuButton" instance=ExtResource( 5 )]
-layer = 11
+layer = 20
 visible = false
 
 [node name="ExitGameButton" type="Button" parent="MainMenu/ScreenButtonContainer/InGameButtonContainer/MainMenuButton/MainMenuPopup/CustomPopupContainer/PopupContainer/MarginContainer/PopupOuterMargin/ContentMargin" index="0"]
@@ -63,13 +63,15 @@ texture_pressed = ExtResource( 8 )
 texture_hover = ExtResource( 8 )
 
 [node name="CustomPopup" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton" instance=ExtResource( 5 )]
+layer = 20
 visible = false
 Title = "Custom game settings"
 
 [node name="CustomPopupContainer" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup" index="1"]
-margin_left = 29.0
-margin_right = 611.0
-margin_bottom = 382.0
+margin_left = -291.0
+margin_top = -222.75
+margin_right = 291.0
+margin_bottom = 222.75
 
 [node name="HeaderCenter" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer" index="0"]
 margin_right = 582.0
@@ -90,33 +92,33 @@ text = "Custom game settings"
 
 [node name="PopupContainer" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer" index="1"]
 margin_right = 582.0
-margin_bottom = 344.0
+margin_bottom = 445.0
 
 [node name="MarginContainer" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer/PopupContainer" index="0"]
 margin_right = 582.0
-margin_bottom = 323.0
+margin_bottom = 424.0
 
 [node name="PopupOuterBackground" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer/PopupContainer/MarginContainer" index="0"]
 margin_right = 582.0
-margin_bottom = 323.0
+margin_bottom = 424.0
 
 [node name="PopupOuterMargin" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer/PopupContainer/MarginContainer" index="1"]
 margin_right = 582.0
-margin_bottom = 323.0
+margin_bottom = 424.0
 
 [node name="PopupInnerBackground" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer/PopupContainer/MarginContainer/PopupOuterMargin" index="0"]
 margin_right = 573.0
-margin_bottom = 314.0
+margin_bottom = 415.0
 
 [node name="ContentMargin" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer/PopupContainer/MarginContainer/PopupOuterMargin" index="1"]
 margin_right = 573.0
-margin_bottom = 314.0
+margin_bottom = 415.0
 
 [node name="Custom" type="VBoxContainer" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer/PopupContainer/MarginContainer/PopupOuterMargin/ContentMargin" index="0"]
 margin_left = 9.0
 margin_top = 9.0
 margin_right = 555.0
-margin_bottom = 296.0
+margin_bottom = 397.0
 custom_constants/separation = 10
 
 [node name="ServerMyIpInfo" type="Label" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup/CustomPopupContainer/PopupContainer/MarginContainer/PopupOuterMargin/ContentMargin/Custom"]
@@ -316,8 +318,13 @@ texture_hover = ExtResource( 13 )
 [node name="Client" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/ConnectButton" instance=ExtResource( 6 )]
 
 [node name="ConnectPopup" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/ConnectButton" instance=ExtResource( 5 )]
+layer = 20
 visible = false
 Title = "Client settings"
+
+[node name="CustomPopupContainer" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/ConnectButton/ConnectPopup" index="1"]
+margin_top = -82.5
+margin_bottom = 82.5
 
 [node name="HeaderMargin" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/ConnectButton/ConnectPopup/CustomPopupContainer/HeaderCenter" index="0"]
 margin_left = 90.0
@@ -397,19 +404,9 @@ texture_pressed = ExtResource( 9 )
 texture_hover = ExtResource( 9 )
 
 [node name="GameOverPopup" parent="." instance=ExtResource( 5 )]
-layer = 11
+layer = 20
 visible = false
 Title = "Game over"
-
-[node name="CustomPopupContainer" parent="GameOverPopup" index="1"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -154.0
-margin_top = -63.5
-margin_right = 154.0
-margin_bottom = 63.5
 
 [node name="HeaderMargin" parent="GameOverPopup/CustomPopupContainer/HeaderCenter" index="0"]
 margin_left = 104.0

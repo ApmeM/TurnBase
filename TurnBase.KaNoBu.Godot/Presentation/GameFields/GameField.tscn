@@ -8,6 +8,7 @@
 [ext_resource path="res://gd-plugins/gd-timerLabel/TimerLabel.tscn" type="PackedScene" id=12]
 
 [sub_resource type="DynamicFont" id=2]
+size = 60
 font_data = ExtResource( 8 )
 
 [node name="GameField" type="CanvasLayer"]
@@ -15,22 +16,16 @@ follow_viewport_enable = true
 script = ExtResource( 1 )
 UnitScene = ExtResource( 2 )
 
-[node name="Water" type="TileMap" parent="."]
+[node name="FieldContainer" type="Node2D" parent="."]
+
+[node name="Water" type="TileMap" parent="FieldContainer"]
 tile_set = ExtResource( 9 )
 cell_quadrant_size = 64
 cell_tile_origin = 1
 centered_textures = true
 format = 1
 
-[node name="Beach" type="TileMap" parent="."]
-tile_set = ExtResource( 9 )
-cell_quadrant_size = 64
-cell_tile_origin = 1
-cell_y_sort = true
-centered_textures = true
-format = 1
-
-[node name="Castle" type="TileMap" parent="."]
+[node name="Beach" type="TileMap" parent="FieldContainer"]
 tile_set = ExtResource( 9 )
 cell_quadrant_size = 64
 cell_tile_origin = 1
@@ -38,22 +33,29 @@ cell_y_sort = true
 centered_textures = true
 format = 1
 
-[node name="Field" type="TileMap" parent="."]
+[node name="Castle" type="TileMap" parent="FieldContainer"]
+tile_set = ExtResource( 9 )
+cell_quadrant_size = 64
+cell_tile_origin = 1
+cell_y_sort = true
+centered_textures = true
+format = 1
+
+[node name="Field" type="TileMap" parent="FieldContainer"]
 tile_set = ExtResource( 9 )
 cell_quadrant_size = 64
 cell_tile_origin = 1
 centered_textures = true
 format = 1
 
-[node name="Drag" parent="." instance=ExtResource( 7 )]
+[node name="Drag" parent="FieldContainer" instance=ExtResource( 7 )]
 
 [node name="UIOverlay" type="CanvasLayer" parent="."]
 
 [node name="TimerLabel" parent="UIOverlay" instance=ExtResource( 12 )]
 anchor_right = 1.0
-margin_right = -512.0
+margin_right = 0.0
 margin_bottom = 20.0
-rect_scale = Vector2( 5, 5 )
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_fonts/font = SubResource( 2 )
