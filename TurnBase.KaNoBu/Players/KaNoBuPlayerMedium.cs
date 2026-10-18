@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TurnBase.KaNoBu
 {
     public class KaNoBuPlayerMedium :
-        IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
+        IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
     {
         private Random r = new Random();
         private string name = "Computer medium";
@@ -234,9 +234,9 @@ namespace TurnBase.KaNoBu
             this.memorizedField.Clear();
         }
 
-        public void GameLogCurrentField(Field2D mainField)
+        public void GameLogCurrentField(KaNoBuField mainField)
         {
-            this.memorizedField.SynchronizeField(mainField);
+            this.memorizedField.SynchronizeField(mainField.Field);
         }
 
         public void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel notification)

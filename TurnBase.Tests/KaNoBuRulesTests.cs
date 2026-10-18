@@ -9,11 +9,14 @@ public class KaNoBuRulesTests
     [Test]
     public void PromotionKeepsCorrectBattleResult()
     {
-        var field = Field2D.Create(2, 2);
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(2, 2)
+        };
         var attacker = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 2);
         var defender = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, 0);
-        field.SetFigure(0, 0, attacker);
-        field.SetFigure(1, 0, defender);
+        field.Field.SetFigure(0, 0, attacker);
+        field.Field.SetFigure(1, 0, defender);
 
         var rules = new KaNoBuRules(6);
         var move = new KaNoBuMoveResponseModel(
@@ -28,7 +31,7 @@ public class KaNoBuRulesTests
         Assert.That(notification.MoveNotifications[0].Battle, Is.Not.Null);
         Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.AttackerWon));
 
-        var placed = (KaNoBuFigure)field.GetFigure(1, 0);
+        var placed = (KaNoBuFigure)field.Field.GetFigure(1, 0);
         Assert.That(placed, Is.Not.Null);
         Assert.That(placed.FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipUniversal));
         Assert.That(placed.PlayerId, Is.EqualTo(1));
@@ -37,11 +40,14 @@ public class KaNoBuRulesTests
     [Test]
     public void BattleResultUsesPlayerIdentityWhenWinnerInstanceChanges()
     {
-        var field = Field2D.Create(2, 2);
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(2, 2)
+        };
         var attacker = new FakeWinningFigure(1, KaNoBuFigure.FigureTypes.ShipUniversal, 0);
         var defender = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipStone, 0);
-        field.SetFigure(0, 0, attacker);
-        field.SetFigure(1, 0, defender);
+        field.Field.SetFigure(0, 0, attacker);
+        field.Field.SetFigure(1, 0, defender);
 
         var rules = new KaNoBuRules(6);
         var move = new KaNoBuMoveResponseModel(
@@ -60,9 +66,12 @@ public class KaNoBuRulesTests
     [Test]
     public void BattleWithMineDestroysBothFigures()
     {
-        var field = Field2D.Create(2, 2);
-        field.SetFigure(0, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0));
-        field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipMine, 0));
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(2, 2)
+        };
+        field.Field.SetFigure(0, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0));
+        field.Field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipMine, 0));
 
         var rules = new KaNoBuRules(6);
         var move = new KaNoBuMoveResponseModel(
@@ -74,16 +83,19 @@ public class KaNoBuRulesTests
         var notification = rules.TryApplyMoveResponse(field, 1, move);
 
         Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.BothDestroyed));
-        Assert.That(field.GetFigure(0, 0), Is.Null);
-        Assert.That(field.GetFigure(1, 0), Is.Null);
+        Assert.That(field.Field.GetFigure(0, 0), Is.Null);
+        Assert.That(field.Field.GetFigure(1, 0), Is.Null);
     }
 
     [Test]
     public void BattleShipTypesAreVisibleOnlyToBattleParticipants()
     {
-        var field = Field2D.Create(2, 2);
-        field.SetFigure(0, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0));
-        field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, 0));
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(2, 2)
+        };
+        field.Field.SetFigure(0, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0));
+        field.Field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, 0));
 
         var rules = new KaNoBuRules(6);
         var move = new KaNoBuMoveResponseModel(
@@ -113,13 +125,16 @@ public class KaNoBuRulesTests
     [Test]
     public void TurnRejectsMoreFiguresThanAllowedPerTurn()
     {
-        var field = Field2D.Create(4, 3);
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(4, 3)
+        };
         var firstFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0);
         var secondFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipPaper, 0);
         var thirdFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScissors, 0);
-        field.SetFigure(0, 0, firstFigure);
-        field.SetFigure(2, 1, secondFigure);
-        field.SetFigure(0, 2, thirdFigure);
+        field.Field.SetFigure(0, 0, firstFigure);
+        field.Field.SetFigure(2, 1, secondFigure);
+        field.Field.SetFigure(0, 2, thirdFigure);
 
         var rules = new KaNoBuRules(6)
         {
@@ -165,9 +180,12 @@ public class KaNoBuRulesTests
     [Test]
     public void UniversalBecomesScoutWhenItBattlesScout()
     {
-        var field = Field2D.Create(2, 1);
-        field.SetFigure(0, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, 0));
-        field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipUniversal, 0));
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(2, 1)
+        };
+        field.Field.SetFigure(0, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, 0));
+        field.Field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipUniversal, 0));
         var rules = new KaNoBuRules(6);
 
         var notification = rules.TryApplyMoveResponse(field, 1, new KaNoBuMoveResponseModel(
@@ -178,18 +196,21 @@ public class KaNoBuRulesTests
 
         Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.DefenderWon));
         Assert.That(notification.MoveNotifications[0].Battle.Value.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
-        Assert.That(field.GetFigure(0, 0), Is.Null);
-        Assert.That(((KaNoBuFigure)field.GetFigure(1, 0)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(field.Field.GetFigure(0, 0), Is.Null);
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(1, 0)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
     }
 
     [Test]
     public void MultiMoveTurnAppliesStepsInOrder()
     {
-        var field = Field2D.Create(4, 3);
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(4, 3)
+        };
         var firstFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0);
         var secondFigure = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipPaper, 0);
-        field.SetFigure(0, 0, firstFigure);
-        field.SetFigure(2, 1, secondFigure);
+        field.Field.SetFigure(0, 0, firstFigure);
+        field.Field.SetFigure(2, 1, secondFigure);
 
         var rules = new KaNoBuRules(6);
         var move = new KaNoBuMoveResponseModel(
@@ -204,8 +225,8 @@ public class KaNoBuRulesTests
         var notification = rules.TryApplyMoveResponse(field, 1, move);
 
         Assert.That(notification.MoveNotifications.Count, Is.EqualTo(2));
-        Assert.That(((KaNoBuFigure)field.GetFigure(0, 1)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipStone));
-        Assert.That(((KaNoBuFigure)field.GetFigure(2, 2)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(0, 1)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipStone));
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(2, 2)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
     }
 
     private sealed class FakeWinningFigure : KaNoBuFigure

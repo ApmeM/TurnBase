@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace TurnBase
 {
 
-    public class Field2D : IField2D
+    public class Field2D
     {
         [JsonProperty]
         private IFigure[,] realField;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
 {
-    public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
+    public class KaNoBuPlayerEasy : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
     {
         private Random r = new Random();
         private string name = "Computer easy";
@@ -29,7 +29,7 @@ namespace TurnBase.KaNoBu
         {
         }
 
-        public void GameLogCurrentField(Field2D field)
+        public void GameLogCurrentField(KaNoBuField field)
         {
         }
 

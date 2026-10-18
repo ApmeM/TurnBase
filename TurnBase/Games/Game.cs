@@ -101,7 +101,6 @@ namespace TurnBase
             return Task.WhenAll(
                 nextPlayers
                     .Select(a => (IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>)a)
-                    .Where(a => this.players[a].IsInGame)
                     .Select(SingleAction)
                     .ToArray());
         }
@@ -191,6 +190,12 @@ namespace TurnBase
             var tryNumber = 0;
 
             var move = this.rules.AutoMove(this.mainField, playerNumber);
+
+            if (move == null && !this.players[player].IsInGame)
+            {
+                throw new InvalidOperationException("Player is not in game, but automove is not generated.");
+            }
+
             while (move == null)
             {
                 token.ThrowIfCancellationRequested();

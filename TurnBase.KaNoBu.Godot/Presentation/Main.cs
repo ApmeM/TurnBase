@@ -58,7 +58,7 @@ public partial class Main
         var godotPlayer = mapUnit.GameToLaunch.Instance<LevelBase>();
 
         var game = godotPlayer.Initialize();
-        game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
+        game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, KaNoBuField>(new GDLogger()));
         this.AttachReplayStorageListener(game);
         var result = await this.StartGame(godotPlayer, game);
         levelMap.LevelFinished(mapUnit, result);
@@ -73,13 +73,13 @@ public partial class Main
         }
 
         var godotPlayer = this.Replay.Instance<GameField>();
-        var game = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(new List<ICommunicationModel>(this.lastReplay))
+        var game = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(new List<ICommunicationModel>(this.lastReplay))
         {
             playerTurnDelayAction = async () => await this.GetTree().CreateTimer(0.5f).ToMySignal(CommonSignals.Timeout)
         };
 
         game.AddGameLogListener(godotPlayer);
-        game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(new GDLogger()));
+        game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel, KaNoBuField>(new GDLogger()));
 
         await this.StartGame(godotPlayer, game);
     }
@@ -155,7 +155,7 @@ public partial class Main
 
     private async Task<bool> StartGame(
         GameField godotPlayer,
-        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> game)
+        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> game)
     {
         if (godotPlayer == null)
         {
@@ -205,7 +205,7 @@ public partial class Main
 
     private async Task<bool> EndGame(
         GameField godotPlayer,
-        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> game)
+        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> game)
     {
         this.mainMenuPopup.Hide();
 
@@ -247,9 +247,9 @@ public partial class Main
     }
 
     private void AttachReplayStorageListener(
-        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> game)
+        IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> game)
     {
-        var replayMemoryStorageListener = new MemoryStorageEventListener<KaNoBuMoveNotificationModel, Field2D>();
+        var replayMemoryStorageListener = new MemoryStorageEventListener<KaNoBuMoveNotificationModel, KaNoBuField>();
         this.lastReplay = replayMemoryStorageListener.Events;
         game.AddGameLogListener(replayMemoryStorageListener);
         this.replayButton.Visible = true;

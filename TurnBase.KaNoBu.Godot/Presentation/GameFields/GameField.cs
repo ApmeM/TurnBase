@@ -9,7 +9,7 @@ using TurnBase.KaNoBu;
 
 [SceneReference("GameField.tscn")]
 public partial class GameField :
-    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
+    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
 {
     [Export]
     public PackedScene UnitScene;
@@ -54,7 +54,7 @@ public partial class GameField :
 
         this.fieldContainer.Visible = true;
         this.uIOverlay.Visible = true;
-        return result;        
+        return result;
     }
 
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model, CancellationToken token = default)
@@ -165,8 +165,9 @@ public partial class GameField :
         this.field.RemoveChildren();
     }
 
-    public virtual void GameLogCurrentField(Field2D mainField)
+    public virtual void GameLogCurrentField(KaNoBuField kaNoBuField)
     {
+        var mainField = kaNoBuField.Field;
         GD.Print("GameLogCurrentField:\n", mainField.ToString());
         this.memorizedField.SynchronizeField(mainField);
         if (this.field.GetChildCount() == 0)

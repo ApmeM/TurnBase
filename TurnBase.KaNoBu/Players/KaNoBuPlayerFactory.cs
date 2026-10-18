@@ -22,9 +22,9 @@ namespace TurnBase.KaNoBu
             public List<KaNoBuPlayerType> PlayerTypes;
         }
 
-        public static IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> Create(
+        public static IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> Create(
             KaNoBuPlayerType playerType,
-            IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> humanPlayer,
+            IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> humanPlayer,
             IServer server,
             string gameId,
             Func<int, Task> delayAction)
@@ -32,7 +32,7 @@ namespace TurnBase.KaNoBu
             switch (playerType)
             {
                 case KaNoBuPlayerType.None:
-                    return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>();
+                    return new PlayerLoose<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>();
                 case KaNoBuPlayerType.Human:
                     return humanPlayer ?? throw new ArgumentNullException(nameof(humanPlayer));
                 case KaNoBuPlayerType.Easy:
@@ -40,8 +40,8 @@ namespace TurnBase.KaNoBu
                 case KaNoBuPlayerType.Medium:
                     return CreateDelayed(new KaNoBuPlayerMedium(), delayAction);
                 case KaNoBuPlayerType.Remote:
-                    return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
-                        new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(server, gameId),
+                    return new TimeoutPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(
+                        new ServerPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(server, gameId),
                         delayAction,
                         600000,
                         60000);
@@ -50,8 +50,8 @@ namespace TurnBase.KaNoBu
             }
         }
 
-        private static IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> CreateDelayed(
-            IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> player,
+        private static IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> CreateDelayed(
+            IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> player,
             Func<int, Task> delayAction)
         {
             if (delayAction == null)
@@ -59,7 +59,7 @@ namespace TurnBase.KaNoBu
                 return player;
             }
 
-            return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
+            return new DelayedPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(
                 player, delayAction, 1, 300);
         }
 
@@ -86,9 +86,9 @@ namespace TurnBase.KaNoBu
             return builder.Uri.ToString().TrimEnd('/');
         }
 
-        public static IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> CreateGame(
+        public static IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> CreateGame(
             GameParameters parameters,
-            IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> humanPlayer,
+            IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> humanPlayer,
             IClient client,
             ILogger logger,
             IServer server,
@@ -101,7 +101,7 @@ namespace TurnBase.KaNoBu
                 return null;
             }
 
-            IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D> game;
+            IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> game;
 
             if (parameters.IsClient)
             {
@@ -112,7 +112,7 @@ namespace TurnBase.KaNoBu
                 }
 
                 var normalizedAddress = NormalizeServerAddress(parameters.ServerAddress);
-                game = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
+                game = new RemoteGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(
                     client,
                     normalizedAddress,
                     parameters.GameId);
@@ -126,7 +126,7 @@ namespace TurnBase.KaNoBu
                     MaxMovesPerTurn = parameters.MaxMovesPerTurn
                 };
 
-                game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>(
+                game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(
                     rules,
                     parameters.GameId);
             }
@@ -150,7 +150,7 @@ namespace TurnBase.KaNoBu
 
             if (logger != null)
             {
-                var readableLogger = new ReadableLogger<KaNoBuMoveNotificationModel, Field2D>(logger);
+                var readableLogger = new ReadableLogger<KaNoBuMoveNotificationModel, KaNoBuField>(logger);
                 game.AddGameLogListener(readableLogger);
             }
 

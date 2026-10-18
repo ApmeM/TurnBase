@@ -1,5 +1,6 @@
 using Godot;
 using TurnBase;
+using TurnBase.KaNoBu;
 
 [SceneReference("CustomField.tscn")]
 public partial class CustomField
@@ -9,9 +10,10 @@ public partial class CustomField
         base._Ready();
         this.FillMembers();
     }
-    public override void GameLogCurrentField(Field2D mainField)
+    public override void GameLogCurrentField(KaNoBuField kaNoBuField)
     {
-        base.GameLogCurrentField(mainField);
+        var mainField = kaNoBuField.Field;
+        base.GameLogCurrentField(kaNoBuField);
         
         var needUpdateBitmask = false;
         for (var x = 0; x < mainField.Width; x++)

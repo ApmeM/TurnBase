@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TurnBase;
 using TurnBase.KaNoBu;
 
-public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, Field2D>
+public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
 {
     private readonly KaNoBuRules mainRules;
 
@@ -14,17 +14,17 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         };
     }
 
-    public KaNoBuMoveResponseModel AutoMove(Field2D mainField, int playerNumber)
+    public KaNoBuMoveResponseModel AutoMove(KaNoBuField mainField, int playerNumber)
     {
         return this.mainRules.AutoMove(mainField, playerNumber);
     }
 
-    public bool IsMoveValid(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel move)
+    public bool IsMoveValid(KaNoBuField mainField, int playerNumber, KaNoBuMoveResponseModel move)
     {
         return this.mainRules.IsMoveValid(mainField, playerNumber, move);
     }
 
-    public List<int> FindWinners(Field2D mainField)
+    public List<int> FindWinners(KaNoBuField mainField)
     {
         return this.mainRules.FindWinners(mainField);
     }
@@ -36,9 +36,13 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         this.field = field;
     }
 
-    public Field2D GenerateGameField()
+    public KaNoBuField GenerateGameField()
     {
-        return this.field;
+        return new KaNoBuField
+        {
+            Field = this.field,
+            DisconnectedPlayers = new List<int>()
+        };
     }
 
     public KaNoBuInitModel GetInitModelForPlayer(int playerNumber)
@@ -61,12 +65,12 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return this.mainRules.GetMinPlayersCount();
     }
 
-    public Field2D GetFieldNotificationForPlayer(Field2D mainField, int playerNumber)
+    public KaNoBuField GetFieldNotificationForPlayer(KaNoBuField mainField, int playerNumber)
     {
         return this.mainRules.GetFieldNotificationForPlayer(mainField, playerNumber);
     }
-    
-    public KaNoBuMoveModel GetMoveModelForPlayer(Field2D mainField, int playerNumber)
+
+    public KaNoBuMoveModel GetMoveModelForPlayer(KaNoBuField mainField, int playerNumber)
     {
         return mainRules.GetMoveModelForPlayer(mainField, playerNumber);
     }
@@ -76,7 +80,7 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return mainRules.GetMoveRotator();
     }
 
-    public KaNoBuMoveNotificationModel TryApplyMoveResponse(Field2D mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
+    public KaNoBuMoveNotificationModel TryApplyMoveResponse(KaNoBuField mainField, int playerNumber, KaNoBuMoveResponseModel playerMove)
     {
         return mainRules.TryApplyMoveResponse(mainField, playerNumber, playerMove);
     }
@@ -86,17 +90,17 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return mainRules.GetMoveNotificationForPlayer(notification, playerNumber);
     }
 
-    public void PlayerDisconnected(Field2D mainField, int playerNumber)
+    public void PlayerDisconnected(KaNoBuField mainField, int playerNumber)
     {
         mainRules.PlayerDisconnected(mainField, playerNumber);
     }
 
-    public bool TryApplyInitResponse(Field2D mainField, int playerNumber, KaNoBuInitResponseModel playerResponse)
+    public bool TryApplyInitResponse(KaNoBuField mainField, int playerNumber, KaNoBuInitResponseModel playerResponse)
     {
         return true;
     }
 
-    public void TurnCompleted(Field2D mainField)
+    public void TurnCompleted(KaNoBuField mainField)
     {
         this.mainRules.TurnCompleted(mainField);
     }
