@@ -50,6 +50,7 @@ public partial class GameField :
         }
 
         this.RemoveChild(gameInit);
+        gameInit.QueueFree();
 
         this.fieldContainer.Visible = true;
         this.uIOverlay.Visible = true;
