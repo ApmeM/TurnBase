@@ -19,7 +19,7 @@ public class KaNoBuPlayerMediumTests
 
         var result = await player.MakeTurn(new MakeTurnModel<KaNoBuMoveModel>
         {
-            Request = new KaNoBuMoveModel(field)
+            Request = new KaNoBuMoveModel(new KaNoBuField { Field = field })
         });
 
         Assert.That(result.Response.Moves.Count, Is.EqualTo(0));
@@ -34,7 +34,7 @@ public class KaNoBuPlayerMediumTests
 
         var result = await player.MakeTurn(new MakeTurnModel<KaNoBuMoveModel>
         {
-            Request = new KaNoBuMoveModel(field)
+            Request = new KaNoBuMoveModel(new KaNoBuField { Field = field })
         });
 
         Assert.That(result.Response.Moves.Count, Is.EqualTo(2));

@@ -2,11 +2,11 @@ namespace TurnBase.KaNoBu
 {
     public class KaNoBuMoveModel
     {
-        public KaNoBuMoveModel(Field2D field)
+        public KaNoBuMoveModel(KaNoBuField field)
         {
             Field = field;
         }
 
-        public readonly Field2D Field;
+        public readonly KaNoBuField Field;
     }
 }

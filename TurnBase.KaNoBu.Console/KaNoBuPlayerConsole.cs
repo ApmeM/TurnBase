@@ -13,7 +13,7 @@ public class KaNoBuPlayerConsole :
     public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> makeTurnModel, CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
-        var field = makeTurnModel.Request.Field;
+        var field = makeTurnModel.Request.Field.Field;
         this.showMessage(field.ToString());
         this.showMessage("Select your move in format A0-A1 (rows may have multiple digits).");
         Point? from = null;

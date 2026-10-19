@@ -49,7 +49,7 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model, CancellationToken token = default)
         {
-            this.memorizedField.SynchronizeField(model.Request.Field);
+            this.memorizedField.SynchronizeField(model.Request.Field.Field);
             var from = this.findAllMovement(this.memorizedField.Field)
                     .Select(move => (move.from, move.to, EvaluateMove(this.memorizedField.Field, move)))
                     .OrderByDescending(a => a.Item3)

@@ -61,8 +61,10 @@ public partial class GameField :
     {
         this.moveButtons.Visible = true;
 
+        GameLogCurrentField(model.Request.Field);
+
         this.timerLabel.ShowMessage("Your turn", 1f);
-        this.memorizedField.SynchronizeField((Field2D)model.Request.Field);
+        this.memorizedField.SynchronizeField(model.Request.Field.Field);
         this.UpdateKnownShips();
         var pendingTurnMoves = new List<KaNoBuMoveResponseModel.MoveStep>();
         this.moveButtons.Visible = true;

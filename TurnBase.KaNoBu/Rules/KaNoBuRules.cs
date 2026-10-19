@@ -183,7 +183,12 @@ namespace TurnBase.KaNoBu
 
         public KaNoBuMoveModel GetMoveModelForPlayer(KaNoBuField kaNoBuField, int playerNumber)
         {
-            return new KaNoBuMoveModel(CopyForPlayer(kaNoBuField.Field, playerNumber));
+            return new KaNoBuMoveModel(
+                new KaNoBuField
+                {
+                    Field = CopyForPlayer(kaNoBuField.Field, playerNumber),
+                    DisconnectedPlayers = kaNoBuField.DisconnectedPlayers
+                });
         }
 
         public KaNoBuMoveResponseModel AutoMove(KaNoBuField kaNoBuField, int playerNumber)

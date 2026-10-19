@@ -71,7 +71,7 @@ namespace TurnBase.KaNoBu
 
         public async Task<MakeTurnResponseModel<KaNoBuMoveResponseModel>> MakeTurn(MakeTurnModel<KaNoBuMoveModel> model, CancellationToken token = default)
         {
-            var from = this.findAllMovement(model.Request.Field);
+            var from = this.findAllMovement(model.Request.Field.Field);
 
             if (from == null || from.Count == 0)
             {
