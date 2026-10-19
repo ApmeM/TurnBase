@@ -49,10 +49,6 @@ namespace TurnBase
                 {
                     this.gameLogListeners.PlayersInitialized();
                 }
-                else if (gameEvent is GameLogCurrentFieldCommunicationModel<TField> gameLogCurrentField)
-                {
-                    this.gameLogListeners.GameLogCurrentField(gameLogCurrentField.field);
-                }
                 else if (gameEvent is GamePlayerTurnCommunicationModel<TMoveNotificationModel> gamePlayerTurn)
                 {
                     this.gameLogListeners.GamePlayerTurn(gamePlayerTurn.playerNumber, gamePlayerTurn.notification);

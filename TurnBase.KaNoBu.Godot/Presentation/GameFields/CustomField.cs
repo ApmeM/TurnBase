@@ -10,7 +10,8 @@ public partial class CustomField
         base._Ready();
         this.FillMembers();
     }
-    public override void GameLogCurrentField(KaNoBuField kaNoBuField)
+    
+    protected override void GameLogCurrentField(KaNoBuField kaNoBuField)
     {
         var mainField = kaNoBuField.Field;
         base.GameLogCurrentField(kaNoBuField);

@@ -31,11 +31,6 @@ namespace TurnBase
             this.listener.PlayersInitialized();
         }
 
-        public void GameLogCurrentField(TField field)
-        {
-            this.listener.GameLogCurrentField(field);
-        }
-
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
         {
             this.listener.GamePlayerTurn(playerNumber, notification);

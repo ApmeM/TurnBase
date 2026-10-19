@@ -60,18 +60,6 @@ namespace TurnBase
             }
         }
 
-        public void GameLogCurrentField(TField field)
-        {
-            try
-            {
-                this.listener.GameLogCurrentField(field);
-            }
-            catch
-            {
-
-            }
-        }
-
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
         {
             try

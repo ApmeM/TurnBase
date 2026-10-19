@@ -166,7 +166,8 @@ public class KaNoBuFieldMemorizationTests
             new List<KaNoBuMoveNotificationModel.MoveNotification>
             {
                 new KaNoBuMoveNotificationModel.MoveNotification(AttackerPosition, DefenderPosition, battle),
-            });
+            },
+            field);
 
         memorization.UpdateKnownShips(notification);
         return memorization.Field;

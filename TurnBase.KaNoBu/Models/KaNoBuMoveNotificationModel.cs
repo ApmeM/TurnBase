@@ -40,12 +40,15 @@ namespace TurnBase.KaNoBu
             BothDestroyed
         }
 
-        public KaNoBuMoveNotificationModel(List<MoveNotification> moveNotifications)
+        public KaNoBuMoveNotificationModel(List<MoveNotification> moveNotifications, Field2D resultField)
         {
             this.MoveNotifications = moveNotifications ?? new List<MoveNotification>();
+            this.ResultField = resultField;
         }
 
         public readonly List<MoveNotification> MoveNotifications;
+        
+        public Field2D ResultField;
 
         public override string ToString()
         {
@@ -63,6 +66,9 @@ namespace TurnBase.KaNoBu
                     result.AppendLine($"Battle result: {move.Battle.Value.battleResult} (IsFlag = {move.Battle.Value.isDefenderFlag})");
                 }
             }
+
+            result.AppendLine($"Result field:");
+            result.AppendLine(this.ResultField.ToString());
 
             return result.ToString();
         }

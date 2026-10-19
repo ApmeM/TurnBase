@@ -36,11 +36,6 @@ namespace TurnBase
             this.gameLogListeners.ForEach(a => a.PlayersInitialized());
         }
 
-        public void GameLogCurrentField(TField field)
-        {
-            this.gameLogListeners.ForEach(a => a.GameLogCurrentField(field));
-        }
-
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
         {
             this.gameLogListeners.ForEach(a => a.GamePlayerTurn(playerNumber, notification));

@@ -183,7 +183,7 @@ namespace TurnBase.KaNoBu
 
         public KaNoBuMoveModel GetMoveModelForPlayer(KaNoBuField kaNoBuField, int playerNumber)
         {
-            return new KaNoBuMoveModel(CopyForPlayer(kaNoBuField, playerNumber));
+            return new KaNoBuMoveModel(CopyForPlayer(kaNoBuField.Field, playerNumber));
         }
 
         public KaNoBuMoveResponseModel AutoMove(KaNoBuField kaNoBuField, int playerNumber)
@@ -265,7 +265,7 @@ namespace TurnBase.KaNoBu
 
             if (playerMove.Moves.Count == 0)
             {
-                return new KaNoBuMoveNotificationModel(notifications);
+                return new KaNoBuMoveNotificationModel(notifications, CopyForPlayer(kaNoBuField.Field, playerNumber));
             }
 
             foreach (var moveStep in playerMove.Moves)
@@ -274,11 +274,11 @@ namespace TurnBase.KaNoBu
                 {
                     continue;
                 }
-                var stepResult = this.MakeMoveStep(kaNoBuField, playerNumber, moveStep);
+                var stepResult = this.MakeMoveStep(kaNoBuField, moveStep);
                 notifications.Add(stepResult);
             }
 
-            return new KaNoBuMoveNotificationModel(notifications);
+            return new KaNoBuMoveNotificationModel(notifications, CopyForPlayer(kaNoBuField.Field, playerNumber));
         }
 
         public KaNoBuMoveNotificationModel GetMoveNotificationForPlayer(
@@ -302,10 +302,10 @@ namespace TurnBase.KaNoBu
                 return new KaNoBuMoveNotificationModel.MoveNotification(move.From, move.To, battle);
             }).ToList();
 
-            return new KaNoBuMoveNotificationModel(notifications);
+            return new KaNoBuMoveNotificationModel(notifications, CopyForPlayer(notification.ResultField, playerNumber));
         }
 
-        private KaNoBuMoveNotificationModel.MoveNotification MakeMoveStep(KaNoBuField kaNoBuField, int playerNumber, KaNoBuMoveResponseModel.MoveStep playerMove)
+        private KaNoBuMoveNotificationModel.MoveNotification MakeMoveStep(KaNoBuField kaNoBuField, KaNoBuMoveResponseModel.MoveStep playerMove)
         {
             var mainField = kaNoBuField.Field;
             var from = (KaNoBuFigure)mainField.GetFigure(playerMove.From);
@@ -381,14 +381,13 @@ namespace TurnBase.KaNoBu
         {
             return new KaNoBuField
             {
-                Field = CopyForPlayer(kaNoBuField, playerNumber),
+                Field = CopyForPlayer(kaNoBuField.Field, playerNumber),
                 DisconnectedPlayers = kaNoBuField.DisconnectedPlayers
             };
         }
 
-        private Field2D CopyForPlayer(KaNoBuField kaNoBuField, int playerNumber)
+        private Field2D CopyForPlayer(Field2D source, int playerNumber)
         {
-            var source = kaNoBuField.Field;
             var result = Field2D.Create(source.Width, source.Height);
             for (int x = 0; x < source.Width; x++)
             {

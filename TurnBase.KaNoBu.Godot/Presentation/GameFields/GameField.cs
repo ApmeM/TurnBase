@@ -165,7 +165,7 @@ public partial class GameField :
         this.field.RemoveChildren();
     }
 
-    public virtual void GameLogCurrentField(KaNoBuField kaNoBuField)
+    protected virtual void GameLogCurrentField(KaNoBuField kaNoBuField)
     {
         var mainField = kaNoBuField.Field;
         GD.Print("GameLogCurrentField:\n", mainField.ToString());

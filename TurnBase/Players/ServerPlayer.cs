@@ -49,14 +49,6 @@ namespace TurnBase
             this.server.SendRequest(PlayerId, new GamePlayersInitializedCommunicationModel());
         }
 
-        public void GameLogCurrentField(TField field)
-        {
-            this.server.SendRequest(PlayerId, new GameLogCurrentFieldCommunicationModel<TField>
-            {
-                field = field
-            });
-        }
-
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
         {
             this.server.SendRequest(PlayerId, new GamePlayerTurnCommunicationModel<TMoveNotificationModel>

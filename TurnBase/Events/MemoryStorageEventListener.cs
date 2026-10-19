@@ -27,11 +27,6 @@ namespace TurnBase
             this.Events.Add(new GamePlayersInitializedCommunicationModel());
         }
 
-        public void GameLogCurrentField(TField field)
-        {
-            this.Events.Add(new GameLogCurrentFieldCommunicationModel<TField> { field = field });
-        }
-
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)
         {
             this.Events.Add(new GamePlayerTurnCommunicationModel<TMoveNotificationModel > { playerNumber = playerNumber, notification = notification });
