@@ -21,7 +21,7 @@ public partial class LevelBase
         this.castle.UpdateBitmaskRegion();
     }
 
-    public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField> Initialize()
+    public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> Initialize()
     {
         var rules = new KaNoBuLevelRules(8, true);
         rules.SetInitialField(this.generateField());

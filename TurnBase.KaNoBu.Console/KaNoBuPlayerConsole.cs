@@ -4,7 +4,7 @@ using System.Globalization;
 namespace TurnBase.KaNoBu;
 
 public class KaNoBuPlayerConsole :
-    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
+    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     private Dictionary<int, string> players = new Dictionary<int, string>();
 

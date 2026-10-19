@@ -8,9 +8,9 @@ namespace TurnBase
 
     }
 
-    public interface IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> : 
+    public interface IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : 
         IPlayer, 
-        IGameEventListener<TMoveNotificationModel, TField>
+        IGameEventListener<TMoveNotificationModel>
     {
         #region Requests for actions
         Task<InitResponseModel<TInitResponseModel>> Init(InitModel<TInitModel> model, CancellationToken token = default);

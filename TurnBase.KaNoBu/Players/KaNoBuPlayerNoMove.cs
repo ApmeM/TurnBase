@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
 {
-    public class KaNoBuPlayerNoMove : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
+    public class KaNoBuPlayerNoMove : IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
     {
         private string name = "Player not moving";
         private int myNumber;

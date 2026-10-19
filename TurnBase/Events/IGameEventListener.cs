@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace TurnBase
 {
-    public interface IGameEventListener<TMoveNotificationModel, TField>
+    public interface IGameEventListener<TMoveNotificationModel>
     {
         void GameStarted();
         void GamePlayerInit(int playerNumber, string playerName);

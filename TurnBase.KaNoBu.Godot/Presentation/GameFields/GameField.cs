@@ -9,7 +9,7 @@ using TurnBase.KaNoBu;
 
 [SceneReference("GameField.tscn")]
 public partial class GameField :
-    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
+    IPlayer<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>
 {
     [Export]
     public PackedScene UnitScene;

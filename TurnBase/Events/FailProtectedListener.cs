@@ -2,12 +2,12 @@ using System.Collections.Generic;
 
 namespace TurnBase
 {
-    public class FailProtectedListener<TMoveNotificationModel, TField> : 
-        IGameEventListener<TMoveNotificationModel, TField>
+    public class FailProtectedListener<TMoveNotificationModel> : 
+        IGameEventListener<TMoveNotificationModel>
     {
-        private readonly IGameEventListener<TMoveNotificationModel, TField> listener;
+        private readonly IGameEventListener<TMoveNotificationModel> listener;
 
-        public FailProtectedListener(IGameEventListener<TMoveNotificationModel, TField> listener)
+        public FailProtectedListener(IGameEventListener<TMoveNotificationModel> listener)
         {
             this.listener = listener;
         }

@@ -5,17 +5,17 @@ using System.Threading.Tasks;
 
 namespace TurnBase.KaNoBu
 {
-    public class TimeoutPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> :
-        PassThroughListener<TMoveNotificationModel, TField>,
-        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
+    public class TimeoutPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
+        PassThroughListener<TMoveNotificationModel>,
+        IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
-        private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player;
+        private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
         private readonly Func<int, Task> delayAction;
         private readonly int initDelay;
         private readonly int turnDelay;
 
         public TimeoutPlayer(
-            IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> originalPlayer,
+            IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> originalPlayer,
             Func<int, Task> delayAction,
             int initDelay,
             int turnDelay) : base(originalPlayer)

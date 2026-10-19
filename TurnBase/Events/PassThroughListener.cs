@@ -2,11 +2,11 @@ using System.Collections.Generic;
 
 namespace TurnBase
 {
-    public class PassThroughListener<TMoveNotificationModel, TField> : IGameEventListener<TMoveNotificationModel, TField>
+    public class PassThroughListener<TMoveNotificationModel> : IGameEventListener<TMoveNotificationModel>
     {
-        private readonly IGameEventListener<TMoveNotificationModel, TField> listener;
+        private readonly IGameEventListener<TMoveNotificationModel> listener;
 
-        public PassThroughListener(IGameEventListener<TMoveNotificationModel, TField> listener)
+        public PassThroughListener(IGameEventListener<TMoveNotificationModel> listener)
         {
             this.listener = listener;
         }

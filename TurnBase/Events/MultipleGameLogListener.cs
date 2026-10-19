@@ -2,16 +2,16 @@ using System.Collections.Generic;
 
 namespace TurnBase
 {
-    public class MultipleGameLogListener<TMoveNotificationModel, TField> : IGameEventListener<TMoveNotificationModel, TField>
+    public class MultipleGameLogListener<TMoveNotificationModel> : IGameEventListener<TMoveNotificationModel>
     {
-        private List<IGameEventListener<TMoveNotificationModel, TField>> gameLogListeners = new List<IGameEventListener<TMoveNotificationModel, TField>>();
+        private List<IGameEventListener<TMoveNotificationModel>> gameLogListeners = new List<IGameEventListener<TMoveNotificationModel>>();
 
-        public void Add(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
+        public void Add(IGameEventListener<TMoveNotificationModel> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
         }
 
-        public void Remove(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
+        public void Remove(IGameEventListener<TMoveNotificationModel> gameLogListener)
         {
             this.gameLogListeners.Remove(gameLogListener);
         }

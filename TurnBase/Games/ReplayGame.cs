@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace TurnBase
 {
-    public class ReplayGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> : 
-        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
+    public class ReplayGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> : 
+        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
         private readonly List<ICommunicationModel> events;
-        private MultipleGameLogListener<TMoveNotificationModel, TField> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel, TField>();
+        private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
 
         public string GameId => "replay_game";
         public Func<Task> playerTurnDelayAction;
@@ -19,12 +19,12 @@ namespace TurnBase
             this.events = events;
         }
 
-        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
+        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
         }
 
-        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player)
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
         {
             // Replay cant not have real players.
             return AddPlayerStatus.MAX_PLAYERS_REACHED;
@@ -74,7 +74,7 @@ namespace TurnBase
             }
         }
 
-        public void Disconnect(IGameEventListener<TMoveNotificationModel, TField> player)
+        public void Disconnect(IGameEventListener<TMoveNotificationModel> player)
         {
             this.events.Clear();
         }

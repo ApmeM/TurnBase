@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace TurnBase
 {
     
-    public class MemoryStorageEventListener<TMoveNotificationModel, TField> : IGameEventListener<TMoveNotificationModel, TField>
+    public class MemoryStorageEventListener<TMoveNotificationModel> : IGameEventListener<TMoveNotificationModel>
     {
         public readonly List<ICommunicationModel> Events = new List<ICommunicationModel>();
 

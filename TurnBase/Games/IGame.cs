@@ -13,15 +13,14 @@ namespace TurnBase
         TInitResponseModel, 
         TMoveModel, 
         TMoveResponseModel, 
-        TMoveNotificationModel, 
-        TField> : IGame
+        TMoveNotificationModel> : IGame
     {
         string GameId { get; }
 
-        AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player);
+        AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player);
 
-        void AddGameLogListener(IGameEventListener<TMoveNotificationModel, TField> gameLogListener);
+        void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener);
         
-        void Disconnect(IGameEventListener<TMoveNotificationModel, TField> player);
+        void Disconnect(IGameEventListener<TMoveNotificationModel> player);
     }
 }

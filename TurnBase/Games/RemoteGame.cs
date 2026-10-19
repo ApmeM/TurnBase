@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 namespace TurnBase
 {
 
-    public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> :
-        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField>
+    public class RemoteGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> :
+        IGame<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>
     {
         private readonly IClient client;
         private readonly string serverUrl;
         public string GameId { get; private set; }
-        private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player;
-        private MultipleGameLogListener<TMoveNotificationModel, TField> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel, TField>();
+        private IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player;
+        private MultipleGameLogListener<TMoveNotificationModel> gameLogListeners = new MultipleGameLogListener<TMoveNotificationModel>();
         private bool connected;
 
         public RemoteGame(IClient client, string serverUrl, string gameId)
@@ -22,7 +22,7 @@ namespace TurnBase
             this.GameId = gameId;
         }
 
-        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel, TField> player)
+        public AddPlayerStatus AddPlayer(IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel> player)
         {
             // Remote game supports only one player.
             if (this.player == null)
@@ -34,7 +34,7 @@ namespace TurnBase
             return AddPlayerStatus.MAX_PLAYERS_REACHED;
         }
 
-        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel, TField> gameLogListener)
+        public void AddGameLogListener(IGameEventListener<TMoveNotificationModel> gameLogListener)
         {
             this.gameLogListeners.Add(gameLogListener);
         }
@@ -125,7 +125,7 @@ namespace TurnBase
             }
         }
 
-        public void Disconnect(IGameEventListener<TMoveNotificationModel, TField> player)
+        public void Disconnect(IGameEventListener<TMoveNotificationModel> player)
         {
             this.connected = false;
         }
