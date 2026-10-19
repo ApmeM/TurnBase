@@ -40,6 +40,11 @@ public partial class LevelMap
 
     public override async void _UnhandledInput(InputEvent @event)
     {
+        if (!this.Visible)
+        {
+            return;
+        }
+
         if (@event.IsActionPressed("left_click") && @event is InputEventMouseButton mouseEvent)
         {
             this.GetTree().SetInputAsHandled();

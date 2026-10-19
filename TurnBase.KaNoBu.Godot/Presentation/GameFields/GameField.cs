@@ -424,15 +424,20 @@ public partial class GameField :
     {
         base._UnhandledInput(@event);
 
+        if (!this.Visible)
+        {
+            return;
+        }
+
         if (@event.IsActionPressed("left_click"))
         {
+            this.GetTree().SetInputAsHandled();
             var selectedShip = this.GetTree().GetNodesInGroup(Groups.IsSelected)
                 .Cast<Unit>()
                 .FirstOrDefault();
             var selectedCell = this.field.WorldToMap(this.field.GetLocalMousePosition());
             if (this.field.GetCellv(selectedCell) == 5 && selectedShip?.TargetPositionMap != null)
             {
-                this.GetTree().SetInputAsHandled();
                 this.EmitSignal(nameof(MoveDone), selectedShip.TargetPositionMap.Value, selectedCell);
             }
             this.ClearSelection();
