@@ -36,12 +36,12 @@ public class KaNoBuBattleTests
     [TestCase(KaNoBuFigure.FigureTypes.ShipUniversal, KaNoBuFigure.FigureTypes.ShipUniversal, null, KaNoBuMoveNotificationModel.BattleResult.Draw)]
     [TestCase(KaNoBuFigure.FigureTypes.ShipUniversal, KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipScout, KaNoBuMoveNotificationModel.BattleResult.AttackerWon)]
     [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipFlag, KaNoBuFigure.FigureTypes.ShipScout, KaNoBuMoveNotificationModel.BattleResult.AttackerWon)]
-    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipStone, KaNoBuMoveNotificationModel.BattleResult.DefenderWon)]
-    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuMoveNotificationModel.BattleResult.DefenderWon)]
-    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuFigure.FigureTypes.ShipScissors, KaNoBuMoveNotificationModel.BattleResult.DefenderWon)]
-    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipMine, null, KaNoBuMoveNotificationModel.BattleResult.BothDestroyed)]
-    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipScout, null, KaNoBuMoveNotificationModel.BattleResult.Draw)]
-    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipUniversal, KaNoBuFigure.FigureTypes.ShipScout, KaNoBuMoveNotificationModel.BattleResult.DefenderWon)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipStone, null, KaNoBuMoveNotificationModel.BattleResult.Scouted)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipPaper, null, KaNoBuMoveNotificationModel.BattleResult.Scouted)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipScissors, null, KaNoBuMoveNotificationModel.BattleResult.Scouted)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipMine, null, KaNoBuMoveNotificationModel.BattleResult.Scouted)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipScout, null, KaNoBuMoveNotificationModel.BattleResult.Scouted)]
+    [TestCase(KaNoBuFigure.FigureTypes.ShipScout, KaNoBuFigure.FigureTypes.ShipUniversal, null, KaNoBuMoveNotificationModel.BattleResult.Scouted)]
     public void BattlesAsExpected(KaNoBuFigure.FigureTypes attackerType, KaNoBuFigure.FigureTypes defenderType, KaNoBuFigure.FigureTypes? expectedWinnerType, KaNoBuMoveNotificationModel.BattleResult expectedBattleResult)
     {
         var attacker = KaNoBuFigure.Create(1, attackerType, 0);

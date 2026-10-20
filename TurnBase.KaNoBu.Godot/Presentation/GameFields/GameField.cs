@@ -222,6 +222,8 @@ public partial class GameField :
                 var defenderUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == toMapPos);
                 switch (notification.Battle.Value.battleResult)
                 {
+                    case KaNoBuMoveNotificationModel.BattleResult.Scouted:
+                        break;
                     case KaNoBuMoveNotificationModel.BattleResult.Draw:
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.BothDestroyed:

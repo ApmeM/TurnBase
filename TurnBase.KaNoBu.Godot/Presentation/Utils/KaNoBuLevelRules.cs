@@ -38,6 +38,11 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
 
     public KaNoBuField GenerateGameField()
     {
+        if (this.field == null)
+        {
+            return this.GenerateGameField();
+        }
+
         return new KaNoBuField
         {
             Field = this.field,

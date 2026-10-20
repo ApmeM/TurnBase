@@ -17,6 +17,11 @@ namespace TurnBase.KaNoBu
             return new BattleResolution(null, KaNoBuMoveNotificationModel.BattleResult.Draw);
         }
 
+        public static BattleResolution Scouted()
+        {
+            return new BattleResolution(null, KaNoBuMoveNotificationModel.BattleResult.Scouted);
+        }
+
         public static BattleResolution AttackerWon(KaNoBuFigure winner)
         {
             return new BattleResolution(winner, KaNoBuMoveNotificationModel.BattleResult.AttackerWon);

@@ -37,7 +37,8 @@ namespace TurnBase.KaNoBu
             Draw,
             AttackerWon,
             DefenderWon,
-            BothDestroyed
+            BothDestroyed,
+            Scouted
         }
 
         public KaNoBuMoveNotificationModel(List<MoveNotification> moveNotifications, Field2D resultField)

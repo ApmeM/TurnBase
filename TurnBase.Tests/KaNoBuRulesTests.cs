@@ -123,6 +123,34 @@ public class KaNoBuRulesTests
     }
 
     [Test]
+    public void ScoutRevealsDefenderWithoutMovingOrDying()
+    {
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(2, 1)
+        };
+        var scout = KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipScout, 0);
+        var defender = KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipMine, 0);
+        field.Field.SetFigure(0, 0, scout);
+        field.Field.SetFigure(1, 0, defender);
+
+        var rules = new KaNoBuRules(6);
+        var notification = rules.TryApplyMoveResponse(field, 1, new KaNoBuMoveResponseModel(
+            new List<KaNoBuMoveResponseModel.MoveStep>
+            {
+                new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
+            }));
+
+        var battle = notification.MoveNotifications[0].Battle.Value;
+        Assert.That(battle.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.Scouted));
+        Assert.That(battle.attackerFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(battle.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipMine));
+        Assert.That(field.Field.GetFigure(0, 0), Is.SameAs(scout));
+        Assert.That(field.Field.GetFigure(1, 0), Is.SameAs(defender));
+        Assert.That(scout.WinNumber, Is.EqualTo(0));
+    }
+
+    [Test]
     public void TurnRejectsMoreFiguresThanAllowedPerTurn()
     {
         var field = new KaNoBuField
@@ -178,7 +206,7 @@ public class KaNoBuRulesTests
     }
 
     [Test]
-    public void UniversalBecomesScoutWhenItBattlesScout()
+    public void ScoutRevealsUniversalWithoutBattleOrTransformation()
     {
         var field = new KaNoBuField
         {
@@ -194,10 +222,10 @@ public class KaNoBuRulesTests
                 new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
             }));
 
-        Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.DefenderWon));
-        Assert.That(notification.MoveNotifications[0].Battle.Value.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
-        Assert.That(field.Field.GetFigure(0, 0), Is.Null);
-        Assert.That(((KaNoBuFigure)field.Field.GetFigure(1, 0)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult, Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.Scouted));
+        Assert.That(notification.MoveNotifications[0].Battle.Value.defenderFigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipUniversal));
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(0, 0)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(1, 0)).FigureType, Is.EqualTo(KaNoBuFigure.FigureTypes.ShipUniversal));
     }
 
     [Test]

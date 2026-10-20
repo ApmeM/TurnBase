@@ -78,6 +78,20 @@ public class KaNoBuFieldMemorizationTests
     }
 
     [Test]
+    public void ScoutEncounterKeepsBothShipsAndRevealsDefender()
+    {
+        var field = UpdateMemory(
+            KaNoBuFigure.FigureTypes.ShipScout,
+            KaNoBuFigure.FigureTypes.Unknown,
+            KaNoBuMoveNotificationModel.BattleResult.Scouted,
+            attackerBattleType: KaNoBuFigure.FigureTypes.ShipScout,
+            defenderBattleType: KaNoBuFigure.FigureTypes.ShipMine);
+
+        Assert.That(GetFigureType(field, AttackerPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipScout));
+        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipMine));
+    }
+
+    [Test]
     public void AttackingWithUniversalShipRevealsItsEffectiveType()
     {
         var field = UpdateMemory(

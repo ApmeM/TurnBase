@@ -41,13 +41,10 @@ namespace TurnBase.KaNoBu
                 case FigureTypes.ShipStone:
                 case FigureTypes.ShipPaper:
                 case FigureTypes.ShipScissors:
-                    return BattleResolution.DefenderWon(defender);
                 case FigureTypes.ShipMine:
-                    return BattleResolution.BothAreDestroyed();
                 case FigureTypes.ShipScout:
-                    return BattleResolution.Draw();
                 case FigureTypes.ShipUniversal:
-                    return BattleResolution.DefenderWon(defender.WithFigureType(FigureTypes.ShipScout));
+                    return BattleResolution.Scouted();
                 default:
                     throw new System.Exception($"Unsupported figure type {defender.FigureType}");
             }

@@ -89,6 +89,10 @@ namespace TurnBase.KaNoBu
 
                 switch (battle.battleResult)
                 {
+                    case KaNoBuMoveNotificationModel.BattleResult.Scouted:
+                        this.Field.SetFigure(fromMapPos, movedUnit.WithFigureType(KaNoBuFigure.FigureTypes.ShipScout));
+                        this.Field.SetFigure(toMapPos, defenderUnit);
+                        break;
                     case KaNoBuMoveNotificationModel.BattleResult.Draw:
                         if (movedUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
                         {
