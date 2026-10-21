@@ -61,11 +61,12 @@ public partial class GameField :
     {
         this.moveButtons.Visible = true;
 
-        GameLogCurrentField(model.Request.Field);
-
         this.timerLabel.ShowMessage("Your turn", 1f);
+
+        InitializeGameField(model.Request.Field.Field);
         this.memorizedField.SynchronizeField(model.Request.Field.Field);
         this.UpdateKnownShips();
+
         var pendingTurnMoves = new List<KaNoBuMoveResponseModel.MoveStep>();
         this.moveButtons.Visible = true;
         this.UpdateMoveButtons(pendingTurnMoves.Count);
@@ -167,44 +168,44 @@ public partial class GameField :
         this.field.RemoveChildren();
     }
 
-    protected virtual void GameLogCurrentField(KaNoBuField kaNoBuField)
+    protected virtual void InitializeGameField(Field2D mainField)
     {
-        var mainField = kaNoBuField.Field;
-        GD.Print("GameLogCurrentField:\n", mainField.ToString());
-        this.memorizedField.SynchronizeField(mainField);
-        if (this.field.GetChildCount() == 0)
+        if (this.field.GetChildCount() != 0)
         {
-            for (var x = 0; x < mainField.Width; x++)
-            {
-                for (var y = 0; y < mainField.Height; y++)
-                {
-                    var pos = new Vector2(x, y);
-
-                    var originalShip = mainField.GetFigure(x, y) as KaNoBuFigure;
-                    if (originalShip == null)
-                    {
-                        continue;
-                    }
-
-                    var mapPos = new Vector2(x, y);
-                    var worldPos = this.field.MapToWorld(mapPos);
-                    var unit = (Unit)UnitScene.Instance();
-
-                    unit.MoveUnitToLogic(mapPos);
-
-                    unit.Position = worldPos + this.field.CellSize / 2;
-                    unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
-
-                    this.field.AddChild(unit);
-                }
-            }
+            return;
         }
 
-        this.UpdateKnownShips();
+        for (var x = 0; x < mainField.Width; x++)
+        {
+            for (var y = 0; y < mainField.Height; y++)
+            {
+                var pos = new Vector2(x, y);
+
+                var originalShip = mainField.GetFigure(x, y) as KaNoBuFigure;
+                if (originalShip == null)
+                {
+                    continue;
+                }
+
+                var mapPos = new Vector2(x, y);
+                var worldPos = this.field.MapToWorld(mapPos);
+                var unit = (Unit)UnitScene.Instance();
+
+                unit.MoveUnitToLogic(mapPos);
+
+                unit.Position = worldPos + this.field.CellSize / 2;
+                unit.Connect(nameof(Unit.UnitClicked), this, nameof(OnUnitClicked), new Godot.Collections.Array { unit });
+
+                this.field.AddChild(unit);
+            }
+        }
     }
 
     public async void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel turnNotification)
     {
+        var allUnits = this.field.GetChildren().OfType<Unit>().ToList();
+        this.InitializeGameField(turnNotification.ResultField );
+
         if (turnNotification.MoveNotifications.Count == 0)
         {
             return;
@@ -215,11 +216,10 @@ public partial class GameField :
             var fromMapPos = new Vector2(notification.From.X, notification.From.Y);
             var toMapPos = new Vector2(notification.To.X, notification.To.Y);
             var toWorldPos = this.field.MapToWorld(toMapPos) + this.field.CellSize / 2;
-            var allUnits = this.field.GetChildren();
-            var movedUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == fromMapPos && a.PlayerNumber == playerNumber);
+            var movedUnit = allUnits.First(a => a.TargetPositionMap == fromMapPos && a.PlayerNumber == playerNumber);
             if (notification.Battle.HasValue)
             {
-                var defenderUnit = allUnits.Cast<Unit>().First(a => a.TargetPositionMap == toMapPos);
+                var defenderUnit = allUnits.First(a => a.TargetPositionMap == toMapPos);
                 switch (notification.Battle.Value.battleResult)
                 {
                     case KaNoBuMoveNotificationModel.BattleResult.Scouted:
@@ -267,6 +267,7 @@ public partial class GameField :
         }
 
         this.memorizedField.UpdateKnownShips(turnNotification);
+        this.memorizedField.SynchronizeField(turnNotification.ResultField);
         this.UpdateKnownShips();
     }
 

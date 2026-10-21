@@ -11,10 +11,14 @@ public partial class CustomField
         this.FillMembers();
     }
     
-    protected override void GameLogCurrentField(KaNoBuField kaNoBuField)
+    protected override void InitializeGameField(Field2D mainField)
     {
-        var mainField = kaNoBuField.Field;
-        base.GameLogCurrentField(kaNoBuField);
+        if (this.field.GetChildCount() != 0)
+        {
+            return;
+        }
+
+        base.InitializeGameField(mainField);
         
         var needUpdateBitmask = false;
         for (var x = 0; x < mainField.Width; x++)
