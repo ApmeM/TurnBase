@@ -14,14 +14,6 @@ namespace TurnBase.KaNoBu
         private int myNumber;
         private int maxMovesPerTurn = int.MaxValue;
 
-        private List<Point> directions = new List<Point>
-        {
-            new Point { X = -1, Y = 0 },
-            new Point { X = 1, Y = 0 },
-            new Point { X = 0, Y = -1 },
-            new Point { X = 0, Y = 1 }
-        };
-
         private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
 
         public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model, CancellationToken token = default)
@@ -52,6 +44,7 @@ namespace TurnBase.KaNoBu
             this.memorizedField.SynchronizeField(model.Request.Field.Field);
             var from = this.findAllMovement(this.memorizedField.Field)
                     .Select(move => (move.from, move.to, EvaluateMove(this.memorizedField.Field, move)))
+                    .Where(move => move.Item3 > 0)
                     .OrderByDescending(a => a.Item3)
                     .ToList();
             if (from.Count == 0)
@@ -90,98 +83,118 @@ namespace TurnBase.KaNoBu
         {
             var from = move.from;
             var to = move.to;
-            
-            var field = (Field2D)mainField;
-                    var shipFrom = field.GetFigure(from) as KaNoBuFigure;
-                    var shipTo = field.GetFigure(to) as KaNoBuFigure;
+
+            var field = mainField;
+            var shipFrom = field.GetFigure(from) as KaNoBuFigure;
+            var shipTo = field.GetFigure(to) as KaNoBuFigure;
             if (shipTo != null && shipTo.PlayerId != this.myNumber)
             {
-                if (shipTo.FigureType == KaNoBuFigure.FigureTypes.Unknown)
-                {
-                    return 8; // Attack unknown enemy
-                }
                 if (shipTo.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
                 {
                     return 100; // Attack flag enemy
                 }
 
-                if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal || 
-                    (
-                        shipTo.FigureType != KaNoBuFigure.FigureTypes.Unknown &&
-                        shipFrom.ResolveBattle(shipTo).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon)
-                    )
+                if (shipTo.FigureType == KaNoBuFigure.FigureTypes.Unknown)
                 {
-                    return 10; // Attack loosing enemy
+                    return shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipScout
+                        ? 80 // Scout discovers an unknown figure.
+                        : 70; // Other ships attack an unknown figure.
                 }
-                return -10; // Do not attack winning enemy
+
+                return shipFrom.ResolveBattle(shipTo).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon
+                    ? 90 // Attack only when this ship is guaranteed to win.
+                    : 0; // Do not select known fights that are lost, drawn, or mutually destructive.
             }
 
-            var enemyNearby = false;
-            foreach (var dir in directions)
+            if (shipFrom.FigureType == KaNoBuFigure.FigureTypes.ShipScout)
             {
-                var checkTo = new Point { X = to.X + dir.X, Y = to.Y + dir.Y };
-                if (!field.IsInBounds(checkTo))
+                var adjacentEnemies = GetAdjacentEnemies(field, from);
+                foreach (var enemyPosition in adjacentEnemies)
                 {
-                    continue;
-                }
-                var shipNearby = field.GetFigure(checkTo) as KaNoBuFigure;
-                if (shipNearby != null && shipNearby.PlayerId != this.myNumber)
-                {
-                    enemyNearby = true;
-                }
-            }
-
-            if (enemyNearby)
-            {
-                return 5; // Prioritize moving to enemy
-            }
-
-            Point? closestEnemy = null;
-            for (int x = 0; x < field.Width; x++)
-            {
-                for (int y = 0; y < field.Height; y++)
-                {
-                    var p = new Point { X = x, Y = y };
-                    var ship = field.GetFigure(p) as KaNoBuFigure;
-                    if (ship != null && ship.PlayerId != this.myNumber && (ship.FigureType == KaNoBuFigure.FigureTypes.Unknown || ship.FigureType == KaNoBuFigure.FigureTypes.ShipFlag))
+                    if (to.ManhattanDistanceTo(enemyPosition) > from.ManhattanDistanceTo(enemyPosition))
                     {
-                        if (closestEnemy == null)
-                        {
-                            closestEnemy = p;
-                        }
-                        else
-                        {
-                            var dst = Math.Abs(closestEnemy.Value.X - from.X) + Math.Abs(closestEnemy.Value.Y - from.Y);
-                            var newDst = Math.Abs(p.X - from.X) + Math.Abs(p.Y - from.Y);
-                            if (newDst < dst)
-                            {
-                                closestEnemy = p;
-                            }
-                        }
+                        return 60; // Scouts retreat from any adjacent enemy, regardless of type.
                     }
                 }
             }
-            if (closestEnemy == null)
+            else
             {
-                return 0;
+                // ToDo: Change throw exception to return IncorrectRequest outcome instead.
+                var adjacentEnemiesThatCanWin = GetAdjacentEnemies(field, from)
+                    .Where(a => ((KaNoBuFigure)field.GetFigure(a)).FigureType != KaNoBuFigure.FigureTypes.Unknown)
+                    .Where(a => ((KaNoBuFigure)field.GetFigure(a)).FigureType != KaNoBuFigure.FigureTypes.ShipFlag)
+                    .Where(a => ((KaNoBuFigure)field.GetFigure(a)).IsMoveable)
+                    .Where(a => ((KaNoBuFigure)field.GetFigure(a)).ResolveBattle(shipFrom).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
+
+                foreach (var enemyPosition in adjacentEnemiesThatCanWin)
+                {
+                    if (to.ManhattanDistanceTo(enemyPosition) > from.ManhattanDistanceTo(enemyPosition))
+                    {
+                        return 60; // Retreat from an adjacent known enemy that would win.
+                    }
+                }
             }
 
+            var closestViableEnemy = GetClosestViableEnemy(field, from);
+            if (closestViableEnemy.HasValue &&
+                to.ManhattanDistanceTo(closestViableEnemy.Value) < from.ManhattanDistanceTo(closestViableEnemy.Value))
             {
-                var dst = Math.Abs(closestEnemy.Value.X - from.X) + Math.Abs(closestEnemy.Value.Y - from.Y);
-                var newDst = Math.Abs(closestEnemy.Value.X - to.X) + Math.Abs(closestEnemy.Value.Y - to.Y);
-                return dst > newDst ? 6 : -6; // Prioritize moving to closest Unknown or Flag enemy
+                return 50; // Moving towards closest viable enemy.
             }
+
+            return 20; // Any other legal move.
+        }
+
+        private Point? GetClosestViableEnemy(Field2D field, Point from)
+        {
+            var shipFrom = field.GetFigure(from) as KaNoBuFigure;
+            Point? closestViableEnemy = null;
+            var closestDistance = int.MaxValue;
+            for (var x = 0; x < field.Width; x++)
+            {
+                for (var y = 0; y < field.Height; y++)
+                {
+                    var enemy = field.GetFigure(x, y) as KaNoBuFigure;
+                    if (enemy == null || enemy.PlayerId == this.myNumber)
+                    {
+                        continue;
+                    }
+
+                    var canApproach = enemy.FigureType == KaNoBuFigure.FigureTypes.Unknown ||
+                        shipFrom.ResolveBattle(enemy).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon;
+                    var distance = from.ManhattanDistanceTo(new Point(x, y));
+                    if (canApproach && distance < closestDistance)
+                    {
+                        closestViableEnemy = new Point(x, y);
+                        closestDistance = distance;
+                    }
+                }
+            }
+            return closestViableEnemy;
+        }
+
+        private IEnumerable<Point> GetAdjacentEnemies(Field2D field, Point position)
+        {
+            return new[]{
+                    new Point { X = -1, Y = 0 },
+                    new Point { X = 1, Y = 0 },
+                    new Point { X = 0, Y = -1 },
+                    new Point { X = 0, Y = 1 }}
+                .Select(a => position + a)
+                .Where(a => field.IsInBounds(a))
+                .Where(a => field.GetFigure(a) as KaNoBuFigure != null)
+                .Where(a => field.GetFigure(a).PlayerId != this.myNumber);
         }
 
         private IEnumerable<(Point from, Point to)> findAllMovement(Field2D mainField)
         {
-            var field = (Field2D)mainField;
+            var field = mainField;
             for (int x = 0; x < field.Width; x++)
             {
                 for (int y = 0; y < field.Height; y++)
                 {
                     var from = new Point { X = x, Y = y };
-                        var shipFrom = field.GetFigure(from) as KaNoBuFigure;
+                    var shipFrom = field.GetFigure(from) as KaNoBuFigure;
                     if (shipFrom == null)
                     {
                         continue;
@@ -197,7 +210,8 @@ namespace TurnBase.KaNoBu
                         continue;
                     }
 
-                    foreach (var dir in directions)
+                    var moveOffsets = shipFrom.GetPossibleMoveOffsets();
+                    foreach (var dir in moveOffsets)
                     {
                         var to = new Point { X = x + dir.X, Y = y + dir.Y };
                         if (!field.IsInBounds(to))
