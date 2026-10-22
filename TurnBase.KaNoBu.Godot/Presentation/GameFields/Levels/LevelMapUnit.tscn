@@ -19,6 +19,7 @@ region = Rect2( 300, 190, 20, 20 )
 [node name="LevelMapUnit" instance=ExtResource( 2 )]
 script = ExtResource( 3 )
 UnitType = 3
+LevelDescription = null
 GameToLaunch = null
 
 [node name="Ship" parent="." index="0"]
@@ -26,3 +27,13 @@ texture = SubResource( 1 )
 
 [node name="ShipTypeFlag" parent="." index="2"]
 texture = SubResource( 2 )
+
+[node name="Description" type="Label" parent="." index="7"]
+margin_left = -55.0
+margin_top = 76.3636
+margin_right = 55.0
+margin_bottom = 90.3636
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_y = 2
+text = "Level description"
+align = 1

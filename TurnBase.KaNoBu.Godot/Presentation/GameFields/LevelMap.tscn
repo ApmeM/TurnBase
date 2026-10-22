@@ -26,6 +26,7 @@ position = Vector2( 270, 654 )
 UnitType = 2
 PlayerNumber = 1
 IsClickable = true
+LevelDescription = "First order"
 GameToLaunch = ExtResource( 4 )
 
 [node name="Level2" parent="FieldContainer/Field" index="1" instance=ExtResource( 6 )]
