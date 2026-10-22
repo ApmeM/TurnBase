@@ -48,11 +48,11 @@ namespace TurnBase
             }
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
             try
             {
-                this.listener.PlayersInitialized();
+                this.listener.GamePlayersInitialized();
             }
             catch
             {

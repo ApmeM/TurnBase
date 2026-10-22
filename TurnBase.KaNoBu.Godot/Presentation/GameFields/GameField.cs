@@ -162,7 +162,7 @@ public partial class GameField :
         this.memorizedField.Clear();
     }
 
-    public void PlayersInitialized()
+    public void GamePlayersInitialized()
     {
         this.memorizedField.Clear();
         this.field.RemoveChildren();
@@ -204,7 +204,15 @@ public partial class GameField :
     public async void GamePlayerTurn(int playerNumber, KaNoBuMoveNotificationModel turnNotification)
     {
         var allUnits = this.field.GetChildren().OfType<Unit>().ToList();
-        this.InitializeGameField(turnNotification.ResultField );
+
+        if (allUnits.Count == 0)
+        {
+            this.InitializeGameField(turnNotification.ResultField);
+            this.memorizedField.SynchronizeField(turnNotification.ResultField);
+            this.UpdateKnownShips();
+            return;
+        }
+
 
         if (turnNotification.MoveNotifications.Count == 0)
         {

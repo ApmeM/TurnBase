@@ -26,7 +26,7 @@ namespace TurnBase
             this.logger.Log($"Player {playerNumber} initialized with name '{playerName}'.");
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
             this.logger.Log("All players initialized.");
         }

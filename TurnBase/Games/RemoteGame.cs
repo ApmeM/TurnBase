@@ -93,8 +93,8 @@ namespace TurnBase
                     }
                     else if (result.body is GamePlayersInitializedCommunicationModel gamePlayersInitialized)
                     {
-                        this.player.PlayersInitialized();
-                        this.gameLogListeners.PlayersInitialized();
+                        this.player.GamePlayersInitialized();
+                        this.gameLogListeners.GamePlayersInitialized();
                     }
                     else if (result.body is GamePlayerTurnCommunicationModel<TMoveNotificationModel> gamePlayerTurn)
                     {

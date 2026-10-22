@@ -243,7 +243,7 @@ namespace TurnBase.KaNoBu
             this.memorizedField.Clear();
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
             this.memorizedField.Clear();
         }

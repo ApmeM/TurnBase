@@ -6,7 +6,7 @@ namespace TurnBase
     {
         void GameStarted();
         void GamePlayerInit(int playerNumber, string playerName);
-        void PlayersInitialized();
+        void GamePlayersInitialized();
         void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification);
         void GameTurnFinished();
         void GamePlayerDisconnected(int playerNumber);

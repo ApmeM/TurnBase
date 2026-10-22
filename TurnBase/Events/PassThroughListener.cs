@@ -26,9 +26,9 @@ namespace TurnBase
             this.listener.GamePlayerInit(playerNumber, playerName);
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
-            this.listener.PlayersInitialized();
+            this.listener.GamePlayersInitialized();
         }
 
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)

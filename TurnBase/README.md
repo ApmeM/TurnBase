@@ -40,7 +40,7 @@
 
 После инициализации вызываются события:
 - `GameStarted()`;
-- `PlayersInitialized()`;
+- `GamePlayersInitialized()`;
 - `GameLogCurrentField(...)`.
 
 ### 5. Ход игрока

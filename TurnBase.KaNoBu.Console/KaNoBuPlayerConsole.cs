@@ -63,7 +63,7 @@ public class KaNoBuPlayerConsole :
         this.players[playerNumber] = playerName;
     }
 
-    public void PlayersInitialized()
+    public void GamePlayersInitialized()
     {
     }
 

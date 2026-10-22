@@ -73,8 +73,8 @@ namespace TurnBase
 
             await this.InitPlayers(token);
 
-            this.players.Keys.ToList().ForEach(a => a.PlayersInitialized());
-            this.gameLogListeners.PlayersInitialized();
+            this.players.Keys.ToList().ForEach(a => a.GamePlayersInitialized());
+            this.gameLogListeners.GamePlayersInitialized();
 
             await this.MovePlayers(token);
 

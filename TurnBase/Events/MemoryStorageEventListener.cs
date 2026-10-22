@@ -22,7 +22,7 @@ namespace TurnBase
             this.Events.Add(new GamePlayerInitCommunicationModel { playerName = playerName, playerNumber = playerNumber });
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
             this.Events.Add(new GamePlayersInitializedCommunicationModel());
         }

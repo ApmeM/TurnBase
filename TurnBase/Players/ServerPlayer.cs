@@ -44,7 +44,7 @@ namespace TurnBase
             });
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
             this.server.SendRequest(PlayerId, new GamePlayersInitializedCommunicationModel());
         }

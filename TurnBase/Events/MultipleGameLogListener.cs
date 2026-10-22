@@ -31,9 +31,9 @@ namespace TurnBase
             this.gameLogListeners.ForEach(a => a.GamePlayerInit(playerNumber, playerName));
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
-            this.gameLogListeners.ForEach(a => a.PlayersInitialized());
+            this.gameLogListeners.ForEach(a => a.GamePlayersInitialized());
         }
 
         public void GamePlayerTurn(int playerNumber, TMoveNotificationModel notification)

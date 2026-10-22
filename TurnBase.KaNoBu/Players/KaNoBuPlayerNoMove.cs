@@ -21,7 +21,7 @@ namespace TurnBase.KaNoBu
         {
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
         }
 

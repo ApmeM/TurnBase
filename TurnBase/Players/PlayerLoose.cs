@@ -20,7 +20,7 @@ namespace TurnBase
         {
         }
 
-        public void PlayersInitialized()
+        public void GamePlayersInitialized()
         {
         }
 
