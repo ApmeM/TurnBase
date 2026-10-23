@@ -145,6 +145,7 @@ namespace TurnBase.KaNoBu
             KaNoBuFigure.FigureTypes.ShipScissors,
             KaNoBuFigure.FigureTypes.ShipStone,
             KaNoBuFigure.FigureTypes.ShipScout,
+            KaNoBuFigure.FigureTypes.ShipDreadnought,
         };
 
         private static KaNoBuFigure FindFigure(KaNoBuFigure template, Func<KaNoBuFigure, bool> predicate)

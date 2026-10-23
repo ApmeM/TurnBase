@@ -147,7 +147,7 @@ public class KaNoBuPlayerMediumTests
         await Initialize(player, 1);
         var field = Field2D.Create(6, 6);
         var scoutPosition = new Point(2, 2);
-        var enemyPosition = new Point(2, 4);
+        var enemyPosition = new Point(2, 3);
         field.SetFigure(scoutPosition, KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipScout, 0));
         field.SetFigure(enemyPosition, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0));
 

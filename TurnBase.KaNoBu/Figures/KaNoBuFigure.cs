@@ -14,6 +14,7 @@ namespace TurnBase.KaNoBu
             ShipUniversal,
             ShipMine,
             ShipScout,
+            ShipDreadnought,
         }
 
         protected KaNoBuFigure(int playerId, int winNumber)
@@ -51,6 +52,8 @@ namespace TurnBase.KaNoBu
                     return new ShipMineKaNoBuFigure(playerId, winNumber);
                 case FigureTypes.ShipScout:
                     return new ShipScoutKaNoBuFigure(playerId, winNumber);
+                case FigureTypes.ShipDreadnought:
+                    return new ShipDreadnoughtKaNoBuFigure(playerId, winNumber);
                 default:
                     throw new Exception("Unknown figure type");
             }

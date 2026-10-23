@@ -63,6 +63,9 @@ public partial class Unit
                     case KaNoBuFigure.FigureTypes.ShipFlag:
                         shipTypeTexture.Region = new Rect2(320, 170, 20, 20);
                         break;
+                    case KaNoBuFigure.FigureTypes.ShipScout:
+                        shipTypeTexture.Region = new Rect2(340, 170, 20, 20);
+                        break;
 
                     case KaNoBuFigure.FigureTypes.ShipScissors:
                         shipTypeTexture.Region = new Rect2(280, 190, 20, 20);
@@ -76,8 +79,8 @@ public partial class Unit
                     case KaNoBuFigure.FigureTypes.ShipMine:
                         shipTypeTexture.Region = new Rect2(340, 190, 20, 20);
                         break;
-                    case KaNoBuFigure.FigureTypes.ShipScout:
-                        shipTypeTexture.Region = new Rect2(340, 170, 20, 20);
+                    case KaNoBuFigure.FigureTypes.ShipDreadnought:
+                        shipTypeTexture.Region = new Rect2(280, 210, 20, 20);
                         break;
                 }
             }

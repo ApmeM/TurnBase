@@ -77,13 +77,17 @@ namespace TurnBase.KaNoBu
             var fieldSize = initFieldWidth * initFieldHeight;
             availableShips.Add(KaNoBuFigure.FigureTypes.ShipFlag);
             availableShips.Add(KaNoBuFigure.FigureTypes.ShipMine);
+            var mobileShipTypes = new[]
+            {
+                KaNoBuFigure.FigureTypes.ShipPaper,
+                KaNoBuFigure.FigureTypes.ShipScout,
+                KaNoBuFigure.FigureTypes.ShipStone,
+                KaNoBuFigure.FigureTypes.ShipScissors,
+                KaNoBuFigure.FigureTypes.ShipDreadnought,
+            };
             for (int i = 2; i < fieldSize; i++)
             {
-                var shipN = i % 4;
-                if (shipN == 0) availableShips.Add(KaNoBuFigure.FigureTypes.ShipStone);
-                if (shipN == 1) availableShips.Add(KaNoBuFigure.FigureTypes.ShipScissors);
-                if (shipN == 2) availableShips.Add(KaNoBuFigure.FigureTypes.ShipPaper);
-                if (shipN == 3) availableShips.Add(KaNoBuFigure.FigureTypes.ShipScout);
+                availableShips.Add(mobileShipTypes[(i - 2) % mobileShipTypes.Length]);
             }
 
             return new KaNoBuInitModel(initFieldWidth, initFieldHeight, availableShips, this.MaxMovesPerTurn);

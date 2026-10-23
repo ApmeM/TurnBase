@@ -42,6 +42,8 @@ namespace TurnBase.KaNoBu
                     return BattleResolution.BothAreDestroyed();
                 case FigureTypes.ShipScout:
                     return BattleResolution.AttackerWon(WithFigureType(FigureTypes.ShipScout));
+                case FigureTypes.ShipDreadnought:
+                    return BattleResolution.AttackerWon(this);
                 default:
                     throw new System.Exception($"Unsupported figure type {defender.FigureType}");
             }

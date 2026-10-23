@@ -10,7 +10,7 @@ public class KaNoBuFieldMemorizationTests
     private static readonly Point DefenderPosition = new Point { X = 1, Y = 0 };
 
     [TestCase(KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.Unknown, KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuMoveNotificationModel.BattleResult.AttackerWon)]
-    [TestCase(KaNoBuFigure.FigureTypes.Unknown, KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuMoveNotificationModel.BattleResult.AttackerWon)]
+    [TestCase(KaNoBuFigure.FigureTypes.Unknown, KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.Unknown, KaNoBuMoveNotificationModel.BattleResult.AttackerWon)]
     [TestCase(KaNoBuFigure.FigureTypes.ShipStone, KaNoBuFigure.FigureTypes.Unknown, KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuMoveNotificationModel.BattleResult.DefenderWon)]
     [TestCase(KaNoBuFigure.FigureTypes.Unknown, KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuFigure.FigureTypes.ShipPaper, KaNoBuMoveNotificationModel.BattleResult.DefenderWon)]
     public void BattleResultRevealsTheMissingRegularShip(
@@ -92,7 +92,7 @@ public class KaNoBuFieldMemorizationTests
     }
 
     [Test]
-    public void AttackingWithUniversalShipRevealsItsEffectiveType()
+    public void AttackingWithUniversalShipKeepsAmbiguousWinnerUnknown()
     {
         var field = UpdateMemory(
             KaNoBuFigure.FigureTypes.ShipUniversal,
@@ -100,7 +100,7 @@ public class KaNoBuFieldMemorizationTests
             KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
 
         Assert.That(field.GetFigure(AttackerPosition), Is.Null);
-        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
+        Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.Unknown));
     }
 
     [Test]
