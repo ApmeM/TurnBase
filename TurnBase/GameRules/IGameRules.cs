@@ -34,6 +34,7 @@ namespace TurnBase
     
     // EndGame
     void TurnCompleted(TField mainField);
+    bool IsGameOver(TField mainField);
     List<int> FindWinners(TField mainField);
-  }
+    }
 }

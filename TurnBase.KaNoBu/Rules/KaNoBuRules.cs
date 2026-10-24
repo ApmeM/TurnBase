@@ -421,6 +421,11 @@ namespace TurnBase.KaNoBu
             return result;
         }
 
+        public bool IsGameOver(KaNoBuField kaNoBuField)
+        {
+            return this.FindWinners(kaNoBuField) == null;
+        }
+
         public List<int> FindWinners(KaNoBuField kaNoBuField)
         {
             var winners = new List<int>();

@@ -24,6 +24,11 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return this.mainRules.IsMoveValid(mainField, playerNumber, move);
     }
 
+    public bool IsGameOver(KaNoBuField kaNoBuField)
+    {
+        return this.mainRules.IsGameOver(kaNoBuField);
+    }
+
     public List<int> FindWinners(KaNoBuField mainField)
     {
         return this.mainRules.FindWinners(mainField);
