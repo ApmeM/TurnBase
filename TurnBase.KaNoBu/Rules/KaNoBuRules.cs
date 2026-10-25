@@ -11,6 +11,7 @@ namespace TurnBase.KaNoBu
         public bool WithDocks;
         public int MaxMovesPerTurn = int.MaxValue;
         public bool EnemyVisible = false;
+        public IGameOverCondition GameOverCondition { get; set; }
 
         public KaNoBuRules(int size)
         {
@@ -20,6 +21,10 @@ namespace TurnBase.KaNoBu
             }
 
             this.size = size;
+            this.GameOverCondition = new OrGameOverCondition(
+                new OnePlayerLeftGameOverCondition(),
+                new AllPlayersEliminatedGameOverCondition()
+            );
         }
 
         public KaNoBuField GenerateGameField()
@@ -423,7 +428,7 @@ namespace TurnBase.KaNoBu
 
         public bool IsGameOver(KaNoBuField kaNoBuField)
         {
-            return this.FindWinners(kaNoBuField) == null;
+            return this.GameOverCondition.IsGameOver(kaNoBuField, this);
         }
 
         public List<int> FindWinners(KaNoBuField kaNoBuField)

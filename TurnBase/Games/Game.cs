@@ -155,7 +155,7 @@ namespace TurnBase
             var nextPlayers = rotator.MoveNext(null, allPlayers);
             Task<bool> action(IPlayer player) => this.MovePlayer((IPlayer<TInitModel, TInitResponseModel, TMoveModel, TMoveResponseModel, TMoveNotificationModel>)player, token);
 
-            while (this.rules.IsGameOver(this.mainField))
+            while (!this.rules.IsGameOver(this.mainField))
             {
                 token.ThrowIfCancellationRequested();
 
