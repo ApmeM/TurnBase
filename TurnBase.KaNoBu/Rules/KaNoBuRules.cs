@@ -432,17 +432,7 @@ namespace TurnBase.KaNoBu
                 }
             }
 
-            if (winners.Count > 1)
-            {
-                // 1+ winners means game not finished. 
-                return null;
-            }
-            else
-            {
-                // 1 winner means someone won.
-                // 0 winners means draw.
-                return winners;
-            }
+            return winners;
         }
 
         private BattleResolution battle(KaNoBuFigure attacker, KaNoBuFigure defender)

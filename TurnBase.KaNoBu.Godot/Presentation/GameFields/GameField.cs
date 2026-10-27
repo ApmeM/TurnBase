@@ -285,11 +285,6 @@ public partial class GameField :
 
     public async void GameFinished(List<int> winners)
     {
-        if (winners.Count > 1)
-        {
-            throw new Exception($"Unexpected number of winners : {winners.Count}.");
-        }
-
         this.Winners = winners;
 
         _ = MoveCameraToCenter();

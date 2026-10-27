@@ -212,12 +212,17 @@ public partial class Main
         var result = false;
 
         var fieldPlayerId = godotPlayer.playerId;
-        var winners = godotPlayer.Winners?.ToHashSet();
+        var winners = godotPlayer.Winners.ToHashSet();
+
+        if (winners.Count == 0)
+        {
+            this.winnerLabel.Text = "The game is over. No winners.";
+        } else
         if (fieldPlayerId == -1)
         {
-            this.winnerLabel.Text = $"The game is over.";
+            this.winnerLabel.Text = $"The game is over.\nWinners: {string.Join(", ", winners.OrderBy(a => a).Select(a => $"Player {a}"))}.";
         }
-        else if (winners?.Contains(fieldPlayerId) ?? false)
+        else if (winners.Contains(fieldPlayerId))
         {
             this.winnerLabel.Text = "You win.";
             result = true;
