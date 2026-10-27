@@ -22,8 +22,7 @@ namespace TurnBase.KaNoBu
 
             this.size = size;
             this.GameOverCondition = new OrGameOverCondition(
-                new OnePlayerLeftGameOverCondition(),
-                new AllPlayersEliminatedGameOverCondition()
+                new DefaultGameOverCondition()
             );
         }
 
@@ -48,7 +47,7 @@ namespace TurnBase.KaNoBu
             return new KaNoBuField
             {
                 Field = field,
-                DisconnectedPlayers = new List<int>()
+                DisconnectedPlayers = new HashSet<int>()
             };
         }
 
@@ -204,41 +203,31 @@ namespace TurnBase.KaNoBu
         {
             if (kaNoBuField.DisconnectedPlayers.Contains(playerNumber))
             {
+                // If player is disconnected.
                 return new KaNoBuMoveResponseModel(null);
             }
+
+            // ToDo: if player lost, but still have ships.
 
             var mainField = kaNoBuField.Field;
             var mainWidth = mainField.Width;
             var mainHeight = mainField.Height;
-            var canMove = false;
-            var flagFound = false;
             for (var i = 0; i < mainWidth; i++)
             {
                 for (var j = 0; j < mainHeight; j++)
                 {
                     var playerShip = (KaNoBuFigure)mainField.GetFigure(i, j);
-                    canMove = canMove || (
-                        playerShip != null &&
+                    if (playerShip != null &&
                         playerShip.PlayerId == playerNumber &&
-                        playerShip.IsMoveable
-                        );
-
-                    flagFound = flagFound || (
-                        playerShip != null &&
-                        playerShip.PlayerId == playerNumber &&
-                        playerShip.FigureType == KaNoBuFigure.FigureTypes.ShipFlag
-                        );
+                        playerShip.IsMoveable)
+                    {
+                        return null;
+                    }
                 }
             }
 
-            if (canMove && flagFound)
-            {
-                return null;
-            }
-            else
-            {
-                return new KaNoBuMoveResponseModel(null);
-            }
+            // If player has no movable figures.
+            return new KaNoBuMoveResponseModel(null);
         }
 
         public bool IsMoveValid(KaNoBuField kaNoBuField, int playerNumber, KaNoBuMoveResponseModel playerMove)
