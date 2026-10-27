@@ -65,6 +65,7 @@ texture_hover = ExtResource( 8 )
 
 [node name="CustomPopup" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton" instance=ExtResource( 5 )]
 layer = 20
+visible = false
 Title = "Custom game settings"
 
 [node name="CustomPopupContainer" parent="MainMenu/ScreenButtonContainer/MainScreenButtonContainer/CustomButton/CustomPopup" index="1"]
