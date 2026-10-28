@@ -51,7 +51,8 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
         return new KaNoBuField
         {
             Field = this.field,
-            DisconnectedPlayers = new HashSet<int>()
+            DisconnectedPlayers = new HashSet<int>(),
+            LostPlayers = new HashSet<int>()
         };
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 
 namespace TurnBase.KaNoBu
@@ -13,6 +14,7 @@ namespace TurnBase.KaNoBu
         public bool EnemyVisible = false;
         public IGameOverCondition GameOverCondition { get; set; } = new DefaultGameOverCondition();
         public IVictoryCondition VictoryCondition { get; set; } = new DefaultVictoryCondition();
+        public ILooseCondition LooseCondition { get; set; } = new NoMoveableFiguresLooseCondition();
 
         public KaNoBuRules(int size)
         {
@@ -45,7 +47,8 @@ namespace TurnBase.KaNoBu
             return new KaNoBuField
             {
                 Field = field,
-                DisconnectedPlayers = new HashSet<int>()
+                DisconnectedPlayers = new HashSet<int>(),
+                LostPlayers = new HashSet<int>()
             };
         }
 
@@ -193,7 +196,8 @@ namespace TurnBase.KaNoBu
                 new KaNoBuField
                 {
                     Field = CopyForPlayer(kaNoBuField.Field, playerNumber),
-                    DisconnectedPlayers = kaNoBuField.DisconnectedPlayers
+                    DisconnectedPlayers = kaNoBuField.DisconnectedPlayers,
+                    LostPlayers = kaNoBuField.LostPlayers
                 });
         }
 
@@ -205,7 +209,10 @@ namespace TurnBase.KaNoBu
                 return new KaNoBuMoveResponseModel(null);
             }
 
-            // ToDo: if player lost, but still have ships.
+            if (kaNoBuField.LostPlayers.Contains(playerNumber))
+            {
+                return new KaNoBuMoveResponseModel(null);
+            }
 
             var mainField = kaNoBuField.Field;
             var mainWidth = mainField.Width;
@@ -230,6 +237,16 @@ namespace TurnBase.KaNoBu
 
         public bool IsMoveValid(KaNoBuField kaNoBuField, int playerNumber, KaNoBuMoveResponseModel playerMove)
         {
+            if (kaNoBuField.LostPlayers.Contains(playerNumber))
+            {
+                return false;
+            }
+
+            if (kaNoBuField.DisconnectedPlayers.Contains(playerNumber))
+            {
+                return false;
+            }
+
             if (playerMove.Moves.Count > this.MaxMovesPerTurn)
             {
                 return false;
@@ -383,7 +400,8 @@ namespace TurnBase.KaNoBu
             return new KaNoBuField
             {
                 Field = CopyForPlayer(kaNoBuField.Field, playerNumber),
-                DisconnectedPlayers = kaNoBuField.DisconnectedPlayers
+                DisconnectedPlayers = kaNoBuField.DisconnectedPlayers,
+                LostPlayers = kaNoBuField.LostPlayers
             };
         }
 
@@ -415,6 +433,7 @@ namespace TurnBase.KaNoBu
 
         public bool IsGameOver(KaNoBuField kaNoBuField)
         {
+            this.UpdateLostPlayers(kaNoBuField);
             return this.GameOverCondition.IsGameOver(kaNoBuField, this);
         }
 
@@ -445,6 +464,23 @@ namespace TurnBase.KaNoBu
         public void PlayerDisconnected(KaNoBuField field, int playerNumber)
         {
             field.DisconnectedPlayers.Add(playerNumber);
+        }
+        private void UpdateLostPlayers(KaNoBuField field)
+        {
+            for (var playerNumber = 0; playerNumber < this.GetMaxPlayersCount(); playerNumber++)
+            {
+                if (field.LostPlayers.Contains(playerNumber)){
+                    // Player already lost.
+                    continue;
+                }
+
+                // Note: Disconnected player still can win
+                // Note: Its loose condition should be checked separately.
+                if (this.LooseCondition.IsLooser(field, this, playerNumber))
+                {
+                    field.LostPlayers.Add(playerNumber);
+                }
+            }
         }
     }
 }

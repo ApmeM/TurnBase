@@ -31,10 +31,10 @@ namespace TurnBase
     TMoveNotificationModel GetMoveNotificationForPlayer(TMoveNotificationModel notification, int playerNumber);
     TField GetFieldNotificationForPlayer(TField mainField, int playerNumber);
     void PlayerDisconnected(TField mainField, int playerNumber);
-    
+
     // EndGame
     void TurnCompleted(TField mainField);
     bool IsGameOver(TField mainField);
     List<int> FindWinners(TField mainField);
-    }
+  }
 }
