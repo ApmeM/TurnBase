@@ -101,7 +101,7 @@ namespace TurnBase.KaNoBu
                         : 70; // Other ships attack an unknown figure.
                 }
 
-                return shipFrom.ResolveBattle(shipTo).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon
+                return shipFrom.ResolveBattle(shipTo).Winner?.PlayerId == shipFrom.PlayerId
                     ? 90 // Attack only when this ship is guaranteed to win.
                     : 0; // Do not select known fights that are lost, drawn, or mutually destructive.
             }
@@ -119,12 +119,11 @@ namespace TurnBase.KaNoBu
             }
             else
             {
-                // ToDo: Change throw exception to return IncorrectRequest outcome instead.
                 var adjacentEnemiesThatCanWin = GetAdjacentEnemies(field, from)
                     .Where(a => ((KaNoBuFigure)field.GetFigure(a)).FigureType != KaNoBuFigure.FigureTypes.Unknown)
                     .Where(a => ((KaNoBuFigure)field.GetFigure(a)).FigureType != KaNoBuFigure.FigureTypes.ShipFlag)
                     .Where(a => ((KaNoBuFigure)field.GetFigure(a)).IsMoveable)
-                    .Where(a => ((KaNoBuFigure)field.GetFigure(a)).ResolveBattle(shipFrom).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon);
+                    .Where(a => ((KaNoBuFigure)field.GetFigure(a)).ResolveBattle(shipFrom).Winner?.PlayerId == ((KaNoBuFigure)field.GetFigure(a)).PlayerId);
 
                 foreach (var enemyPosition in adjacentEnemiesThatCanWin)
                 {
@@ -161,7 +160,7 @@ namespace TurnBase.KaNoBu
                     }
 
                     var canApproach = enemy.FigureType == KaNoBuFigure.FigureTypes.Unknown ||
-                        shipFrom.ResolveBattle(enemy).Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon;
+                        shipFrom.ResolveBattle(enemy).Winner?.PlayerId == shipFrom.PlayerId;
                     var distance = from.ManhattanDistanceTo(new Point(x, y));
                     if (canApproach && distance < closestDistance)
                     {

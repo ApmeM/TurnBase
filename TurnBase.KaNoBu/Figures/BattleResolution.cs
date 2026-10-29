@@ -32,6 +32,11 @@ namespace TurnBase.KaNoBu
             return new BattleResolution(winner, KaNoBuMoveNotificationModel.BattleResult.DefenderWon);
         }
 
+        public static BattleResolution FlagCaptured(KaNoBuFigure winner)
+        {
+            return new BattleResolution(winner, KaNoBuMoveNotificationModel.BattleResult.FlagCaptured);
+        }
+
         public static BattleResolution BothAreDestroyed()
         {
             return new BattleResolution(null, KaNoBuMoveNotificationModel.BattleResult.BothDestroyed);

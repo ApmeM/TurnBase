@@ -26,7 +26,7 @@ namespace TurnBase.KaNoBu
                     }
                 }
             }
-            
+
             for (var x = 0; x < model.Width; x++)
             {
                 for (var y = 0; y < model.Height; y++)
@@ -109,6 +109,28 @@ namespace TurnBase.KaNoBu
                         this.Field.SetFigure(fromMapPos, null);
                         this.Field.SetFigure(toMapPos, null);
                         break;
+                    case KaNoBuMoveNotificationModel.BattleResult.FlagCaptured:
+                        var defeatedPlayerNumber = battle.defenderPlayerNumber;
+
+                        for (var x = 0; x < this.Field.Width; x++)
+                        {
+                            for (var y = 0; y < this.Field.Height; y++)
+                            {
+                                var ship = this.Field.GetFigure(x, y) as KaNoBuFigure;
+                                if (ship != null && ship.PlayerId == defeatedPlayerNumber)
+                                {
+                                    ship.PlayerId = battle.attackerPlayerNumber;
+                                }
+                            }
+                        }
+
+                        if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.Unknown && defenderUnit.FigureType != KaNoBuFigure.FigureTypes.Unknown)
+                        {
+                            movedUnit = FindFigure(movedUnit, candidate => candidate.ResolveBattle(defenderUnit).Outcome == KaNoBuMoveNotificationModel.BattleResult.FlagCaptured);
+                        }
+                        this.Field.SetFigure(fromMapPos, null);
+                        this.Field.SetFigure(toMapPos, movedUnit);
+                        break;
                     case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
                         if (movedUnit.FigureType == KaNoBuFigure.FigureTypes.ShipUniversal)
                         {
@@ -155,7 +177,7 @@ namespace TurnBase.KaNoBu
                 .Where(a => predicate(a))
                 .ToList();
 
-            if(applicableTypes.Count == 1)
+            if (applicableTypes.Count == 1)
             {
                 return applicableTypes[0];
             }

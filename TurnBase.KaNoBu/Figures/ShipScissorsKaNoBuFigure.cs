@@ -31,6 +31,7 @@ namespace TurnBase.KaNoBu
                 case FigureTypes.ShipScissors:
                     return BattleResolution.Draw();
                 case FigureTypes.ShipFlag:
+                    return BattleResolution.FlagCaptured(this);
                 case FigureTypes.ShipPaper:
                 case FigureTypes.ShipScout:
                     return BattleResolution.AttackerWon(this);

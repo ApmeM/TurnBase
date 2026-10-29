@@ -25,7 +25,6 @@ namespace TurnBase.KaNoBu
         public struct Battle
         {
             public BattleResult battleResult;
-            public bool isDefenderFlag;
             public int attackerPlayerNumber;
             public int defenderPlayerNumber;
             public KaNoBuFigure.FigureTypes attackerFigureType;
@@ -38,7 +37,8 @@ namespace TurnBase.KaNoBu
             AttackerWon,
             DefenderWon,
             BothDestroyed,
-            Scouted
+            Scouted,
+            FlagCaptured // Note: Flag can not be 'given', only attacker can win this battle.
         }
 
         public KaNoBuMoveNotificationModel(List<MoveNotification> moveNotifications, Field2D resultField)
@@ -64,7 +64,7 @@ namespace TurnBase.KaNoBu
                 result.AppendLine($"Player move from {move.From} to {move.To}.");
                 if (move.Battle.HasValue)
                 {
-                    result.AppendLine($"Battle result: {move.Battle.Value.battleResult} (IsFlag = {move.Battle.Value.isDefenderFlag})");
+                    result.AppendLine($"Battle result: {move.Battle.Value.battleResult}");
                 }
             }
 

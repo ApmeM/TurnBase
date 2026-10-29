@@ -37,7 +37,7 @@ namespace TurnBase.KaNoBu
                 case FigureTypes.Unknown:
                     throw new System.Exception("Can not resolve battle with unknown ship");
                 case FigureTypes.ShipFlag:
-                    return BattleResolution.AttackerWon(this);
+                    return BattleResolution.FlagCaptured(this);
                 case FigureTypes.ShipStone:
                 case FigureTypes.ShipPaper:
                 case FigureTypes.ShipScissors:

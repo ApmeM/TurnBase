@@ -31,6 +31,7 @@ namespace TurnBase.KaNoBu
                 case FigureTypes.ShipMine:
                     return BattleResolution.BothAreDestroyed();
                 case FigureTypes.ShipFlag:
+                    return BattleResolution.FlagCaptured(this);
                 case FigureTypes.ShipStone:
                 case FigureTypes.ShipPaper:
                 case FigureTypes.ShipScissors:

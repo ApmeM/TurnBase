@@ -121,11 +121,12 @@ public class KaNoBuFieldMemorizationTests
         var field = UpdateMemory(
             KaNoBuFigure.FigureTypes.ShipPaper,
             KaNoBuFigure.FigureTypes.Unknown,
-            KaNoBuMoveNotificationModel.BattleResult.AttackerWon,
-            isDefenderFlag: true);
+            KaNoBuMoveNotificationModel.BattleResult.FlagCaptured);
 
         Assert.That(field.GetFigure(AttackerPosition), Is.Null);
         Assert.That(GetFigureType(field, DefenderPosition), Is.EqualTo(KaNoBuFigure.FigureTypes.ShipPaper));
+        Assert.That(((KaNoBuFigure)field.GetFigure(DefenderPosition)).PlayerId, Is.EqualTo(1));
+        Assert.That(((KaNoBuFigure)field.GetFigure(DefenderPosition)).PlayerId, Is.Not.EqualTo(2));
     }
 
     [Test]
@@ -158,7 +159,6 @@ public class KaNoBuFieldMemorizationTests
         KaNoBuFigure.FigureTypes attackerType,
         KaNoBuFigure.FigureTypes defenderType,
         KaNoBuMoveNotificationModel.BattleResult battleResult,
-        bool isDefenderFlag = false,
         KaNoBuFigure.FigureTypes attackerBattleType = KaNoBuFigure.FigureTypes.Unknown,
         KaNoBuFigure.FigureTypes defenderBattleType = KaNoBuFigure.FigureTypes.Unknown)
     {
@@ -172,7 +172,8 @@ public class KaNoBuFieldMemorizationTests
         var battle = new KaNoBuMoveNotificationModel.Battle
         {
             battleResult = battleResult,
-            isDefenderFlag = isDefenderFlag,
+            attackerPlayerNumber = 1,
+            defenderPlayerNumber = 2,
             attackerFigureType = attackerBattleType,
             defenderFigureType = defenderBattleType,
         };

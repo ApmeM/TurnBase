@@ -355,7 +355,7 @@ namespace TurnBase.KaNoBu
                     mainField.SetFigure(playerMove.To, winner);
                 }
 
-                if (to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag)
+                if (resolution.Outcome == KaNoBuMoveNotificationModel.BattleResult.FlagCaptured)
                 {
                     // Change all figures of this player to the player that captures the flag.
                     for (int i = 0; i < mainField.Width; i++)
@@ -380,13 +380,12 @@ namespace TurnBase.KaNoBu
             var battle = new KaNoBuMoveNotificationModel.Battle
             {
                 battleResult = resolution.Outcome,
-                isDefenderFlag = to.FigureType == KaNoBuFigure.FigureTypes.ShipFlag,
                 attackerPlayerNumber = from.PlayerId,
                 defenderPlayerNumber = to.PlayerId,
-                attackerFigureType = resolution.Outcome == KaNoBuMoveNotificationModel.BattleResult.AttackerWon
+                attackerFigureType = resolution.Winner?.PlayerId == from.PlayerId
                     ? resolution.Winner.FigureType
                     : from.FigureType,
-                defenderFigureType = resolution.Outcome == KaNoBuMoveNotificationModel.BattleResult.DefenderWon
+                defenderFigureType = resolution.Winner?.PlayerId == to.PlayerId
                     ? resolution.Winner.FigureType
                     : to.FigureType
             };

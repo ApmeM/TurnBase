@@ -88,6 +88,33 @@ public class KaNoBuRulesTests
     }
 
     [Test]
+    public void FlagCapturedResultTransfersDefeatedPlayerFleetToAttacker()
+    {
+        var field = new KaNoBuField
+        {
+            Field = Field2D.Create(3, 2)
+        };
+        field.Field.SetFigure(0, 0, new FakeFlagCaptureFigure(1));
+        field.Field.SetFigure(1, 0, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipStone, 0));
+        field.Field.SetFigure(0, 1, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipPaper, 0));
+        field.Field.SetFigure(1, 1, KaNoBuFigure.Create(2, KaNoBuFigure.FigureTypes.ShipScissors, 0));
+        field.Field.SetFigure(2, 1, KaNoBuFigure.Create(3, KaNoBuFigure.FigureTypes.ShipScout, 0));
+
+        var rules = new KaNoBuRules(6);
+        var notification = rules.TryApplyMoveResponse(field, 1, new KaNoBuMoveResponseModel(
+            new List<KaNoBuMoveResponseModel.MoveStep>
+            {
+                new KaNoBuMoveResponseModel.MoveStep(new Point { X = 0, Y = 0 }, new Point { X = 1, Y = 0 })
+            }));
+
+        Assert.That(notification.MoveNotifications[0].Battle.Value.battleResult,
+            Is.EqualTo(KaNoBuMoveNotificationModel.BattleResult.FlagCaptured));
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(0, 1)).PlayerId, Is.EqualTo(1));
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(1, 1)).PlayerId, Is.EqualTo(1));
+        Assert.That(((KaNoBuFigure)field.Field.GetFigure(2, 1)).PlayerId, Is.EqualTo(3));
+    }
+
+    [Test]
     public void BattleShipTypesAreVisibleOnlyToBattleParticipants()
     {
         var field = new KaNoBuField
@@ -283,6 +310,25 @@ public class KaNoBuRulesTests
         public override BattleResolution ResolveBattle(KaNoBuFigure defender)
         {
             return BattleResolution.AttackerWon(KaNoBuFigure.Create(this.PlayerId, KaNoBuFigure.FigureTypes.ShipStone, 0));
+        }
+    }
+
+    private sealed class FakeFlagCaptureFigure : KaNoBuFigure
+    {
+        public FakeFlagCaptureFigure(int playerId)
+            : base(playerId, 0)
+        {
+        }
+
+        public override KaNoBuFigure.FigureTypes FigureType => KaNoBuFigure.FigureTypes.ShipUniversal;
+
+        public override bool IsMoveable => true;
+
+        public override Point[] GetPossibleMoveOffsets() => new[] { new Point(1, 0) };
+
+        public override BattleResolution ResolveBattle(KaNoBuFigure defender)
+        {
+            return BattleResolution.FlagCaptured(this);
         }
     }
 }

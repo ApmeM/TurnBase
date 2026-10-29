@@ -243,6 +243,8 @@ public partial class GameField :
                         movedUnit.CallbackAnimation((unit) => movedUnit.UnitHitAnimation());
                         movedUnit.CallbackAnimation((unit) => defenderUnit.UnitHitAnimation());
                         break;
+                    case KaNoBuMoveNotificationModel.BattleResult.FlagCaptured:
+                        // Flag captured => attacker won.
                     case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
                         // Attacker won
                         defenderUnit.UnitHitLogic();
