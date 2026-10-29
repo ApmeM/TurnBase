@@ -6,12 +6,32 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
 {
     private readonly KaNoBuRules mainRules;
 
-    public KaNoBuLevelRules(int size, bool visibleShips)
+    public KaNoBuLevelRules(
+        int size,
+        bool visibleShips,
+        IVictoryCondition victoryCondition = null,
+        IGameOverCondition gameOverCondition = null,
+        ILooseCondition looseCondition = null)
     {
         this.mainRules = new KaNoBuRules(size)
         {
             EnemyVisible = visibleShips
         };
+
+        if (victoryCondition != null)
+        {
+            this.mainRules.VictoryCondition = victoryCondition;
+        }
+
+        if (gameOverCondition != null)
+        {
+            this.mainRules.GameOverCondition = gameOverCondition;
+        }
+
+        if (looseCondition != null)
+        {
+            this.mainRules.LooseCondition = looseCondition;
+        }
     }
 
     public KaNoBuMoveResponseModel AutoMove(KaNoBuField mainField, int playerNumber)

@@ -23,12 +23,17 @@ public partial class LevelBase
 
     public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> Initialize()
     {
-        var rules = new KaNoBuLevelRules(8, true);
+        var rules = this.CreateRules();
         rules.SetInitialField(this.generateField());
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(rules, "level");
         game.AddPlayer(this);
         game.AddPlayer(new KaNoBuPlayerNoMove());
         return game;
+    }
+
+    protected virtual KaNoBuLevelRules CreateRules()
+    {
+        return new KaNoBuLevelRules(8, true);
     }
 
     public Field2D generateField()
