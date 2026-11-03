@@ -4,7 +4,7 @@ using TurnBase;
 using TurnBase.KaNoBu;
 
 [TestFixture]
-public class KaNoBuDefaultLooseConditionTests
+public class KaNoBuPlayerStatusTests
 {
     [Test]
     public void NoMoveableFiguresConditionDetectsLoss()
@@ -15,8 +15,8 @@ public class KaNoBuDefaultLooseConditionTests
         field.Field.SetFigure(1, 0, KaNoBuFigure.Create(0, KaNoBuFigure.FigureTypes.ShipMine, 0));
         field.Field.SetFigure(2, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0));
 
-        Assert.That(rules.LooseCondition.IsLooser(field, rules, 0), Is.True);
-        Assert.That(rules.LooseCondition.IsLooser(field, rules, 1), Is.False);
+        Assert.That(rules.LooseCondition.CheckCondition(field, rules, 0), Is.True);
+        Assert.That(rules.LooseCondition.CheckCondition(field, rules, 1), Is.False);
     }
 
     [Test]
@@ -88,36 +88,21 @@ public class KaNoBuDefaultLooseConditionTests
     }
 
     [Test]
-    public void AllPlayersLostConditionUsesPlayersActuallyInTheGame()
+    public void AtMostOneActivePlayerGameOverConditionUsesThePlayerLossCondition()
     {
-        var condition = new AllPlayersLostGameOverCondition();
-        var rules = new KaNoBuRules(6);
-        var field = CreateField();
-        field.LostPlayers.UnionWith(new[] { 0, 1, 2, 3 });
-
-        Assert.That(condition.IsGameOver(field, rules), Is.True);
-
-        field.LostPlayers.Remove(1);
-        field.Field.SetFigure(0, 0, KaNoBuFigure.Create(1, KaNoBuFigure.FigureTypes.ShipStone, 0));
-        Assert.That(condition.IsGameOver(field, rules), Is.False);
-    }
-
-    [Test]
-    public void AllButOnePlayersLostConditionUsesPlayersActuallyInTheGame()
-    {
-        var condition = new AllButOnePlayerLostGameOverCondition();
+        var condition = new AtMostOnePlayerGameOverCondition(new NotGameCondition(new PlayerLooseGameCondtion()));
         var rules = new KaNoBuRules(6);
         var field = CreateField();
         field.LostPlayers.UnionWith(new[] { 0, 1, 2 });
 
         Assert.That(condition.IsGameOver(field, rules), Is.True);
 
-        field.LostPlayers.Add(3);
+        field.LostPlayers.Remove(2);
         Assert.That(condition.IsGameOver(field, rules), Is.False);
     }
 
     [Test]
-    public void DisconnectedPlayerCanWinThroughAnotherVictoryCondition()
+    public void FindWinnersIncludesDisconnectedPlayerWhenCustomConditionMatches()
     {
         var rules = new KaNoBuRules(6)
         {
@@ -140,7 +125,7 @@ public class KaNoBuDefaultLooseConditionTests
         };
     }
 
-    private sealed class TerritoryVictoryCondition : IVictoryCondition
+    private sealed class TerritoryVictoryCondition : IGameCondition
     {
         private readonly int territoryOwner;
 
@@ -149,7 +134,7 @@ public class KaNoBuDefaultLooseConditionTests
             this.territoryOwner = territoryOwner;
         }
 
-        public bool IsWinner(KaNoBuField mainField, KaNoBuRules rules, int playerNumber)
+        public bool CheckCondition(KaNoBuField mainField, KaNoBuRules rules, int playerNumber)
         {
             return playerNumber == this.territoryOwner;
         }

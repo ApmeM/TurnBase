@@ -4,16 +4,26 @@ using TurnBase;
 using TurnBase.KaNoBu;
 
 [TestFixture]
-public class DefaultGameOverConditionTests
+public class KaNoBuDefaultGameOverConditionTests
 {
     [Test]
-    public void DefaultConditionEndsWhenAtMostOnePlayerCanPlay()
+    public void IsGameOverWhenAtMostOneConnectedPlayerHasMoveableFigures()
     {
         var rules = new KaNoBuRules(6);
 
         Assert.That(rules.GameOverCondition.IsGameOver(CreateField(), rules), Is.True);
         Assert.That(rules.GameOverCondition.IsGameOver(CreateField(0), rules), Is.True);
         Assert.That(rules.GameOverCondition.IsGameOver(CreateField(0, 1), rules), Is.False);
+    }
+
+    [Test]
+    public void IsGameOverIgnoresDisconnectedPlayers()
+    {
+        var rules = new KaNoBuRules(6);
+        var field = CreateField(0, 1);
+        field.DisconnectedPlayers.Add(1);
+
+        Assert.That(rules.GameOverCondition.IsGameOver(field, rules), Is.True);
     }
 
     private static KaNoBuField CreateField(params int[] activePlayers)

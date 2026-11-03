@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Linq;
 
 namespace TurnBase.KaNoBu
@@ -12,9 +11,13 @@ namespace TurnBase.KaNoBu
         public bool WithDocks;
         public int MaxMovesPerTurn = int.MaxValue;
         public bool EnemyVisible = false;
-        public IGameOverCondition GameOverCondition { get; set; } = new DefaultGameOverCondition();
-        public IVictoryCondition VictoryCondition { get; set; } = new DefaultVictoryCondition();
-        public ILooseCondition LooseCondition { get; set; } = new NoMoveableFiguresLooseCondition();
+        public IGameOverCondition GameOverCondition { get; set; } 
+            = new AtMostOnePlayerGameOverCondition(
+                new AndGameCondition(
+                    new PlayerHasMoveableFiguresGameCondition(),
+                    new NotGameCondition(new PlayerDisconnectedGameCondition())));
+        public IGameCondition VictoryCondition { get; set; } = new NotGameCondition(new HasAutoMoveGameCondition());
+        public IGameCondition LooseCondition { get; set; } = new NoMoveableFiguresGameCondition();
 
         public KaNoBuRules(int size)
         {
@@ -441,7 +444,7 @@ namespace TurnBase.KaNoBu
             var winners = new List<int>();
             for (var i = 0; i < GetMaxPlayersCount(); i++)
             {
-                if (this.VictoryCondition.IsWinner(kaNoBuField, this, i))
+                if (this.VictoryCondition.CheckCondition(kaNoBuField, this, i))
                 {
                     winners.Add(i);
                 }
@@ -464,6 +467,7 @@ namespace TurnBase.KaNoBu
         {
             field.DisconnectedPlayers.Add(playerNumber);
         }
+        
         private void UpdateLostPlayers(KaNoBuField field)
         {
             for (var playerNumber = 0; playerNumber < this.GetMaxPlayersCount(); playerNumber++)
@@ -475,7 +479,7 @@ namespace TurnBase.KaNoBu
 
                 // Note: Disconnected player still can win
                 // Note: Its loose condition should be checked separately.
-                if (this.LooseCondition.IsLooser(field, this, playerNumber))
+                if (this.LooseCondition.CheckCondition(field, this, playerNumber))
                 {
                     field.LostPlayers.Add(playerNumber);
                 }

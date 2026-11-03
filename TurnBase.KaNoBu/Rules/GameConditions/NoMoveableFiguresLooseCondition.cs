@@ -2,9 +2,9 @@ using TurnBase.KaNoBu;
 
 namespace TurnBase
 {
-    public class NoMoveableFiguresLooseCondition : ILooseCondition
+    public class NoMoveableFiguresGameCondition : IGameCondition
     {
-        public bool IsLooser(KaNoBuField mainField, KaNoBuRules rules, int playerNumber)
+        public bool CheckCondition(KaNoBuField mainField, KaNoBuRules rules, int playerNumber)
         {
             for (var x = 0; x < mainField.Field.Width; x++)
             {

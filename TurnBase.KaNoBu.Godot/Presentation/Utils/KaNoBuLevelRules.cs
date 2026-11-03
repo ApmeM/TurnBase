@@ -9,9 +9,9 @@ public class KaNoBuLevelRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseMo
     public KaNoBuLevelRules(
         int size,
         bool visibleShips,
-        IVictoryCondition victoryCondition = null,
+        IGameCondition victoryCondition = null,
         IGameOverCondition gameOverCondition = null,
-        ILooseCondition looseCondition = null)
+        IGameCondition looseCondition = null)
     {
         this.mainRules = new KaNoBuRules(size)
         {
