@@ -50,17 +50,7 @@ namespace TurnBase.KaNoBu
             this.myNumber = model.PlayerId;
             this.maxMovesPerTurn = model.Request.MaxMovesPerTurn;
 
-            var preparedField = Field2D.Create(model.Request.Width, model.Request.Height);
-            for (var i = 0; i < model.Request.Width; i++)
-            {
-                for (var j = 0; j < model.Request.Height; j++)
-                {
-                    var p = new Point { X = i, Y = j };
-                    var ship = model.Request.AvailableFigures[r.Next(model.Request.AvailableFigures.Count)];
-                    preparedField.SetFigure(p, KaNoBuFigure.Create(this.myNumber, ship, 0));
-                    model.Request.AvailableFigures.Remove(ship);
-                }
-            }
+            var preparedField = PlayerInitHelper.CreateRandomField(this.myNumber, model.Request);
 
             return new InitResponseModel<KaNoBuInitResponseModel>
             {

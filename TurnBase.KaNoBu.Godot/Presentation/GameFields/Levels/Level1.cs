@@ -54,19 +54,7 @@ public partial class Level1
             this.maxMovesPerTurn = model.Request.MaxMovesPerTurn;
             this.patrols.Clear();
 
-            var preparedField = Field2D.Create(model.Request.Width, model.Request.Height);
-            for (var i = 0; i < model.Request.Width; i++)
-            {
-                for (var j = 0; j < model.Request.Height; j++)
-                {
-                    token.ThrowIfCancellationRequested();
-
-                    var p = new Point { X = i, Y = j };
-                    var ship = model.Request.AvailableFigures[0];
-                    preparedField.SetFigure(p, KaNoBuFigure.Create(this.playerNumber, ship, 0));
-                    model.Request.AvailableFigures.Remove(ship);
-                }
-            }
+            var preparedField = PlayerInitHelper.CreateOrderedField(this.playerNumber, model.Request);
 
             return new InitResponseModel<KaNoBuInitResponseModel>
             {
