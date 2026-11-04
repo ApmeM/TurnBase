@@ -14,7 +14,7 @@ public partial class Level1
         this.FillMembers();
     }
 
-    protected override KaNoBuLevelRules CreateRules()
+    public override IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> CreateGame()
     {
         var victoryCondition = new ShipReachesColumnGameCondtion(6);
         var looseCondition = new NoMoveableFiguresGameCondition();
@@ -23,12 +23,19 @@ public partial class Level1
             new OrGameCondition(victoryCondition, looseCondition));
         var gameOverCondition = new AnyPlayerGameOverCondition(playerZeroGameOverCondition);
 
-        return new KaNoBuLevelRules(
+        var rules = new KaNoBuLevelRules(
             8,
             true,
             victoryCondition,
             gameOverCondition,
             looseCondition
             );
+
+        rules.SetInitialField(this.generateField());
+        
+        var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(rules, "level");
+        game.AddPlayer(this);
+        game.AddPlayer(new KaNoBuPlayerNoMove());
+        return game;
     }
 }

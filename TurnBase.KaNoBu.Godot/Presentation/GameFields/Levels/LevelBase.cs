@@ -21,9 +21,9 @@ public partial class LevelBase
         this.castle.UpdateBitmaskRegion();
     }
 
-    public IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> Initialize()
+    public virtual IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> CreateGame()
     {
-        var rules = this.CreateRules();
+        var rules = new KaNoBuLevelRules(8, true);
         rules.SetInitialField(this.generateField());
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(rules, "level");
         game.AddPlayer(this);
@@ -31,12 +31,7 @@ public partial class LevelBase
         return game;
     }
 
-    protected virtual KaNoBuLevelRules CreateRules()
-    {
-        return new KaNoBuLevelRules(8, true);
-    }
-
-    public Field2D generateField()
+    protected Field2D generateField()
     {
         var cells = this.field.GetUsedCells().Cast<Vector2>().ToList();
 

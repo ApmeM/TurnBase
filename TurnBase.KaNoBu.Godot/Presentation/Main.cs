@@ -57,7 +57,7 @@ public partial class Main
     {
         var godotPlayer = mapUnit.GameToLaunch.Instance<LevelBase>();
 
-        var game = godotPlayer.Initialize();
+        var game = godotPlayer.CreateGame();
         game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
         this.AttachReplayStorageListener(game);
         var result = await this.StartGame(godotPlayer, game);
