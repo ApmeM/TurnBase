@@ -8,7 +8,7 @@ public class AndGameConditionTests
     [Test]
     public void CheckConditionReturnsTrueWhenAllConditionsAreTrue()
     {
-        var condition = new AndGameCondition(new FixedCondition(true), new FixedCondition(true));
+        var condition = new AndGameCondition(new FixedGameCondition(true), new FixedGameCondition(true));
 
         Assert.That(condition.CheckCondition(null, null, 3), Is.True);
     }
@@ -16,7 +16,7 @@ public class AndGameConditionTests
     [Test]
     public void CheckConditionReturnsFalseWhenAnyConditionIsFalse()
     {
-        var condition = new AndGameCondition(new FixedCondition(true), new FixedCondition(false));
+        var condition = new AndGameCondition(new FixedGameCondition(true), new FixedGameCondition(false));
 
         Assert.That(condition.CheckCondition(null, null, 3), Is.False);
     }
@@ -27,18 +27,4 @@ public class AndGameConditionTests
         Assert.That(new AndGameCondition().CheckCondition(null, null, 3), Is.True);
     }
 
-    private sealed class FixedCondition : IGameCondition
-    {
-        private readonly bool result;
-
-        public FixedCondition(bool result)
-        {
-            this.result = result;
-        }
-
-        public bool CheckCondition(KaNoBuField mainField, KaNoBuRules rules, int playerNumber)
-        {
-            return this.result;
-        }
-    }
 }

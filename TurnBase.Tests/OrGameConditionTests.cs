@@ -8,7 +8,7 @@ public class OrGameConditionTests
     [Test]
     public void CheckConditionReturnsTrueWhenAnyConditionIsTrue()
     {
-        var condition = new OrGameCondition(new FixedCondition(false), new FixedCondition(true));
+        var condition = new OrGameCondition(new FixedGameCondition(false), new FixedGameCondition(true));
 
         Assert.That(condition.CheckCondition(null, null, 3), Is.True);
     }
@@ -16,7 +16,7 @@ public class OrGameConditionTests
     [Test]
     public void CheckConditionReturnsFalseWhenAllConditionsAreFalse()
     {
-        var condition = new OrGameCondition(new FixedCondition(false), new FixedCondition(false));
+        var condition = new OrGameCondition(new FixedGameCondition(false), new FixedGameCondition(false));
 
         Assert.That(condition.CheckCondition(null, null, 3), Is.False);
     }
@@ -27,18 +27,4 @@ public class OrGameConditionTests
         Assert.That(new OrGameCondition().CheckCondition(null, null, 3), Is.False);
     }
 
-    private sealed class FixedCondition : IGameCondition
-    {
-        private readonly bool result;
-
-        public FixedCondition(bool result)
-        {
-            this.result = result;
-        }
-
-        public bool CheckCondition(KaNoBuField mainField, KaNoBuRules rules, int playerNumber)
-        {
-            return this.result;
-        }
-    }
 }

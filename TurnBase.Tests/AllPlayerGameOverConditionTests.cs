@@ -9,17 +9,15 @@ public class AllPlayerGameOverConditionTests
     [Test]
     public void IsGameOverReturnsTrueWhenEveryPlayerMeetsTheCondition()
     {
-        var condition = new AllPlayerGameOverCondition(
-            new AndGameCondition(new FixedCondition(true), new FixedCondition(true)));
+        var condition = new AllPlayerGameOverCondition(new FixedGameCondition(true));
 
         Assert.That(condition.IsGameOver(CreateField(), new KaNoBuRules(6)), Is.True);
     }
 
     [Test]
-    public void IsGameOverReturnsFalseWhenCombinedConditionIsFalseForEveryPlayer()
+    public void IsGameOverReturnsFalseWhenConditionIsFalseForEveryPlayer()
     {
-        var condition = new AllPlayerGameOverCondition(
-            new AndGameCondition(new FixedCondition(true), new FixedCondition(false)));
+        var condition = new AllPlayerGameOverCondition(new FixedGameCondition(false));
 
         Assert.That(condition.IsGameOver(CreateField(), new KaNoBuRules(6)), Is.False);
     }
@@ -29,18 +27,4 @@ public class AllPlayerGameOverConditionTests
         return new KaNoBuField { Field = Field2D.Create(1, 1), DisconnectedPlayers = new HashSet<int>() };
     }
 
-    private sealed class FixedCondition : IGameCondition
-    {
-        private readonly bool result;
-
-        public FixedCondition(bool result)
-        {
-            this.result = result;
-        }
-
-        public bool CheckCondition(KaNoBuField mainField, KaNoBuRules rules, int playerNumber)
-        {
-            return this.result;
-        }
-    }
 }
