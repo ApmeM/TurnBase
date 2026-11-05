@@ -119,9 +119,8 @@ namespace TurnBase.KaNoBu
             }
             else
             {
-                var rules = new KaNoBuRules(parameters.FieldSize)
+                var rules = new KaNoBuRules(parameters.FieldSize, parameters.WithDocks)
                 {
-                    WithDocks = parameters.WithDocks,
                     EnemyVisible = parameters.EnemyVisible,
                     MaxMovesPerTurn = parameters.MaxMovesPerTurn
                 };

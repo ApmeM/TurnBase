@@ -6,33 +6,52 @@ namespace TurnBase.KaNoBu
 {
     public class KaNoBuRules : IGameRules<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>
     {
-        private readonly int size;
-
-        public bool WithDocks;
         public int MaxMovesPerTurn = int.MaxValue;
+
         public bool EnemyVisible = false;
-        public IGameOverCondition GameOverCondition { get; set; } 
+        public IGameOverCondition GameOverCondition
             = new AtMostOnePlayerGameOverCondition(
                 new AndGameCondition(
                     new PlayerHasMoveableFiguresGameCondition(),
                     new NotGameCondition(new PlayerDisconnectedGameCondition())));
-        public IGameCondition VictoryCondition { get; set; } = new NotGameCondition(new HasAutoMoveGameCondition());
-        public IGameCondition LooseCondition { get; set; } = new NoMoveableFiguresGameCondition();
+        public IGameCondition VictoryCondition = new NotGameCondition(new HasAutoMoveGameCondition());
+        public IGameCondition LooseCondition = new NoMoveableFiguresGameCondition();
+        public Field2D field;
 
-        public KaNoBuRules(int size)
+        public KaNoBuRules(int size, bool withDocks = false) 
+            : this(GenerateEmptyField(size, withDocks))
+        {
+        }
+
+        public KaNoBuRules(Field2D field)
+        {
+            if (field == null)
+            {
+                throw new Exception("Field is not initialized.");
+            }
+
+            this.field = field;
+        }
+
+        public KaNoBuField GenerateGameField()
+        {
+            return new KaNoBuField
+            {
+                Field = field,
+                DisconnectedPlayers = new HashSet<int>(),
+                LostPlayers = new HashSet<int>()
+            };
+        }
+
+        private static Field2D GenerateEmptyField(int size, bool withDocks)
         {
             if (size < 6)
             {
                 throw new Exception("Min size is 6.");
             }
 
-            this.size = size;
-        }
-
-        public KaNoBuField GenerateGameField()
-        {
-            var field = Field2D.Create(this.size, this.size);
-            if (this.WithDocks)
+            var field = Field2D.Create(size, size);
+            if (withDocks)
             {
                 var blockSize = size / 3;
                 for (var i = 0; i < blockSize; i++)
@@ -46,13 +65,7 @@ namespace TurnBase.KaNoBu
                     }
                 }
             }
-
-            return new KaNoBuField
-            {
-                Field = field,
-                DisconnectedPlayers = new HashSet<int>(),
-                LostPlayers = new HashSet<int>()
-            };
+            return field;
         }
 
         public int GetMaxPlayersCount()
@@ -78,8 +91,8 @@ namespace TurnBase.KaNoBu
 
         public KaNoBuInitModel GetInitModelForPlayer(int playerNumber)
         {
-            var initFieldHeight = size / 3;
-            var initFieldWidth = size - 2 * initFieldHeight;
+            var initFieldHeight = this.field.Height / 3;
+            var initFieldWidth = this.field.Width - 2 * initFieldHeight;
 
             var availableShips = new List<KaNoBuFigure.FigureTypes>();
             var fieldSize = initFieldWidth * initFieldHeight;
@@ -101,7 +114,7 @@ namespace TurnBase.KaNoBu
             return new KaNoBuInitModel(initFieldWidth, initFieldHeight, availableShips, this.MaxMovesPerTurn);
         }
 
-        public bool TryApplyInitResponse(KaNoBuField kaNoBuField, int playerNumber, KaNoBuInitResponseModel initResponse)
+        public virtual bool TryApplyInitResponse(KaNoBuField kaNoBuField, int playerNumber, KaNoBuInitResponseModel initResponse)
         {
             var preparedField = initResponse.Field;
             var mainField = kaNoBuField.Field;
@@ -144,8 +157,8 @@ namespace TurnBase.KaNoBu
                 return false;
             }
 
-            var initFieldHeight = size / 3;
-            var initFieldWidth = size - 2 * initFieldHeight;
+            var initFieldHeight = this.field.Height / 3;
+            var initFieldWidth = this.field.Width - 2 * initFieldHeight;
 
             var mainHeight = mainField.Height;
             var mainWidth = mainField.Width;
@@ -467,12 +480,13 @@ namespace TurnBase.KaNoBu
         {
             field.DisconnectedPlayers.Add(playerNumber);
         }
-        
+
         private void UpdateLostPlayers(KaNoBuField field)
         {
             for (var playerNumber = 0; playerNumber < this.GetMaxPlayersCount(); playerNumber++)
             {
-                if (field.LostPlayers.Contains(playerNumber)){
+                if (field.LostPlayers.Contains(playerNumber))
+                {
                     // Player already lost.
                     continue;
                 }

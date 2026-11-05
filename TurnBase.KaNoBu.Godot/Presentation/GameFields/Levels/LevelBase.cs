@@ -23,8 +23,11 @@ public partial class LevelBase
 
     public virtual IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> CreateGame()
     {
-        var rules = new KaNoBuLevelRules(8, true);
-        rules.SetInitialField(this.generateField());
+        var rules = new KaNoBuRulesPredefinedFieldWithShips(this.generateField())
+        {
+            EnemyVisible = true
+        };
+
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(rules, "level");
         game.AddPlayer(this);
         game.AddPlayer(new KaNoBuPlayerNoMove());

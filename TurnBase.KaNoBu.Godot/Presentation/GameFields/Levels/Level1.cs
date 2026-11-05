@@ -19,20 +19,20 @@ public partial class Level1
     {
         var victoryCondition = new ShipReachesColumnGameCondtion(6);
         var looseCondition = new NoMoveableFiguresGameCondition();
-        var playerZeroGameOverCondition = new AndGameCondition(
-            new PlayerFilterGameCondtion(0),
-            new OrGameCondition(victoryCondition, looseCondition));
-        var gameOverCondition = new AnyPlayerGameOverCondition(playerZeroGameOverCondition);
+        var gameOverCondition = new AnyPlayerGameOverCondition(
+            new AndGameCondition(
+                new PlayerFilterGameCondtion(0),
+                new OrGameCondition(victoryCondition, looseCondition)));
 
-        var rules = new KaNoBuLevelRules(
-            8,
-            true,
-            victoryCondition,
-            gameOverCondition,
-            looseCondition
-            );
+        var field = this.generateField();
 
-        rules.SetInitialField(this.generateField());
+        var rules = new KaNoBuRulesPredefinedFieldWithShips(field)
+        {
+            EnemyVisible = true,
+            VictoryCondition = victoryCondition,
+            LooseCondition = looseCondition,
+            GameOverCondition = gameOverCondition
+        };
 
         var game = new Game<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel, KaNoBuField>(rules, "level");
         game.AddPlayer(this);
