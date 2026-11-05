@@ -17,7 +17,7 @@ public partial class GameField :
     public PackedScene GameInitScene;
     public int playerId { get; private set; } = -1;
     private int maxMovesPerTurn = int.MaxValue;
-    public List<int> Winners { get; private set; }
+    public List<int> Winners { get; private set; } = new List<int>();
     private KaNoBuFieldMemorization memorizedField = new KaNoBuFieldMemorization();
     private readonly List<Unit> movePreviews = new List<Unit>();
 
@@ -149,6 +149,7 @@ public partial class GameField :
     public void GameStarted()
     {
         this.playerId = -1;
+        this.Winners.Clear();
 
         this.field.RemoveChildren();
         this.memorizedField.Clear();
@@ -287,7 +288,8 @@ public partial class GameField :
 
     public async void GameFinished(List<int> winners)
     {
-        this.Winners = winners;
+        this.Winners.Clear();
+        this.Winners.AddRange(winners);
 
         _ = MoveCameraToCenter();
     }
