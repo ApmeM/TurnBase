@@ -13,27 +13,17 @@ public partial class Main
     [Export]
     public PackedScene Replay;
 
-    [Export]
-    public PackedScene GameField;
-
     private List<ICommunicationModel> lastReplay;
 
     public override void _Ready()
     {
         this.FillMembers();
 
-        this.startCustomButton.Connect(CommonSignals.Pressed, this, nameof(OnStartCustomGame));
-        this.startConnectButton.Connect(CommonSignals.Pressed, this, nameof(OnStartConnectGame));
         this.levelMap.Connect(nameof(LevelMap.LevelSelected), this, nameof(OnStartLevelGame));
         this.replayButton.Connect(CommonSignals.Pressed, this, nameof(OnStartReplayGame));
 
         this.exitGameButton.Connect(CommonSignals.Pressed, this, nameof(EndCurrentGame));
         this.mainMenuButton.Connect(CommonSignals.Pressed, this, nameof(ShowMainMenuPopup));
-        this.customButton.Connect(CommonSignals.Pressed, this, nameof(ShowCustomPopup));
-        this.connectButton.Connect(CommonSignals.Pressed, this, nameof(ShowConnectPopup));
-
-        this.serverMyIpInfo.Text = "Your IP address: " + string.Join(", ", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
-        this.clientMyIpInfo.Text = "Your IP address: " + string.Join(", ", IP.GetLocalAddresses().Cast<string>().Where(a => !a.Contains(":")));
 
         PlayerFailProtection<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>.logger = new GDLogger();
     }
@@ -43,21 +33,18 @@ public partial class Main
         this.mainMenuPopup.Show();
     }
 
-    private void ShowCustomPopup()
-    {
-        this.customPopup.Show();
-    }
-
-    private void ShowConnectPopup()
-    {
-        this.connectPopup.Show();
-    }
-
     private async void OnStartLevelGame(LevelMapUnit mapUnit)
     {
-        var godotPlayer = mapUnit.GameToLaunch.Instance<LevelBase>();
+        var godotPlayer = mapUnit.GameToLaunch.Instance<GameField>();
+        this.AddChild(godotPlayer);
 
-        var game = godotPlayer.CreateGame();
+        var game = await godotPlayer.CreateGame();
+        if (game == null)
+        {
+            godotPlayer.QueueFree();
+            return;
+        }
+
         game.AddGameLogListener(new ReadableLogger<KaNoBuMoveNotificationModel>(new GDLogger()));
         this.AttachReplayStorageListener(game);
         var result = await this.StartGame(godotPlayer, game);
@@ -73,6 +60,8 @@ public partial class Main
         }
 
         var godotPlayer = this.Replay.Instance<GameField>();
+        this.AddChild(godotPlayer);
+
         var game = new ReplayGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>(new List<ICommunicationModel>(this.lastReplay))
         {
             playerTurnDelayAction = async () => await this.GetTree().CreateTimer(0.5f).ToMySignal(CommonSignals.Timeout)
@@ -84,73 +73,6 @@ public partial class Main
         await this.StartGame(godotPlayer, game);
     }
 
-    private async void OnStartCustomGame()
-    {
-        // server
-        var parameters = new KaNoBuPlayerFactory.GameParameters
-        {
-            IsClient = false,
-            GameId = "local" + Guid.NewGuid().ToString(),
-            ServerAddress = null,
-            FieldSize = (int)this.mapSizeSelector.Value,
-            WithDocks = this.withDocksSelector.Pressed,
-            EnemyVisible = this.allShipsVisibleSelector.Pressed,
-            MaxMovesPerTurn = (int)this.maxMovesPerTurnSelector.Value,
-            PlayerTypes = new[]{
-                this.serverPlayer1,
-                this.serverPlayer2,
-                this.serverPlayer3,
-                this.serverPlayer4,
-            }.Select(a => (KaNoBuPlayerType)a.GetSelectedId()).ToList()
-        };
-
-        var godotPlayer = this.GameField.Instance<GameField>();
-        var game = KaNoBuPlayerFactory.CreateGame(
-            parameters,
-            godotPlayer,
-            this.client,
-            new GDLogger(),
-            this.server,
-            async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout));
-
-        if (game == null)
-        {
-            GD.PrintErr("TODO: Failed to create game popup.");
-            return;
-        }
-
-        this.AttachReplayStorageListener(game);
-        await this.StartGame(godotPlayer, game);
-    }
-
-    private async void OnStartConnectGame()
-    {
-        var parameters = new KaNoBuPlayerFactory.GameParameters
-        {
-            IsClient = true,
-            GameId = null,
-            ServerAddress = $"http://{this.serverIpInput.Text}:8080",
-            PlayerTypes = new List<KaNoBuPlayerType> { (KaNoBuPlayerType)this.clientPlayer.GetSelectedId() }
-        };
-
-        var godotPlayer = this.GameField.Instance<GameField>();
-        var game = KaNoBuPlayerFactory.CreateGame(
-            parameters,
-            godotPlayer,
-            this.client,
-            new GDLogger(),
-            this.server,
-            async (delay) => await this.GetTree().CreateTimer(delay / 1000f).ToMySignal(CommonSignals.Timeout));
-
-        if (game == null)
-        {
-            GD.PrintErr("TODO: Failed to create game popup.");
-            return;
-        }
-
-        this.AttachReplayStorageListener(game);
-        await this.StartGame(godotPlayer, game);
-    }
     private CancellationTokenSource currentGameCancellationTokenSource;
 
     private async Task<bool> StartGame(
@@ -162,8 +84,6 @@ public partial class Main
             return false;
         }
 
-        this.customPopup.Hide();
-        this.connectPopup.Hide();
         this.mainMenuPopup.Hide();
 
         this.levelMap.Hide();
@@ -171,7 +91,6 @@ public partial class Main
         this.mainScreenButtonContainer.Visible = false;
         this.inGameButtonContainer.Visible = true;
 
-        this.AddChild(godotPlayer);
         this.SetCameraLimits(godotPlayer.Water);
 
         this.draggableCamera.Current = true;

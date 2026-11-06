@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Godot;
 using TurnBase;
 using TurnBase.KaNoBu;
@@ -21,7 +22,7 @@ public partial class LevelBase
         this.castle.UpdateBitmaskRegion();
     }
 
-    public virtual IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> CreateGame()
+    public override async Task<IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>> CreateGame()
     {
         var rules = new KaNoBuRulesPredefinedFieldWithShips(this.generateField())
         {

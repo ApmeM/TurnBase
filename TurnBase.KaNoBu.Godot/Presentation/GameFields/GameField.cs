@@ -23,6 +23,11 @@ public partial class GameField :
 
     public TileMap Water => this.water;
 
+    public virtual async Task<IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>> CreateGame()
+    {
+        return null;
+    }
+
     #region IPlayer region
 
     public async Task<InitResponseModel<KaNoBuInitResponseModel>> Init(InitModel<KaNoBuInitModel> model, CancellationToken token = default)
@@ -176,6 +181,35 @@ public partial class GameField :
             return;
         }
 
+        var needUpdateBitmask = false;
+        for (var x = 0; x < mainField.Width; x++)
+        {
+            for (var y = 0; y < mainField.Height; y++)
+            {
+                var pos = new Vector2(x, y);
+                if (this.field.GetCellv(pos) == 4 && mainField.GetWall(x, y))
+                {
+                    this.field.SetCellv(pos, -1);
+                }
+                if (this.field.GetCellv(pos) == -1 && !mainField.GetWall(x, y))
+                {
+                    this.field.SetCellv(pos, 4);
+                    this.beach.SetCellv(pos, -1);
+                    this.castle.SetCellv(pos, -1);
+                    this.castle.SetCellv(pos + Vector2.Down, -1);
+                    this.castle.SetCellv(pos + Vector2.Up, -1);
+                    this.castle.SetCellv(pos + Vector2.Left, -1);
+                    this.castle.SetCellv(pos + Vector2.Right, -1);
+                    needUpdateBitmask = true;
+                }
+            }
+        }
+        if (needUpdateBitmask)
+        {
+            this.beach.UpdateBitmaskRegion();
+            this.castle.UpdateBitmaskRegion();
+        }
+
         for (var x = 0; x < mainField.Width; x++)
         {
             for (var y = 0; y < mainField.Height; y++)
@@ -245,7 +279,7 @@ public partial class GameField :
                         movedUnit.CallbackAnimation((unit) => defenderUnit.UnitHitAnimation());
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.FlagCaptured:
-                        // Flag captured => attacker won.
+                    // Flag captured => attacker won.
                     case KaNoBuMoveNotificationModel.BattleResult.AttackerWon:
                         // Attacker won
                         defenderUnit.UnitHitLogic();

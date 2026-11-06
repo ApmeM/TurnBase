@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Presentation/GameFields/LevelMap.cs" type="Script" id=1]
 [ext_resource path="res://Presentation/GameFields/GameField.tscn" type="PackedScene" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://Presentation/GameFields/Levels/LevelMapUnit.tscn" type="PackedScene" id=6]
 [ext_resource path="res://gd-plugins/gd-highlitePointer/HighlitePointer.tscn" type="PackedScene" id=7]
 [ext_resource path="res://gd-plugins/gd-dialog/Dialog.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Presentation/GameFields/Levels/LevelCustom.tscn" type="PackedScene" id=9]
 
 [node name="LevelMap" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
@@ -39,6 +40,14 @@ GameToLaunch = ExtResource( 5 )
 [node name="Player" parent="FieldContainer/Field" index="2" instance=ExtResource( 3 )]
 position = Vector2( 85, 670 )
 IsSelected = true
+
+[node name="CustomGame" parent="FieldContainer/Field" index="3" instance=ExtResource( 6 )]
+position = Vector2( 202, 469 )
+UnitType = 8
+PlayerNumber = 1
+IsClickable = true
+LevelDescription = "Custom"
+GameToLaunch = ExtResource( 9 )
 
 [node name="MoveButtons" parent="UIOverlay" index="1"]
 visible = false

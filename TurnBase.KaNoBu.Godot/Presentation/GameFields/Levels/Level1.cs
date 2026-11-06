@@ -15,7 +15,7 @@ public partial class Level1
         this.FillMembers();
     }
 
-    public override IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel> CreateGame()
+    public override async Task<IGame<KaNoBuInitModel, KaNoBuInitResponseModel, KaNoBuMoveModel, KaNoBuMoveResponseModel, KaNoBuMoveNotificationModel>> CreateGame()
     {
         var victoryCondition = new ShipReachesColumnGameCondtion(6);
         var looseCondition = new NoMoveableFiguresGameCondition();
