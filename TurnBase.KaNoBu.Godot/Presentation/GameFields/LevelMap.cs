@@ -15,7 +15,7 @@ public partial class LevelMap
         {
             if (mapUnit is LevelMapUnit levelMapUnit)
             {
-                levelMapUnit.Connect(nameof(Unit.UnitClicked), this, nameof(OnLevelPressed), new Godot.Collections.Array { levelMapUnit });
+                levelMapUnit.Connect(nameof(LevelMapUnit.UnitClicked), this, nameof(OnLevelPressed), new Godot.Collections.Array { levelMapUnit });
             }
         }
 
