@@ -273,9 +273,9 @@ public partial class GameField :
                         movedUnit.UnitHitLogic();
                         defenderUnit.UnitHitLogic();
                         movedUnit.AttackLogic();
-                        movedUnit.CallbackAnimation((unit) => movedUnit.RotateUnitToAnimation(toWorldPos));
-                        movedUnit.CallbackAnimation((unit) => movedUnit.AttackAnimation());
-                        movedUnit.CallbackAnimation((unit) => movedUnit.UnitHitAnimation());
+                        _ = movedUnit.RotateUnitToAnimation(toWorldPos);
+                        _ = movedUnit.AttackAnimation();
+                        _ = movedUnit.UnitHitAnimation();
                         movedUnit.CallbackAnimation((unit) => defenderUnit.UnitHitAnimation());
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.FlagCaptured:
@@ -285,17 +285,17 @@ public partial class GameField :
                         defenderUnit.UnitHitLogic();
                         movedUnit.MoveUnitToLogic(toMapPos);
                         movedUnit.AttackLogic();
-                        movedUnit.CallbackAnimation((unit) => movedUnit.RotateUnitToAnimation(toWorldPos));
-                        movedUnit.CallbackAnimation((unit) => movedUnit.AttackAnimation());
+                        _ = movedUnit.RotateUnitToAnimation(toWorldPos);
+                        _ = movedUnit.AttackAnimation();
                         movedUnit.CallbackAnimation((unit) => defenderUnit.UnitHitAnimation());
-                        movedUnit.CallbackAnimation((unit) => movedUnit.MoveUnitToAnimation(toWorldPos));
+                        _ = movedUnit.MoveUnitToAnimation(toWorldPos);
                         break;
                     case KaNoBuMoveNotificationModel.BattleResult.DefenderWon:
                         // Defender won
                         movedUnit.UnitHitLogic();
                         defenderUnit.AttackLogic();
-                        defenderUnit.CallbackAnimation((unit) => defenderUnit.RotateUnitToAnimation(movedUnit.Position));
-                        defenderUnit.CallbackAnimation((unit) => defenderUnit.AttackAnimation());
+                        _ = defenderUnit.RotateUnitToAnimation(movedUnit.Position);
+                        _ = defenderUnit.AttackAnimation();
                         defenderUnit.CallbackAnimation((unit) => movedUnit.UnitHitAnimation());
                         break;
                     default:
@@ -306,8 +306,8 @@ public partial class GameField :
             {
                 // No battle - swim here.
                 movedUnit.MoveUnitToLogic(toMapPos);
-                movedUnit.CallbackAnimation((unit) => movedUnit.RotateUnitToAnimation(toWorldPos));
-                movedUnit.CallbackAnimation((unit) => movedUnit.MoveUnitToAnimation(toWorldPos));
+                _ = movedUnit.RotateUnitToAnimation(toWorldPos);
+                _ = movedUnit.MoveUnitToAnimation(toWorldPos);
             }
         }
 

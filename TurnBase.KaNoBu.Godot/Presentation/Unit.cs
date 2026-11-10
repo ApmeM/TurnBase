@@ -179,7 +179,12 @@ public partial class Unit
         this.IsDead = true;
     }
 
-    public async Task UnitHitAnimation()
+    public Task UnitHitAnimation()
+    {
+        return this.EnqueueAnimation(this.PlayUnitHitAnimation);
+    }
+
+    private async Task PlayUnitHitAnimation()
     {
         var texture = (AtlasTexture)this.ship.Texture;
 
@@ -193,8 +198,6 @@ public partial class Unit
         this.ZIndex = -1;
     }
 
-    // Records the non-animation side effects of an attack.  This allows a
-    // battle sequence to await the projectile before starting the hit effect.
     public void AttackLogic()
     {
         var star = (TextureRect)this.starExample.Duplicate();
@@ -206,7 +209,12 @@ public partial class Unit
         }
     }
 
-    public async Task AttackAnimation()
+    public Task AttackAnimation()
+    {
+        return this.EnqueueAnimation(this.PlayAttackAnimation);
+    }
+
+    private async Task PlayAttackAnimation()
     {
         const float MOVE_SPEED = 200;
 
@@ -231,7 +239,12 @@ public partial class Unit
         this.TargetPositionMap = newCell;
     }
 
-    public async Task MoveUnitToAnimation(Vector2 newPosition)
+    public Task MoveUnitToAnimation(Vector2 newPosition)
+    {
+        return this.EnqueueAnimation(() => this.PlayMoveUnitToAnimation(newPosition));
+    }
+
+    private async Task PlayMoveUnitToAnimation(Vector2 newPosition)
     {
         this.waveGenerator.Start();
         const float MOVE_SPEED = 160;
@@ -244,7 +257,12 @@ public partial class Unit
         tween.QueueFree();
     }
 
-    public async Task RotateUnitToAnimation(Vector2 lookAtPosition)
+    public Task RotateUnitToAnimation(Vector2 lookAtPosition)
+    {
+        return this.EnqueueAnimation(() => this.PlayRotateUnitToAnimation(lookAtPosition));
+    }
+
+    private async Task PlayRotateUnitToAnimation(Vector2 lookAtPosition)
     {
         var newRotation = (lookAtPosition - this.Position).Angle() - Mathf.Pi / 2;
         var rotationDistance = Math.Abs(newRotation - this.Rotation);
@@ -272,7 +290,28 @@ public partial class Unit
 
     public void CallbackAnimation(Func<Unit, Task> callback)
     {
-        this.PendingAnimations.Enqueue(() => callback(this));
+        this.EnqueueAnimation(() => callback(this));
+    }
+
+    private Task EnqueueAnimation(Func<Task> animation)
+    {
+        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cancellationRegistration = this.currentActionCancellation.Token.Register(() => completion.TrySetResult(true));
+        this.PendingAnimations.Enqueue(async () =>
+        {
+            cancellationRegistration.Dispose();
+            try
+            {
+                await animation();
+                completion.TrySetResult(true);
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+                throw;
+            }
+        });
+        return completion.Task;
     }
 
     public void CancelAnimations()

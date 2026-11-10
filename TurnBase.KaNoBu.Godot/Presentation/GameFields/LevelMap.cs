@@ -49,8 +49,8 @@ public partial class LevelMap
         {
             this.GetTree().SetInputAsHandled();
             this.player.CancelAnimations();
-            this.player.CallbackAnimation((unit) => unit.RotateUnitToAnimation(mouseEvent.Position));
-            this.player.CallbackAnimation((unit) => unit.MoveUnitToAnimation(mouseEvent.Position));
+            _ = this.player.RotateUnitToAnimation(mouseEvent.Position);
+            _ = this.player.MoveUnitToAnimation(mouseEvent.Position);
         }
     }
 
@@ -58,8 +58,8 @@ public partial class LevelMap
     {
         GD.Print("LevelMap: OnLevelPressed");
         this.player.CancelAnimations();
-        this.player.CallbackAnimation((unit) => unit.RotateUnitToAnimation(mapUnit.Position));
-        this.player.CallbackAnimation((unit) => unit.MoveUnitToAnimation(mapUnit.Position - (mapUnit.Position - this.player.Position).Normalized() * 64));
+        _ = this.player.RotateUnitToAnimation(mapUnit.Position);
+        _ = this.player.MoveUnitToAnimation(mapUnit.Position - (mapUnit.Position - this.player.Position).Normalized() * 64);
         this.player.CallbackAnimation((unit) => mapUnit.RotateUnitToAnimation(this.player.Position));
         this.player.CallbackAnimation(async (unit) => this.EmitSignal(nameof(LevelSelected), mapUnit));
     }

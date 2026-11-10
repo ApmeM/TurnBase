@@ -192,31 +192,31 @@ public partial class GameInit : IGameInit
         unitFrom.CancelAnimations();
         if (unitFrom.Position.y >= centerBottomPos.y)
         {
-            unitFrom.CallbackAnimation((u) => u.RotateUnitToAnimation(centerBottomPos));
-            unitFrom.CallbackAnimation((u) => u.MoveUnitToAnimation(centerBottomPos));
+            _ = unitFrom.RotateUnitToAnimation(centerBottomPos);
+            _ = unitFrom.MoveUnitToAnimation(centerBottomPos);
         }
         if (unitFrom.Position.y >= centerTopPos.y)
         {
-            unitFrom.CallbackAnimation((u) => u.RotateUnitToAnimation(centerTopPos));
-            unitFrom.CallbackAnimation((u) => u.MoveUnitToAnimation(centerTopPos));
+            _ = unitFrom.RotateUnitToAnimation(centerTopPos);
+            _ = unitFrom.MoveUnitToAnimation(centerTopPos);
         }
-        unitFrom.CallbackAnimation((u) => u.RotateUnitToAnimation(toPos));
-        unitFrom.CallbackAnimation((u) => u.MoveUnitToAnimation(toPos));
+        _ = unitFrom.RotateUnitToAnimation(toPos);
+        _ = unitFrom.MoveUnitToAnimation(toPos);
 
         unitTo?.MoveUnitToLogic(fromMap);
         unitTo?.CancelAnimations();
         if (unitTo?.Position.y < centerTopPos.y && !fromMap.HasValue)
         {
-            unitTo?.CallbackAnimation((u) => u.RotateUnitToAnimation(centerTopPos));
-            unitTo?.CallbackAnimation((u) => u.MoveUnitToAnimation(centerTopPos));
+            _ = unitTo?.RotateUnitToAnimation(centerTopPos);
+            _ = unitTo?.MoveUnitToAnimation(centerTopPos);
         }
         if (unitTo?.Position.y < centerBottomPos.y && !fromMap.HasValue)
         {
-            unitTo?.CallbackAnimation((u) => u.RotateUnitToAnimation(centerBottomPos));
-            unitTo?.CallbackAnimation((u) => u.MoveUnitToAnimation(centerBottomPos));
+            _ = unitTo?.RotateUnitToAnimation(centerBottomPos);
+            _ = unitTo?.MoveUnitToAnimation(centerBottomPos);
         }
-        unitTo?.CallbackAnimation((u) => u.RotateUnitToAnimation(fromPos));
-        unitTo?.CallbackAnimation((u) => u.MoveUnitToAnimation(fromPos));
+        _ = unitTo?.RotateUnitToAnimation(fromPos);
+        _ = unitTo?.MoveUnitToAnimation(fromPos);
 
         UpdateBattleButton();
     }
@@ -268,16 +268,16 @@ public partial class GameInit : IGameInit
             units[i].CancelAnimations();
             if (units[i].Position.y > centerBottomPos.y)
             {
-                units[i].CallbackAnimation((u) => u.RotateUnitToAnimation(centerBottomPos));
-                units[i].CallbackAnimation((u) => u.MoveUnitToAnimation(centerBottomPos));
+                _ = units[i].RotateUnitToAnimation(centerBottomPos);
+                _ = units[i].MoveUnitToAnimation(centerBottomPos);
             }
             if (units[i].Position.y > centerTopPos.y)
             {
-                units[i].CallbackAnimation((u) => u.RotateUnitToAnimation(centerTopPos));
-                units[i].CallbackAnimation((u) => u.MoveUnitToAnimation(centerTopPos));
+                _ = units[i].RotateUnitToAnimation(centerTopPos);
+                _ = units[i].MoveUnitToAnimation(centerTopPos);
             }
-            units[i].CallbackAnimation((u) => u.RotateUnitToAnimation(toPos));
-            units[i].CallbackAnimation((u) => u.MoveUnitToAnimation(toPos));
+            _ = units[i].RotateUnitToAnimation(toPos);
+            _ = units[i].MoveUnitToAnimation(toPos);
 
             positions.RemoveAt(index);
         }
