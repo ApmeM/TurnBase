@@ -51,17 +51,17 @@ format = 1
 
 [node name="Level1" parent="FieldContainer/Field" instance=ExtResource( 6 )]
 position = Vector2( 270, 654 )
+IsClickable = true
 UnitType = 2
 PlayerNumber = 1
-IsClickable = true
 LevelDescription = "First order"
 GameToLaunch = ExtResource( 4 )
 
 [node name="Level2" parent="FieldContainer/Field" instance=ExtResource( 6 )]
 position = Vector2( 443, 600 )
+IsClickable = true
 UnitType = 4
 PlayerNumber = 1
-IsClickable = true
 GameToLaunch = ExtResource( 5 )
 
 [node name="Player" parent="FieldContainer/Field" instance=ExtResource( 3 )]
@@ -70,9 +70,9 @@ IsSelected = true
 
 [node name="CustomGame" parent="FieldContainer/Field" instance=ExtResource( 6 )]
 position = Vector2( 202, 469 )
+IsClickable = true
 UnitType = 8
 PlayerNumber = 1
-IsClickable = true
 LevelDescription = "Custom"
 GameToLaunch = ExtResource( 9 )
 

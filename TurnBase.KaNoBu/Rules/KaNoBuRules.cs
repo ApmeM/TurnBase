@@ -18,7 +18,7 @@ namespace TurnBase.KaNoBu
         public IGameCondition LooseCondition = new NoMoveableFiguresGameCondition();
         public Field2D field;
 
-        public KaNoBuRules(int size, bool withDocks = false) 
+        public KaNoBuRules(int size, bool withDocks = false)
             : this(GenerateEmptyField(size, withDocks))
         {
         }
@@ -165,6 +165,8 @@ namespace TurnBase.KaNoBu
 
             var playerWidth = preparedField.Width;
             var playerHeight = preparedField.Height;
+            var horizontalMargin = (mainWidth - playerWidth) / 2;
+            var verticalMargin = (mainHeight - playerWidth) / 2;
 
             if (initFieldWidth != playerWidth || initFieldHeight != playerHeight)
             {
@@ -175,30 +177,32 @@ namespace TurnBase.KaNoBu
             {
                 for (var j = 0; j < playerHeight; j++)
                 {
-                    var p = new Point(i, j);
                     var playerShip = (preparedField.GetFigure(i, j) as KaNoBuFigure).FigureType;
                     Point position;
                     if (playerNumber == 0)
                     {
-                        position = new Point { X = i + initFieldHeight, Y = j };
+                        // Player 1 starts at the bottom; later rows are closer to the edge.
+                        position = new Point { X = horizontalMargin + i, Y = mainHeight - playerHeight + j };
                     }
                     else if (playerNumber == 1)
                     {
-                        position = new Point { X = i + initFieldHeight, Y = playerNumber == 0 ? j : mainHeight - playerHeight + j };
+                        // Player 2 starts at the top; later rows are closer to the edge.
+                        position = new Point { X = mainWidth - horizontalMargin - 1 - i, Y = playerHeight - 1 - j };
                     }
                     else if (playerNumber == 2)
                     {
-                        position = new Point { X = j, Y = i + initFieldHeight };
+                        // Player 3 starts at the right; later rows are closer to the edge.
+                        position = new Point { X = mainWidth - playerHeight + j, Y = mainHeight - verticalMargin - 1 - i };
                     }
                     else if (playerNumber == 3)
                     {
-                        position = new Point { X = playerNumber == 0 ? j : mainWidth - playerHeight + j, Y = i + initFieldHeight };
+                        // Player 4 starts at the left; later rows are closer to the edge.
+                        position = new Point { X = playerHeight - 1 - j, Y = verticalMargin + i };
                     }
                     else
                     {
                         throw new Exception("Unsupported number of players.");
                     }
-
                     mainField.SetFigure(position, KaNoBuFigure.Create(playerNumber, playerShip, 0));
                 }
             }

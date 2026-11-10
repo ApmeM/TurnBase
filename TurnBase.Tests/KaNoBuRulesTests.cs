@@ -221,6 +221,82 @@ public class KaNoBuRulesTests
     }
 
     [Test]
+    [TestCase(6, 6)]
+    [TestCase(7, 7)]
+    [TestCase(8, 8)]
+    [TestCase(9, 9)]
+    [TestCase(10, 10)]
+    [TestCase(10, 8)]
+    [TestCase(8, 10)]
+    public void InitResponsePlacesLastRowClosestToEachPlayersEdge(int fieldWidth, int fieldHeight)
+    {
+        var rules = new KaNoBuRules(Field2D.Create(fieldWidth, fieldHeight));
+        var gameField = rules.GenerateGameField();
+        var initFieldHeight = fieldHeight / 3;
+
+        for (var playerNumber = 0; playerNumber < 4; playerNumber++)
+        {
+            var initModel = rules.GetInitModelForPlayer(playerNumber);
+            var preparedField = Field2D.Create(initModel.Width, initModel.Height);
+            var figureIndex = 0;
+            for (var i = 0; i < initModel.Width; i++)
+            {
+                for (var j = 0; j < initModel.Height; j++)
+                {
+                    preparedField.SetFigure(i, j, KaNoBuFigure.Create(
+                        playerNumber,
+                        initModel.AvailableFigures[figureIndex++],
+                        0));
+                }
+            }
+
+            Assert.That(rules.TryApplyInitResponse(
+                gameField,
+                playerNumber,
+                new KaNoBuInitResponseModel(preparedField)), Is.True);
+
+            for (var i = 0; i < initModel.Width; i++)
+            {
+                for (var j = 0; j < initModel.Height; j++)
+                {
+                    Point expectedPosition;
+                    if (playerNumber == 0)
+                    {
+                        expectedPosition = new Point(
+                            (fieldWidth - initModel.Width) / 2 + i,
+                            fieldHeight - initModel.Height + j);
+                    }
+                    else if (playerNumber == 1)
+                    {
+                        expectedPosition = new Point(
+                            fieldWidth - (fieldWidth - initModel.Width) / 2 - 1 - i,
+                            initFieldHeight - 1 - j);
+                    }
+                    else if (playerNumber == 2)
+                    {
+                        expectedPosition = new Point(
+                            fieldWidth - initModel.Height + j,
+                            fieldHeight - (fieldHeight - initModel.Width) / 2 - 1 - i);
+                    }
+                    else
+                    {
+                        expectedPosition = new Point(
+                            initModel.Height - 1 - j,
+                            (fieldHeight - initModel.Width) / 2 + i);
+                    }
+
+                    var expectedFigure = preparedField.GetFigure(i, j) as KaNoBuFigure;
+                    Assert.That(gameField.Field.IsInBounds(expectedPosition), Is.True);
+                    var placedFigure = gameField.Field.GetFigure(expectedPosition) as KaNoBuFigure;
+                    Assert.That(placedFigure, Is.Not.Null);
+                    Assert.That(placedFigure.PlayerId, Is.EqualTo(playerNumber));
+                    Assert.That(placedFigure.FigureType, Is.EqualTo(expectedFigure.FigureType));
+                }
+            }
+        }
+    }
+
+    [Test]
     public void InitModelDistributesShipsAcrossFourMobileTypes()
     {
         var initModel = new KaNoBuRules(7).GetInitModelForPlayer(0);
