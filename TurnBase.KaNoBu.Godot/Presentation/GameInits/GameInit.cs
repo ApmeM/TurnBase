@@ -202,6 +202,7 @@ public partial class GameInit : IGameInit
         }
         _ = unitFrom.RotateUnitToAnimation(toPos);
         _ = unitFrom.MoveUnitToAnimation(toPos);
+        _ = unitFrom.RotateUnitToAnimation(toPos - new Vector2(0, 0.1f));
 
         unitTo?.MoveUnitToLogic(fromMap);
         unitTo?.CancelAnimations();
@@ -217,13 +218,14 @@ public partial class GameInit : IGameInit
         }
         _ = unitTo?.RotateUnitToAnimation(fromPos);
         _ = unitTo?.MoveUnitToAnimation(fromPos);
+        _ = unitTo?.RotateUnitToAnimation(fromPos - new Vector2(0, 0.1f));
 
         UpdateBattleButton();
     }
 
-    private void SendButtonClicked()
+    private async void SendButtonClicked()
     {
-        var units = this.field.GetChildren().OfType<Unit>();
+        var units = this.field.GetChildren().OfType<Unit>().ToList();
         if (units.Any(a => !a.TargetPositionMap.HasValue) || this.completion == null)
         {
             return;
@@ -236,7 +238,30 @@ public partial class GameInit : IGameInit
             result.SetFigure((int)position.x, (int)position.y, KaNoBuFigure.Create(this.model.PlayerId, unit.UnitType, 0));
         }
 
-        this.completion.TrySetResult(result);
+        this.sendButton.Disabled = true;
+        this.randomButton.Disabled = true;
+        try
+        {
+            await Task.WhenAll(units.Select(unit =>
+            {
+                return unit.WaitAllAnimation();
+            }));
+
+            await Task.WhenAll(units.Select(unit =>
+            {
+                var target = this.field.MapToWorld(new Vector2(unit.TargetPositionMap.Value.x, -2)) + this.field.CellSize / 2;
+                return unit.MoveUnitToAnimation(target);
+            }));
+
+            this.completion?.TrySetResult(result);
+        }
+        finally
+        {
+            if (this.completion != null)
+            {
+                this.UpdateBattleButton();
+            }
+        }
     }
 
     private void RandomButtonClicked()
@@ -278,6 +303,7 @@ public partial class GameInit : IGameInit
             }
             _ = units[i].RotateUnitToAnimation(toPos);
             _ = units[i].MoveUnitToAnimation(toPos);
+            _ = units[i].RotateUnitToAnimation(toPos - new Vector2(0, 0.1f));
 
             positions.RemoveAt(index);
         }
@@ -289,5 +315,6 @@ public partial class GameInit : IGameInit
     {
         var units = this.field.GetChildren().OfType<Unit>();
         this.sendButton.Disabled = units.Any(a => !a.TargetPositionMap.HasValue);
+        this.randomButton.Disabled = false;
     }
 }

@@ -181,7 +181,7 @@ public partial class Unit
 
     public Task UnitHitAnimation()
     {
-        return this.EnqueueAnimation(this.PlayUnitHitAnimation);
+        return this.CallbackAnimation(this.PlayUnitHitAnimation);
     }
 
     private async Task PlayUnitHitAnimation()
@@ -211,7 +211,7 @@ public partial class Unit
 
     public Task AttackAnimation()
     {
-        return this.EnqueueAnimation(this.PlayAttackAnimation);
+        return this.CallbackAnimation(this.PlayAttackAnimation);
     }
 
     private async Task PlayAttackAnimation()
@@ -241,7 +241,7 @@ public partial class Unit
 
     public Task MoveUnitToAnimation(Vector2 newPosition)
     {
-        return this.EnqueueAnimation(() => this.PlayMoveUnitToAnimation(newPosition));
+        return this.CallbackAnimation(() => this.PlayMoveUnitToAnimation(newPosition));
     }
 
     private async Task PlayMoveUnitToAnimation(Vector2 newPosition)
@@ -259,7 +259,7 @@ public partial class Unit
 
     public Task RotateUnitToAnimation(Vector2 lookAtPosition)
     {
-        return this.EnqueueAnimation(() => this.PlayRotateUnitToAnimation(lookAtPosition));
+        return this.CallbackAnimation(() => this.PlayRotateUnitToAnimation(lookAtPosition));
     }
 
     private async Task PlayRotateUnitToAnimation(Vector2 lookAtPosition)
@@ -288,12 +288,17 @@ public partial class Unit
         tween.QueueFree();
     }
 
-    public void CallbackAnimation(Func<Unit, Task> callback)
+    public Task WaitAllAnimation()
     {
-        this.EnqueueAnimation(() => callback(this));
+        return this.CallbackAnimation(async () => {});
     }
 
-    private Task EnqueueAnimation(Func<Task> animation)
+    public Task CallbackAnimation(Func<Unit, Task> callback)
+    {
+        return this.CallbackAnimation(() => callback(this));
+    }
+
+    public Task CallbackAnimation(Func<Task> animation)
     {
         var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         var cancellationRegistration = this.currentActionCancellation.Token.Register(() => completion.TrySetResult(true));

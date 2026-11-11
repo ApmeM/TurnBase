@@ -42,6 +42,43 @@ public partial class LevelCustom
         return game;
     }
 
+    protected override void InitializeGameField(Field2D mainField)
+    {
+        base.InitializeGameField(mainField);
+
+        var center = new Vector2((mainField.Width - 1) / 2f, (mainField.Height - 1) / 2f);
+        foreach (var unit in this.field.GetChildren().OfType<Unit>())
+        {
+            if (!unit.TargetPositionMap.HasValue)
+            {
+                continue;
+            }
+
+            var targetMap = unit.TargetPositionMap.Value;
+            var direction = targetMap - center;
+            var spawnMap = targetMap;
+
+            if (Math.Abs(direction.x) >= Math.Abs(direction.y) && direction.x != 0)
+            {
+                spawnMap.x += Math.Sign(direction.x);
+            }
+            else if (direction.y != 0)
+            {
+                spawnMap.y += Math.Sign(direction.y);
+            }
+            else
+            {
+                // A ship exactly at the center has no outward direction; use the top edge.
+                spawnMap.y -= 1;
+            }
+
+            var targetPosition = this.field.MapToWorld(targetMap) + this.field.CellSize / 2;
+            unit.Position = this.field.MapToWorld(spawnMap) + this.field.CellSize / 2;
+            _ = unit.RotateUnitToAnimation(targetPosition);
+            _ = unit.MoveUnitToAnimation(targetPosition);
+        }
+    }
+
     private void OnStartCustomGame()
     {
         if (this.gameCompletion == null)
