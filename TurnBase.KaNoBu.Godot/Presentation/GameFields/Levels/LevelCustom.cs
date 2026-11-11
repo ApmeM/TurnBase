@@ -47,6 +47,7 @@ public partial class LevelCustom
         base.InitializeGameField(mainField);
 
         var center = new Vector2((mainField.Width - 1) / 2f, (mainField.Height - 1) / 2f);
+        var beachChanged = false;
         foreach (var unit in this.field.GetChildren().OfType<Unit>())
         {
             if (!unit.TargetPositionMap.HasValue)
@@ -72,10 +73,23 @@ public partial class LevelCustom
                 spawnMap.y -= 1;
             }
 
+            if (this.beach.GetCellv(spawnMap) != -1)
+            {
+                this.beach.SetCellv(spawnMap, -1);
+                this.castle.SetCellv(spawnMap, -1);
+                beachChanged = true;
+            }
+
             var targetPosition = this.field.MapToWorld(targetMap) + this.field.CellSize / 2;
             unit.Position = this.field.MapToWorld(spawnMap) + this.field.CellSize / 2;
             _ = unit.RotateUnitToAnimation(targetPosition);
             _ = unit.MoveUnitToAnimation(targetPosition);
+        }
+
+        if (beachChanged)
+        {
+            this.beach.UpdateBitmaskRegion();
+            this.castle.UpdateBitmaskRegion();
         }
     }
 
