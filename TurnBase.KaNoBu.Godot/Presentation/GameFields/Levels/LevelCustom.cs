@@ -44,7 +44,12 @@ public partial class LevelCustom
 
     protected override void InitializeGameField(Field2D mainField)
     {
+        var isInitialFieldInitialization = this.field.GetChildCount() == 0;
         base.InitializeGameField(mainField);
+        if (!isInitialFieldInitialization)
+        {
+            return;
+        }
 
         var center = new Vector2((mainField.Width - 1) / 2f, (mainField.Height - 1) / 2f);
         var beachChanged = false;
