@@ -293,7 +293,7 @@ namespace TurnBase.KaNoBu
             return
                 from != null &&
                 from.PlayerId == playerNumber &&
-                from.IsMoveValid(playerMove) &&
+                from.IsMoveValid(playerMove, mainField) &&
                 (to == null || to.PlayerId != from.PlayerId);
         }
 

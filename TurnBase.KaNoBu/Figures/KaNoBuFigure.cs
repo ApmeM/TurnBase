@@ -61,7 +61,7 @@ namespace TurnBase.KaNoBu
 
         public abstract bool IsMoveable { get; }
 
-        public virtual bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep)
+        public virtual bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep, Field2D mainField)
         {
             var offset = new Point(
                 moveStep.To.X - moveStep.From.X,

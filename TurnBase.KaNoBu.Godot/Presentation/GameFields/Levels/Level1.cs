@@ -215,7 +215,7 @@ public partial class Level1
         private bool CanMove(Field2D field, KaNoBuFigure figure, Point from, Point to, bool allowEnemy)
         {
             if (!field.IsInBounds(to) || field.GetWall(to) ||
-                !figure.IsMoveValid(new KaNoBuMoveResponseModel.MoveStep(from, to)))
+                !figure.IsMoveValid(new KaNoBuMoveResponseModel.MoveStep(from, to), field))
             {
                 return false;
             }

@@ -30,6 +30,28 @@ namespace TurnBase.KaNoBu
             };
         }
 
+        public override bool IsMoveValid(KaNoBuMoveResponseModel.MoveStep moveStep, Field2D mainField)
+        {
+            if (!base.IsMoveValid(moveStep, mainField))
+            {
+                return false;
+            }
+
+            var offsetX = moveStep.To.X - moveStep.From.X;
+            var offsetY = moveStep.To.Y - moveStep.From.Y;
+            if ((System.Math.Abs(offsetX) == 2 && offsetY == 0) ||
+                (System.Math.Abs(offsetY) == 2 && offsetX == 0))
+            {
+                var middle = new Point(
+                    moveStep.From.X + offsetX / 2,
+                    moveStep.From.Y + offsetY / 2);
+                var middleFigure = (KaNoBuFigure)mainField.GetFigure(middle);
+                return middleFigure == null || middleFigure.PlayerId == this.PlayerId;
+            }
+
+            return true;
+        }
+
         public override BattleResolution ResolveBattle(KaNoBuFigure defender)
         {
             switch (defender.FigureType)
