@@ -22,7 +22,7 @@ public class KaNoBuPlayerConsole :
         while (from == null || to == null)
         {
             token.ThrowIfCancellationRequested();
-            (from, to) = await readMove(field.Width, field.Height);
+            (from, to) = await readMove(field.Width, field.Height, token);
         }
 
         return new MakeTurnResponseModel<KaNoBuMoveResponseModel>
@@ -39,9 +39,9 @@ public class KaNoBuPlayerConsole :
     {
         token.ThrowIfCancellationRequested();
         this.showMessage($"Your turn number: {model.PlayerId}");
-        var name = await this.getName();
+        var name = await this.getName(token);
 
-        var preparedField = await this.fillField(model.PlayerId, model.Request);
+        var preparedField = await this.fillField(model.PlayerId, model.Request, token);
 
         return new InitResponseModel<KaNoBuInitResponseModel>
         {
@@ -89,7 +89,7 @@ public class KaNoBuPlayerConsole :
 
     #endregion
 
-    private async Task<Field2D> fillField(int playerId, KaNoBuInitModel model)
+    private async Task<Field2D> fillField(int playerId, KaNoBuInitModel model, CancellationToken token)
     {
         var ships = model.AvailableFigures;
         var preparedField = Field2D.Create(model.Width, model.Height);
@@ -101,7 +101,7 @@ public class KaNoBuPlayerConsole :
             this.showMessage(preparedField.ToString());
             var ship = ships[0];
             this.showMessage($"Select position for {ship}, empty value = random.");
-            Point? p = await readPoint(model.Width, model.Height);
+            Point? p = await readPoint(model.Width, model.Height, token);
             if (p == null)
             {
                 while (true)
@@ -133,11 +133,11 @@ public class KaNoBuPlayerConsole :
         return preparedField;
     }
 
-    private async Task<Point?> readPoint(int width, int height)
+    private async Task<Point?> readPoint(int width, int height, CancellationToken token)
     {
         while (true)
         {
-            var input = (await Task.Run(() => Console.ReadLine()))?.Trim();
+            var input = (await Console.In.ReadLineAsync(token))?.Trim();
             if (string.IsNullOrWhiteSpace(input))
             {
                 return null;
@@ -153,11 +153,11 @@ public class KaNoBuPlayerConsole :
         }
     }
 
-    private async Task<(Point, Point)> readMove(int width, int height)
+    private async Task<(Point, Point)> readMove(int width, int height, CancellationToken token)
     {
         while (true)
         {
-            var input = (await Task.Run(() => Console.ReadLine()))?.Trim();
+            var input = (await Console.In.ReadLineAsync(token))?.Trim();
             if (string.IsNullOrWhiteSpace(input))
             {
                 continue;
@@ -191,10 +191,10 @@ public class KaNoBuPlayerConsole :
         return true;
     }
 
-    private async Task<string> getName()
+    private async Task<string> getName(CancellationToken token)
     {
         this.showMessage("Please enter your name (default - unnamed):");
-        var name = await Task.Run(() => Console.ReadLine());
+        var name = await Console.In.ReadLineAsync(token);
         if (string.IsNullOrWhiteSpace(name))
         {
             name = "unnamed";
